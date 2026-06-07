@@ -12,6 +12,30 @@ export default {
 			month: '最近 30 天',
 			year: '最近 365 天',
 			total: '全部时间'
+		},
+		window: {
+			day: '今天',
+			week: '本周',
+			month: '最近 30 天内',
+			year: '最近 365 天内',
+			total: '累计'
+		},
+		adjective: {
+			day: '日',
+			week: '周',
+			month: '月',
+			year: '年',
+			total: '总'
+		},
+		relative: {
+			today: '今天',
+			yesterday: '昨天',
+			this_week: '本周',
+			last_week: '上周',
+			this_month: '本月',
+			last_month: '上月',
+			this_year: '今年',
+			last_year: '去年'
 		}
 	},
 	sections: {
@@ -19,6 +43,7 @@ export default {
 		report: '报告',
 		memory: '记忆',
 		agent: '智能体概览',
+		session_activity: '会话活跃度',
 		activity_surface: '活动面',
 		top_agents: '头部智能体',
 		top_groups: '头部群组',
@@ -40,6 +65,46 @@ export default {
 		more: '高',
 		activities_summary: '{{summary}} 内共有 {{count}} 次活动'
 	},
+	summary: {
+		sessions_total_running: '{{total}} 总数 · {{running}} 当前运行中',
+		sessions_total_running_created: '{{total}} 总数 · {{running}} 当前运行中 · {{today}} 今日创建',
+		messages_total: '{{total}} 总数',
+		messages_total_today: '{{total}} 总数 · {{today}} 今天',
+		stale_unread_mix: '{{stale_24h}} 个 24 小时未处理 · {{stale_72h}} 个 72 小时未处理',
+		tokens_total_per_reply: '{{total}} 总量 · {{per_reply}} 每次回复',
+		posts_total_mix: '{{total}} 总数 · {{user}} · {{wiki}} · {{memory}}',
+		pipeline_queued_now: '{{count}} 当前排队中',
+		graph_growth_mix: '{{total}} 总量 · +{{nodes}} 节点 · +{{edges}} 边 {{window}}',
+		token_trend: '{{window}} · {{total}} tokens · {{replies}} 次助手回复',
+		activity_trend:
+			'{{window}} · {{messages}} 条消息 · {{sessions}} 个会话 · {{posts}} 篇帖子 · {{rewires}} 次重连',
+		heatmap: '{{window}} · {{active_days}} 个活跃日 · 峰值 {{date}} 得分 {{score}}',
+		model_calls_source: '{{calls}} 次调用 · 来源 {{source}}',
+		provider_calls: '{{calls}} 次调用',
+		provider_calls_named: '{{provider}} · {{calls}} 次调用',
+		session_recency_mix:
+			'24 小时内活跃 {{hours_24}} · 72 小时内温热 {{hours_72}} · 7 天内冷却中 {{days_7}} · 沉寂 {{dormant}}',
+		cached_of_input_tokens: '{{cached}} 已缓存 / {{input}} 输入 tokens',
+		reasoning_of_total_tokens: '{{reasoning}} 推理 / {{total}} 总 tokens',
+		period_vs_total_ratio:
+			'{{period_count}}/{{period_total}} {{window}} · {{total_count}}/{{total_total}} 总计',
+		posts_from_intake: '{{window}} 内 {{intake}} 条新文档/文章/链接产出 {{posts}} 篇帖子',
+		active_with_content_mix: '{{active}}/{{total}} 在{{window}}活跃 · {{with_content}}/{{total}} 有内容',
+		with_messages_window: '{{window}} 内 {{value}} 有消息',
+		with_content_total: '{{with_content}} 有内容 · {{total}} 总数',
+		staffed_total: '{{value}} 已配成员 · {{total}} 总数',
+		messages_window: '{{window}} 内 {{value}} 条消息',
+		top_agent_subtitle: '{{sessions}} 个活跃会话 · {{messages}} 条消息 · {{replies}} 次回复',
+		top_agent_meta: '{{posts}} 篇帖子 · {{docs}} 份文档 · {{articles}} 篇文章',
+		top_group_subtitle: '{{members}} 名成员 · {{sessions}} 个活跃会话 · {{messages}} 条消息',
+		top_group_meta: '{{replies}} 次回复 · {{sessions}} 个已关联会话',
+		frozen_nodes_edges_combined: '{{total}} 个冻结节点与边合计',
+		window_messages: '{{value}} 条消息',
+		window_activity_desc: '{{sessions}} 个会话 · {{posts}} 篇帖子 · {{tokens}} tokens',
+		total_post_think_reviews: '{{count}} 次 post-think 复盘总计',
+		last_review_relative: '{{status}} · 最近复盘于 {{value}}',
+		last_output_mix: '{{articles}} 篇文章 · {{skills}} 个技能 · {{tools}} 个工具'
+	},
 	model: {
 		no_review_generated: '还没有生成复盘。',
 		runtime_status_unavailable: '运行状态不可用',
@@ -57,6 +122,7 @@ export default {
 		failed_load_report: '加载报告失败。',
 		sessions: '会话',
 		messages: '消息',
+		total: '总计',
 		active_sessions: '活跃会话',
 		unread_now: '当前未读',
 		tokens: 'Token',

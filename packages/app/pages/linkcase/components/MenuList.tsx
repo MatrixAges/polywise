@@ -1,5 +1,6 @@
 import { Loader, TriangleAlert } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/__shadcn__/components/ui/button'
 
@@ -8,6 +9,7 @@ import MenuListItem from './MenuListItem'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 
 	return (
 		<div
@@ -32,7 +34,7 @@ const Index = () => {
 							onClick={x.loadMoreList}
 						>
 							{x.loading_more && <Loader className='size-3 animate-spin'></Loader>}
-							{x.loading_more ? 'Loading more' : 'Load more'}
+							{t('selection.load_more')}
 						</Button>
 					</div>
 				)}

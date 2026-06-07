@@ -74,6 +74,26 @@ export const getForTypeTabItems = (t: TFunction<'post'>) =>
 		{ key: 'agent', title: t('tab.agent'), Icon: Bot }
 	] as const
 
+export const getPostForTypeLabel = (args: {
+	value: string
+	labels: { wiki: string; memory: string; user: string; linkcase: string }
+}) => {
+	const { value, labels } = args
+
+	switch (value) {
+		case 'wiki':
+			return labels.wiki
+		case 'memory':
+			return labels.memory
+		case 'user':
+			return labels.user
+		case 'linkcase':
+			return labels.linkcase
+		default:
+			return value
+	}
+}
+
 export const getDetailTabItems = (t: TFunction<'post'>) =>
 	[
 		{ key: 'outline', title: t('tab.outline'), Icon: TableOfContents },

@@ -197,7 +197,48 @@ export default {
 		crawl4ai_recreated: 'Crawl4AI profile recreated from current Chrome session',
 		crawl4ai_created: 'Crawl4AI profile created from current Chrome session',
 		crawl4ai_exists: 'Crawl4AI profile already exists',
-		action_failed: 'Provider action failed'
+		action_failed: 'Provider action failed',
+		provider_agent_browser_desc:
+			'Native browser automation provider for agent-driven page navigation and extraction, with Chrome profile and CDP attach support.',
+		provider_opencli_desc:
+			'CLI browser/content provider that uses Browser Bridge to drive your logged-in Chrome session.',
+		provider_crawl4ai_desc:
+			'CLI crawler with markdown output and managed Chromium profile support for logged-in local sessions.',
+		provider_dokobot_desc:
+			'Local browser agent CLI that can read through your logged-in Chrome session via the Dokobot extension bridge.',
+		check_ok: 'Ready',
+		check_warning: 'Warning',
+		check_missing: 'Missing',
+		check_info: 'Info',
+		check_browser_bridge: 'Browser Bridge',
+		check_chrome_session_reuse: 'Chrome Session Reuse',
+		check_managed_profiles: 'Managed Profiles',
+		action_install_bridge: 'Install Bridge',
+		action_setup_guide: 'Setup Guide',
+		action_session_docs: 'Session Docs',
+		drag_reorder: 'Drag to reorder {{name}}',
+		opencli_probe_deferred:
+			'Runtime probe is deferred until you click Refresh or OpenCLI is used, so opening this page does not start the Browser Bridge.',
+		opencli_bridge_connected: 'Connected to the local Chrome/Chromium extension.',
+		opencli_bridge_missing: 'The Chrome extension is not connected.',
+		opencli_install_first: 'Install opencli first, then connect the Browser Bridge extension.',
+		opencli_no_output: 'opencli doctor returned no output.',
+		agent_browser_cannot_inspect_profiles:
+			'Unable to inspect local Chrome profiles, but agent-browser can still attach via CDP.',
+		agent_browser_no_profiles: 'CDP attach is available; no local Chrome profiles were listed.',
+		agent_browser_detected_profiles: 'CDP attach is available; detected {{count}} local Chrome profile.',
+		crawl4ai_no_local_profile: 'No local Chrome profile was detected for session cloning.',
+		crawl4ai_profile_ready:
+			'Polywise managed profile is ready at {{path}}. It is a snapshot cloned from Chrome profile {{profile}}; use Recreate Profile to refresh cookies or login state later.',
+		crawl4ai_profile_missing:
+			'No managed profile detected yet. Click Create From Chrome to clone a snapshot of the current Chrome profile {{profile}}.',
+		dokobot_bridge_not_ready:
+			'Dokobot CLI is installed, but the local browser bridge is not ready. Install the extension, enable Remote Control, and run `dokobot install-bridge`.',
+		dokobot_no_bridge_device:
+			'No Dokobot local bridge/device was detected. Install the extension, enable Remote Control, and run `dokobot install-bridge`.',
+		dokobot_bridge_responding: 'Dokobot local bridge is responding.',
+		dokobot_install_first: 'Install Dokobot CLI first, then set up the extension bridge for local mode.',
+		dokobot_bridge_lines: 'Dokobot bridge/device list returned {{count}} line.'
 	},
 	im: {
 		accounts_title: 'Existing Accounts',

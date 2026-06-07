@@ -19,33 +19,14 @@ import type {
 	HomeTrendPoint
 } from './types'
 
-const compact_formatter = Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
+const compact_formatter = Intl.NumberFormat(navigator.language, { notation: 'compact', maximumFractionDigits: 1 })
 const t_home = (key: string, options?: Record<string, unknown>) =>
 	$t(key as never, { ns: 'home', ...(options || {}) }) as string
 
 const stats_period_options = ['week', 'day', 'month', 'year', 'total'] as const
-const stats_period_title_map: Record<HomeStatsPeriod, string> = {
-	day: 'Today',
-	week: 'This week',
-	month: 'Last 30 days',
-	year: 'Last 365 days',
-	total: 'All time'
-}
-const stats_period_window_map: Record<HomeStatsPeriod, string> = {
-	day: 'today',
-	week: 'this week',
-	month: 'in the last 30 days',
-	year: 'in the last 365 days',
-	total: 'in total'
-}
-const stats_period_adjective_map: Record<HomeStatsPeriod, string> = {
-	day: 'Daily',
-	week: 'Weekly',
-	month: 'Monthly',
-	year: 'Yearly',
-	total: 'Total'
-}
 const getStatsPeriodTitle = (value: HomeStatsPeriod) => $t(`period.title.${value}`, { ns: 'home' })
+const getStatsPeriodWindow = (value: HomeStatsPeriod) => t_home(`period.window.${value}`)
+const getStatsPeriodAdjective = (value: HomeStatsPeriod) => t_home(`period.adjective.${value}`)
 
 const getHomeStatsPeriodItems = () =>
 	stats_period_options.map(value => ({
@@ -60,7 +41,7 @@ const getHomeReportPeriodItems = () =>
 	}>
 
 const formatCompact = (value: number) => compact_formatter.format(value)
-const formatInteger = (value: number) => value.toLocaleString('en-US')
+const formatInteger = (value: number) => value.toLocaleString(navigator.language)
 const formatPercent = (value: number) => `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`
 const formatRatio = (value: number) => `${value.toFixed(value >= 10 ? 0 : 1)}x`
 const toPhoto = (value: unknown) => value as Uint8Array | null
@@ -190,11 +171,11 @@ const getReportWindowEnd = (period: HomeReportPeriod, start: Date) => {
 const formatReportWindowLabel = (period: HomeReportPeriod, offset: number, start: Date, end: Date | null) => {
 	if (period === 'day') {
 		if (offset === 0) {
-			return 'Today'
+			return t_home('period.relative.today')
 		}
 
 		if (offset === 1) {
-			return 'Yesterday'
+			return t_home('period.relative.yesterday')
 		}
 
 		return formatDate(start.getTime(), 'MMM D, YYYY')
@@ -202,11 +183,11 @@ const formatReportWindowLabel = (period: HomeReportPeriod, offset: number, start
 
 	if (period === 'week') {
 		if (offset === 0) {
-			return 'This week'
+			return t_home('period.relative.this_week')
 		}
 
 		if (offset === 1) {
-			return 'Last week'
+			return t_home('period.relative.last_week')
 		}
 
 		const end_label = end ? formatDate(end.getTime() - 1, 'MMM D') : ''
@@ -216,40 +197,42 @@ const formatReportWindowLabel = (period: HomeReportPeriod, offset: number, start
 
 	if (period === 'month') {
 		if (offset === 0) {
-			return 'This month'
+			return t_home('period.relative.this_month')
 		}
 
 		if (offset === 1) {
-			return 'Last month'
+			return t_home('period.relative.last_month')
 		}
 
 		return formatDate(start.getTime(), 'MMMM YYYY')
 	}
 
 	if (offset === 0) {
-		return 'This year'
+		return t_home('period.relative.this_year')
 	}
 
 	if (offset === 1) {
-		return 'Last year'
+		return t_home('period.relative.last_year')
 	}
 
 	return formatDate(start.getTime(), 'YYYY')
 }
 
-export const token_trend_config = {
-	total_tokens: { label: t_home('model.total'), color: '#f59e0b' },
-	input_tokens: { label: t_home('model.input'), color: '#38bdf8' },
-	output_tokens: { label: t_home('model.output'), color: '#34d399' },
-	reasoning_tokens: { label: t_home('model.reasoning'), color: '#f97316' }
-} satisfies ChartConfig
+export const getTokenTrendConfig = () =>
+	({
+		total_tokens: { label: t_home('model.total'), color: '#f59e0b' },
+		input_tokens: { label: t_home('model.input'), color: '#38bdf8' },
+		output_tokens: { label: t_home('model.output'), color: '#34d399' },
+		reasoning_tokens: { label: t_home('model.reasoning'), color: '#f97316' }
+	}) satisfies ChartConfig
 
-export const activity_trend_config = {
-	messages: { label: t_home('model.messages'), color: '#6366f1' },
-	new_posts: { label: t_home('model.posts'), color: '#10b981' },
-	new_sessions: { label: t_home('model.sessions'), color: '#607D8B' },
-	rewire_events: { label: t_home('model.rewires'), color: '#f43f5e' }
-} satisfies ChartConfig
+export const getActivityTrendConfig = () =>
+	({
+		messages: { label: t_home('model.messages'), color: '#6366f1' },
+		new_posts: { label: t_home('model.posts'), color: '#10b981' },
+		new_sessions: { label: t_home('model.sessions'), color: '#607D8B' },
+		rewire_events: { label: t_home('model.rewires'), color: '#f43f5e' }
+	}) satisfies ChartConfig
 export { getHomeStatsPeriodItems }
 export { getHomeReportPeriodItems }
 
@@ -335,15 +318,15 @@ export default class Index {
 	}
 
 	get stats_period_title() {
-		return stats_period_title_map[this.stats_period]
+		return getStatsPeriodTitle(this.stats_period)
 	}
 
 	get stats_period_window() {
-		return stats_period_window_map[this.stats_period]
+		return getStatsPeriodWindow(this.stats_period)
 	}
 
 	get stats_period_adjective() {
-		return stats_period_adjective_map[this.stats_period]
+		return getStatsPeriodAdjective(this.stats_period)
 	}
 
 	setStatsPeriod(period: HomeStatsPeriod) {
@@ -596,8 +579,15 @@ export default class Index {
 				value: formatInteger(this.data.overview.sessions_week),
 				desc:
 					this.stats_period === 'day'
-						? `${formatCompact(this.data.overview.session_total)} ${t_home('model.total')} · ${this.data.overview.sessions_running} ${t_home('model.running_now')}`
-						: `${formatCompact(this.data.overview.session_total)} ${t_home('model.total')} · ${this.data.overview.sessions_running} ${t_home('model.running_now')} · ${this.data.overview.sessions_today} ${t_home('model.created_today')}`
+						? t_home('summary.sessions_total_running', {
+								total: formatCompact(this.data.overview.session_total),
+								running: this.data.overview.sessions_running
+							})
+						: t_home('summary.sessions_total_running_created', {
+								total: formatCompact(this.data.overview.session_total),
+								running: this.data.overview.sessions_running,
+								today: this.data.overview.sessions_today
+							})
 			},
 			{
 				key: 'messages',
@@ -605,8 +595,13 @@ export default class Index {
 				value: formatCompact(this.data.overview.messages_week),
 				desc:
 					this.stats_period === 'day'
-						? `${formatCompact(this.data.overview.message_total)} ${t_home('model.total')}`
-						: `${formatCompact(this.data.overview.message_total)} ${t_home('model.total')} · ${formatCompact(this.data.overview.messages_today)} ${t_home('period.title.day').toLowerCase()}`
+						? t_home('summary.messages_total', {
+								total: formatCompact(this.data.overview.message_total)
+							})
+						: t_home('summary.messages_total_today', {
+								total: formatCompact(this.data.overview.message_total),
+								today: formatCompact(this.data.overview.messages_today)
+							})
 			},
 			{
 				key: 'running',
@@ -618,32 +613,50 @@ export default class Index {
 				key: 'unread',
 				title: $t('model.unread_now', { ns: 'home' }),
 				value: formatInteger(this.data.overview.sessions_unread),
-				desc: `${this.data.overview.stale_unread_sessions_24h} stale 24h · ${this.data.overview.stale_unread_sessions_72h} stale 72h`
+				desc: t_home('summary.stale_unread_mix', {
+					stale_24h: this.data.overview.stale_unread_sessions_24h,
+					stale_72h: this.data.overview.stale_unread_sessions_72h
+				})
 			},
 
 			{
 				key: 'tokens',
 				title: $t('model.tokens', { ns: 'home' }),
 				value: formatCompact(this.data.usage.period_total_tokens),
-				desc: `${formatCompact(this.data.usage.total_tokens)} ${t_home('model.total')} · ${formatCompact(this.data.usage.avg_period_total_tokens_per_reply)} ${t_home('model.per_reply')}`
+				desc: t_home('summary.tokens_total_per_reply', {
+					total: formatCompact(this.data.usage.total_tokens),
+					per_reply: formatCompact(this.data.usage.avg_period_total_tokens_per_reply)
+				})
 			},
 			{
 				key: 'posts',
 				title: $t('model.posts', { ns: 'home' }),
 				value: formatInteger(this.data.activity.week.posts),
-				desc: `${formatCompact(this.data.content.post_total)} ${t_home('model.total')} · ${t_home('model.user_count', { count: post_counts.user })} · ${t_home('model.wiki_count', { count: post_counts.wiki })} · ${t_home('model.memory_count', { count: post_counts.memory })}`
+				desc: t_home('summary.posts_total_mix', {
+					total: formatCompact(this.data.content.post_total),
+					user: t_home('model.user_count', { count: post_counts.user }),
+					wiki: t_home('model.wiki_count', { count: post_counts.wiki }),
+					memory: t_home('model.memory_count', { count: post_counts.memory })
+				})
 			},
 			{
 				key: 'pipeline',
 				title: $t('model.pipeline', { ns: 'home' }),
 				value: `+${formatInteger(this.data.content.pipeline_created_week_total)}`,
-				desc: `${this.data.health.backlog_pending_total} ${$t('model.queued_now', { ns: 'home' })}`
+				desc: t_home('summary.pipeline_queued_now', {
+					count: this.data.health.backlog_pending_total
+				})
 			},
 			{
 				key: 'graph',
 				title: $t('model.graph', { ns: 'home' }),
 				value: `+${formatCompact(graph_week_total)}`,
-				desc: `${formatCompact(graph_total)} ${t_home('model.total')} · +${this.data.memory.node_week_total} ${t_home('memory.nodes').toLowerCase()} · +${this.data.memory.edge_week_total} ${t_home('memory.edges').toLowerCase()} ${this.stats_period_window}`
+				desc: t_home('summary.graph_growth_mix', {
+					total: formatCompact(graph_total),
+					nodes: this.data.memory.node_week_total,
+					edges: this.data.memory.edge_week_total,
+					window: this.stats_period_window
+				})
 			}
 		]
 	}
@@ -657,7 +670,11 @@ export default class Index {
 			return ''
 		}
 
-		return `${$t('model.last_14_days', { ns: 'home' })} · ${formatCompact(this.data.usage.total_tokens)} ${$t('model.tokens', { ns: 'home' }).toLowerCase()} · ${this.data.usage.assistant_messages} ${$t('model.assistant_replies', { ns: 'home' })}`
+		return t_home('summary.token_trend', {
+			window: $t('model.last_14_days', { ns: 'home' }),
+			total: formatCompact(this.data.usage.total_tokens),
+			replies: this.data.usage.assistant_messages
+		})
 	}
 
 	get activity_trend_summary() {
@@ -677,7 +694,13 @@ export default class Index {
 			{ messages: 0, sessions: 0, posts: 0, rewire: 0 }
 		)
 
-		return `${$t('model.last_14_days', { ns: 'home' })} · ${totals.messages.toLocaleString(navigator.language)} ${$t('model.messages', { ns: 'home', defaultValue: 'Messages' }).toLowerCase()} · ${totals.sessions.toLocaleString(navigator.language)} ${$t('model.sessions', { ns: 'home' }).toLowerCase()} · ${totals.posts.toLocaleString(navigator.language)} ${$t('model.posts', { ns: 'home' }).toLowerCase()} · ${totals.rewire.toLocaleString(navigator.language)} ${$t('model.rewires', { ns: 'home', defaultValue: 'Rewires' }).toLowerCase()}`
+		return t_home('summary.activity_trend', {
+			window: $t('model.last_14_days', { ns: 'home' }),
+			messages: totals.messages.toLocaleString(navigator.language),
+			sessions: totals.sessions.toLocaleString(navigator.language),
+			posts: totals.posts.toLocaleString(navigator.language),
+			rewires: totals.rewire.toLocaleString(navigator.language)
+		})
 	}
 
 	get activity_heatmap_cells(): Array<HomeHeatmapCell> {
@@ -736,7 +759,12 @@ export default class Index {
 		const active_days = cells.filter(item => item.score > 0).length
 		const busiest_day = cells.reduce((best, item) => (item.score > best.score ? item : best), cells[0]!)
 
-		return `${t_home('model.last_48_weeks', { defaultValue: 'Last 48 weeks' })} · ${active_days} ${t_home('model.active_days')} · ${t_home('model.busiest')} ${formatDate(busiest_day.date, 'MMM D')} ${t_home('model.at')} ${busiest_day.score}`
+		return t_home('summary.heatmap', {
+			window: t_home('model.last_48_weeks'),
+			active_days,
+			date: formatDate(busiest_day.date, 'MMM D'),
+			score: busiest_day.score
+		})
 	}
 
 	get usage_metrics(): Array<HomeModelItem> {
@@ -772,7 +800,10 @@ export default class Index {
 		return (this.data?.usage.models ?? []).map(item => ({
 			key: item.key,
 			title: item.label,
-			subtitle: `${item.calls} calls · source ${item.source}`,
+			subtitle: t_home('summary.model_calls_source', {
+				calls: item.calls,
+				source: item.source
+			}),
 			value: formatCompact(item.total_tokens),
 			meta: t_home('common.tokens')
 		}))
@@ -782,7 +813,7 @@ export default class Index {
 		return (this.data?.usage.providers ?? []).map(item => ({
 			key: item.provider,
 			title: item.provider,
-			subtitle: `${item.calls} calls`,
+			subtitle: t_home('summary.provider_calls', { calls: item.calls }),
 			value: formatCompact(item.total_tokens)
 		}))
 	}
@@ -792,7 +823,12 @@ export default class Index {
 			return ''
 		}
 
-		return `24h ${this.data.overview.sessions_active_24h} · 72h ${this.data.overview.sessions_warm_72h} · 7d ${this.data.overview.sessions_cooling_week} · ${t_home('model.dormant', { defaultValue: 'dormant' })} ${this.data.overview.sessions_dormant_over_week}`
+		return t_home('summary.session_recency_mix', {
+			hours_24: this.data.overview.sessions_active_24h,
+			hours_72: this.data.overview.sessions_warm_72h,
+			days_7: this.data.overview.sessions_cooling_week,
+			dormant: this.data.overview.sessions_dormant_over_week
+		})
 	}
 
 	get usage_depth_items(): Array<HomeModelItem> {
@@ -836,20 +872,29 @@ export default class Index {
 				title: $t('model.provider_concentration', { ns: 'home' }),
 				value: formatPercent(top_provider_share),
 				desc: top_provider
-					? `${top_provider.provider} · ${top_provider.calls} calls`
+					? t_home('summary.provider_calls_named', {
+							provider: top_provider.provider,
+							calls: top_provider.calls
+						})
 					: $t('model.no_provider_activity', { ns: 'home' })
 			},
 			{
 				key: 'cached-ratio',
 				title: $t('model.cached_input_ratio', { ns: 'home' }),
 				value: formatPercent(cached_ratio),
-				desc: `${formatCompact(this.data.usage.period_cached_input_tokens)} cached of ${formatCompact(this.data.usage.period_input_tokens)} input tokens`
+				desc: t_home('summary.cached_of_input_tokens', {
+					cached: formatCompact(this.data.usage.period_cached_input_tokens),
+					input: formatCompact(this.data.usage.period_input_tokens)
+				})
 			},
 			{
 				key: 'reasoning-share',
 				title: $t('model.reasoning_share', { ns: 'home' }),
 				value: formatPercent(reasoning_share),
-				desc: `${formatCompact(this.data.usage.period_reasoning_tokens)} reasoning of ${formatCompact(this.data.usage.period_total_tokens)} total tokens`
+				desc: t_home('summary.reasoning_of_total_tokens', {
+					reasoning: formatCompact(this.data.usage.period_reasoning_tokens),
+					total: formatCompact(this.data.usage.period_total_tokens)
+				})
 			}
 		]
 	}
@@ -883,25 +928,46 @@ export default class Index {
 				key: 'grounding',
 				title: $t('model.session_grounded_posts', { ns: 'home' }),
 				value: formatPercent(session_grounding_week),
-				desc: `${this.data.content.posts_week_with_session}/${this.data.activity.week.posts} ${this.stats_period_window} · ${this.data.content.posts_with_session_total}/${this.data.content.post_total} total`
+				desc: t_home('summary.period_vs_total_ratio', {
+					period_count: this.data.content.posts_week_with_session,
+					period_total: this.data.activity.week.posts,
+					window: this.stats_period_window,
+					total_count: this.data.content.posts_with_session_total,
+					total_total: this.data.content.post_total
+				})
 			},
 			{
 				key: 'project-tagging',
 				title: $t('model.project_tagged_posts', { ns: 'home' }),
 				value: formatPercent(project_tagging_week),
-				desc: `${this.data.content.posts_week_with_project}/${this.data.activity.week.posts} ${this.stats_period_window} · ${this.data.content.posts_with_project_total}/${this.data.content.post_total} total`
+				desc: t_home('summary.period_vs_total_ratio', {
+					period_count: this.data.content.posts_week_with_project,
+					period_total: this.data.activity.week.posts,
+					window: this.stats_period_window,
+					total_count: this.data.content.posts_with_project_total,
+					total_total: this.data.content.post_total
+				})
 			},
 			{
 				key: 'intake-output',
 				title: $t('model.intake_to_output', { ns: 'home' }),
 				value: formatRatio(intake_to_output),
-				desc: `${this.data.activity.week.posts} posts from ${this.data.content.intake_week_total} new docs/articles/links ${this.stats_period_window}`
+				desc: t_home('summary.posts_from_intake', {
+					posts: this.data.activity.week.posts,
+					intake: this.data.content.intake_week_total,
+					window: this.stats_period_window
+				})
 			},
 			{
 				key: 'agent-coverage',
 				title: $t('model.active_agent_coverage', { ns: 'home' }),
 				value: formatPercent(active_agent_share),
-				desc: `${this.data.system.agents_active_week}/${this.data.system.agent_total} active ${this.stats_period_window} · ${this.data.system.agents_with_content_total}/${this.data.system.agent_total} with content`
+				desc: t_home('summary.active_with_content_mix', {
+					active: this.data.system.agents_active_week,
+					total: this.data.system.agent_total,
+					window: this.stats_period_window,
+					with_content: this.data.system.agents_with_content_total
+				})
 			}
 		]
 	}
@@ -922,25 +988,37 @@ export default class Index {
 				key: 'active-agents',
 				title: $t('model.active_agents', { ns: 'home' }),
 				value: `${summary.active_agents}/${this.data.system.agent_total}`,
-				desc: `${formatPercent(active_agent_share)} with messages ${this.stats_period_window}`
+				desc: t_home('summary.with_messages_window', {
+					value: formatPercent(active_agent_share),
+					window: this.stats_period_window
+				})
 			},
 			{
 				key: 'linked-agents',
 				title: $t('model.linked_agents', { ns: 'home' }),
 				value: String(summary.agents_with_sessions_total),
-				desc: `${summary.agents_with_content_total} with content · ${this.data.system.agent_total} total`
+				desc: t_home('summary.with_content_total', {
+					with_content: summary.agents_with_content_total,
+					total: this.data.system.agent_total
+				})
 			},
 			{
 				key: 'active-groups',
 				title: $t('model.active_groups', { ns: 'home' }),
 				value: `${summary.active_groups}/${this.data.system.group_total}`,
-				desc: `${formatPercent(active_group_share)} with messages ${this.stats_period_window}`
+				desc: t_home('summary.with_messages_window', {
+					value: formatPercent(active_group_share),
+					window: this.stats_period_window
+				})
 			},
 			{
 				key: 'linked-groups',
 				title: $t('model.linked_groups', { ns: 'home' }),
 				value: String(summary.groups_with_sessions_total),
-				desc: `${summary.groups_with_members_total} staffed · ${this.data.system.group_total} total`
+				desc: t_home('summary.staffed_total', {
+					value: summary.groups_with_members_total,
+					total: this.data.system.group_total
+				})
 			}
 		]
 	}
@@ -957,25 +1035,37 @@ export default class Index {
 				key: 'agent-sessions',
 				title: $t('model.agent_sessions', { ns: 'home' }),
 				value: formatInteger(summary.agent_sessions_total),
-				desc: `${formatCompact(summary.period_messages_by_agents)} messages ${this.stats_period_window}`
+				desc: t_home('summary.messages_window', {
+					value: formatCompact(summary.period_messages_by_agents),
+					window: this.stats_period_window
+				})
 			},
 			{
 				key: 'agent-tokens',
 				title: $t('model.agent_tokens', { ns: 'home' }),
 				value: formatCompact(summary.period_tokens_by_agents),
-				desc: `${formatCompact(summary.period_messages_by_agents)} messages ${this.stats_period_window}`
+				desc: t_home('summary.messages_window', {
+					value: formatCompact(summary.period_messages_by_agents),
+					window: this.stats_period_window
+				})
 			},
 			{
 				key: 'group-sessions',
 				title: $t('model.group_sessions', { ns: 'home' }),
 				value: formatInteger(summary.group_sessions_total),
-				desc: `${formatCompact(summary.period_messages_by_groups)} messages ${this.stats_period_window}`
+				desc: t_home('summary.messages_window', {
+					value: formatCompact(summary.period_messages_by_groups),
+					window: this.stats_period_window
+				})
 			},
 			{
 				key: 'group-tokens',
 				title: $t('model.group_tokens', { ns: 'home' }),
 				value: formatCompact(summary.period_tokens_by_groups),
-				desc: `${formatCompact(summary.period_messages_by_groups)} messages ${this.stats_period_window}`
+				desc: t_home('summary.messages_window', {
+					value: formatCompact(summary.period_messages_by_groups),
+					window: this.stats_period_window
+				})
 			}
 		]
 	}
@@ -984,8 +1074,16 @@ export default class Index {
 		return (this.data?.agents.top_agents ?? []).map(item => ({
 			key: item.id,
 			title: item.name,
-			subtitle: `${item.session_count} active sessions · ${item.message_count} messages · ${item.assistant_replies} replies`,
-			meta: `${item.post_count} posts · ${item.document_count} docs · ${item.article_count} articles`,
+			subtitle: t_home('summary.top_agent_subtitle', {
+				sessions: item.session_count,
+				messages: item.message_count,
+				replies: item.assistant_replies
+			}),
+			meta: t_home('summary.top_agent_meta', {
+				posts: item.post_count,
+				docs: item.document_count,
+				articles: item.article_count
+			}),
 			value: formatCompact(item.total_tokens),
 			photo: toPhoto(item.photo),
 			avatar: item.avatar ?? null,
@@ -1002,8 +1100,15 @@ export default class Index {
 		return (this.data?.agents.top_groups ?? []).map(item => ({
 			key: item.id,
 			title: item.name,
-			subtitle: `${item.agent_count} members · ${item.session_count} active sessions · ${item.message_count} messages`,
-			meta: `${item.assistant_replies} replies · ${item.session_total} linked sessions`,
+			subtitle: t_home('summary.top_group_subtitle', {
+				members: item.agent_count,
+				sessions: item.session_count,
+				messages: item.message_count
+			}),
+			meta: t_home('summary.top_group_meta', {
+				replies: item.assistant_replies,
+				sessions: item.session_total
+			}),
 			value: formatCompact(item.total_tokens),
 			photo: toPhoto(item.photo),
 			footnote: item.last_active_at
@@ -1200,7 +1305,9 @@ export default class Index {
 				key: 'freeze-ratio',
 				title: $t('model.frozen_ratio', { ns: 'home' }),
 				value: formatPercent(freeze_ratio),
-				desc: `${frozen_total.toLocaleString('en-US')} frozen nodes and edges combined`
+				desc: t_home('summary.frozen_nodes_edges_combined', {
+					total: frozen_total.toLocaleString(navigator.language)
+				})
 			}
 		]
 	}
@@ -1213,22 +1320,40 @@ export default class Index {
 		const primary_item = {
 			key: this.stats_period,
 			title: this.stats_period_title,
-			value: `${this.data.activity.week.messages} ${$t('model.messages', { ns: 'home' }).toLowerCase()}`,
-			desc: `${this.data.activity.week.sessions} ${$t('model.sessions', { ns: 'home' }).toLowerCase()} · ${this.data.activity.week.posts} ${$t('model.posts', { ns: 'home' }).toLowerCase()} · ${formatCompact(this.data.activity.week.tokens)} ${$t('model.tokens', { ns: 'home' }).toLowerCase()}`
+			value: t_home('summary.window_messages', {
+				value: this.data.activity.week.messages
+			}),
+			desc: t_home('summary.window_activity_desc', {
+				sessions: this.data.activity.week.sessions,
+				posts: this.data.activity.week.posts,
+				tokens: formatCompact(this.data.activity.week.tokens)
+			})
 		}
 		const comparison_item =
 			this.stats_period === 'day'
 				? {
 						key: 'total',
 						title: $t('model.all_time', { ns: 'home' }),
-						value: `${this.data.overview.message_total} ${$t('model.messages', { ns: 'home' }).toLowerCase()}`,
-						desc: `${this.data.overview.session_total} ${$t('model.sessions', { ns: 'home' }).toLowerCase()} · ${this.data.content.post_total} ${$t('model.posts', { ns: 'home' }).toLowerCase()} · ${formatCompact(this.data.usage.total_tokens)} ${$t('model.tokens', { ns: 'home' }).toLowerCase()}`
+						value: t_home('summary.window_messages', {
+							value: this.data.overview.message_total
+						}),
+						desc: t_home('summary.window_activity_desc', {
+							sessions: this.data.overview.session_total,
+							posts: this.data.content.post_total,
+							tokens: formatCompact(this.data.usage.total_tokens)
+						})
 					}
 				: {
 						key: 'today',
 						title: $t('period.title.day', { ns: 'home' }),
-						value: `${this.data.activity.today.messages} ${$t('model.messages', { ns: 'home' }).toLowerCase()}`,
-						desc: `${this.data.activity.today.sessions} ${$t('model.sessions', { ns: 'home' }).toLowerCase()} · ${this.data.activity.today.posts} ${$t('model.posts', { ns: 'home' }).toLowerCase()} · ${formatCompact(this.data.activity.today.tokens)} ${$t('model.tokens', { ns: 'home' }).toLowerCase()}`
+						value: t_home('summary.window_messages', {
+							value: this.data.activity.today.messages
+						}),
+						desc: t_home('summary.window_activity_desc', {
+							sessions: this.data.activity.today.sessions,
+							posts: this.data.activity.today.posts,
+							tokens: formatCompact(this.data.activity.today.tokens)
+						})
 					}
 
 		return [primary_item, comparison_item]
@@ -1310,7 +1435,9 @@ export default class Index {
 				key: 'review-volume',
 				title: $t('model.review_volume', { ns: 'home' }),
 				value: `${week_counts.review}`,
-				desc: `${total_counts.review} total post-think reviews`
+				desc: t_home('summary.total_post_think_reviews', {
+					count: total_counts.review
+				})
 			},
 			{
 				key: 'review-gap',
@@ -1320,7 +1447,10 @@ export default class Index {
 						? $t('model.none', { ns: 'home' })
 						: `${last_report_gap_hours}h`,
 				desc: this.data.pthink.status.last_report_at
-					? `${this.data.pthink.status.last_status} · last review ${fromNow(this.data.pthink.status.last_report_at)}`
+					? t_home('summary.last_review_relative', {
+							status: this.data.pthink.status.last_status,
+							value: fromNow(this.data.pthink.status.last_report_at)
+						})
 					: $t('model.no_post_think_review_generated', { ns: 'home' })
 			},
 			{
@@ -1328,7 +1458,11 @@ export default class Index {
 				title: $t('model.last_output_mix', { ns: 'home' }),
 				value: last_output_total ? String(last_output_total) : '0',
 				desc: last_summary
-					? `${last_summary.article_ids.length} articles · ${last_summary.skill_names.length} skills · ${last_summary.tool_names.length} tools`
+					? t_home('summary.last_output_mix', {
+							articles: last_summary.article_ids.length,
+							skills: last_summary.skill_names.length,
+							tools: last_summary.tool_names.length
+						})
 					: $t('model.no_durable_output_yet', { ns: 'home' })
 			}
 		]

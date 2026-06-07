@@ -1,6 +1,7 @@
 import { useLayoutEffect, useState } from 'react'
 import { BellRing, Link2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { container } from 'tsyringe'
 
 import { formatDateTime, fromNow } from '@/utils'
@@ -9,6 +10,7 @@ import Model from './model'
 
 const Index = () => {
 	const [x] = useState(() => container.resolve(Model))
+	const { t } = useTranslation('layout')
 
 	useLayoutEffect(() => {
 		x.init()
@@ -26,7 +28,7 @@ const Index = () => {
 					text-sm text-std-400
 				'
 			>
-				Loading notifications...
+				{t('panel.loading_notifications')}
 			</div>
 		)
 	}
@@ -41,7 +43,7 @@ const Index = () => {
 					text-sm text-std-400
 				'
 			>
-				No notifications.
+				{t('panel.empty_notifications')}
 			</div>
 		)
 	}

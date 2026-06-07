@@ -1,10 +1,10 @@
 export default {
 	detail: {
 		info: '信息',
-		prompt: '智能体如何运行',
-		soul: '智能体在想什么',
-		identity: '智能体是谁',
-		memory: '核心记忆',
+		prompt: '提示词',
+		soul: '灵魂',
+		identity: '身份',
+		memory: '记忆',
 		skills: '技能',
 		tools: '工具',
 		content: '内容',

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import { fromNow } from '@/utils'
 
-import { post_for_types } from '../../utils'
+import { getPostForTypeLabel, post_for_types } from '../../utils'
 import { useModel } from '../context'
 
 import type { PostForType } from '../../types'
@@ -16,6 +16,18 @@ type Props = {
 const EditorPanelFooter = ({ character_count }: Props) => {
 	const x = useModel()
 	const { t } = useTranslation('post')
+	const for_type_labels = {
+		wiki: t('tab.wiki'),
+		memory: t('tab.memory'),
+		user: t('tab.user'),
+		linkcase: t('tab.linkcase')
+	}
+	const for_type_items = post_for_types.map(item => ({
+		value: item,
+		label: getPostForTypeLabel({ value: item, labels: for_type_labels })
+	}))
+	const current_for_type_label =
+		for_type_items.find(item => item.value === x.draft_for_type)?.label || x.draft_for_type
 
 	if (!x.selected_post) {
 		return null
@@ -47,12 +59,12 @@ const EditorPanelFooter = ({ character_count }: Props) => {
 						noStyle
 						noActiveStyle
 					>
-						<SelectValue className='capitalize' />
+						<SelectValue>{current_for_type_label}</SelectValue>
 					</SelectTrigger>
 					<SelectContent align='start'>
-						{post_for_types.map(item => (
-							<SelectItem value={item} key={item}>
-								<span className='capitalize'>{item}</span>
+						{for_type_items.map(item => (
+							<SelectItem value={item.value} key={item.value}>
+								<span>{item.label}</span>
 							</SelectItem>
 						))}
 					</SelectContent>

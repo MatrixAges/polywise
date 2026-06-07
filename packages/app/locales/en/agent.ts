@@ -1,10 +1,10 @@
 export default {
 	detail: {
 		info: 'Info',
-		prompt: 'How agent run',
-		soul: "What's in agent's mind",
-		identity: 'Who agent is',
-		memory: 'Core memory',
+		prompt: 'Prompt',
+		soul: 'Soul',
+		identity: 'Identity',
+		memory: 'Memory',
 		skills: 'Skills',
 		tools: 'Tools',
 		content: 'Content',

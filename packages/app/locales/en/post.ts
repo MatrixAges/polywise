@@ -1,9 +1,10 @@
 export default {
 	tab: {
-		wiki: 'wiki',
-		memory: 'memory',
-		user: 'user',
-		agent: 'agent',
+		wiki: 'Wiki',
+		memory: 'Memory',
+		user: 'User',
+		linkcase: 'Linkcase',
+		agent: 'Agent',
 		outline: 'Outline',
 		related: 'Related',
 		project: 'Project'

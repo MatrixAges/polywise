@@ -8,6 +8,7 @@ import { Input } from '@/__shadcn__/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import Editor from '@/components/Editor'
 import { loadPageLocale, usePageLocaleCleanup } from '@/hooks'
+import { getPostForTypeLabel } from '@/pages/post/utils'
 import { formatDateTime, fromNow, rpc } from '@/utils'
 
 import type { RPCOutput } from '@/types/rpc'
@@ -33,6 +34,17 @@ const Index = () => {
 	const [dirty, setDirty] = useState(false)
 	const [saving, setSaving] = useState(false)
 	const [character_count, setCharacterCount] = useState(0)
+	const for_type_labels = {
+		wiki: t_post('tab.wiki'),
+		memory: t_post('tab.memory'),
+		user: t_post('tab.user'),
+		linkcase: t_post('tab.linkcase')
+	}
+	const for_type_items = article_for_types.map(item => ({
+		value: item,
+		label: getPostForTypeLabel({ value: item, labels: for_type_labels })
+	}))
+	const current_for_type_label = for_type_items.find(item => item.value === draft_for_type)?.label || draft_for_type
 	const ref_save_timer = useRef<ReturnType<typeof setTimeout> | 0>(0)
 	const ref_save_promise = useRef<Promise<ArticleDetail | null> | null>(null)
 	const ref_latest = useRef({
@@ -353,12 +365,12 @@ const Index = () => {
 								noStyle
 								noActiveStyle
 							>
-								<SelectValue className='capitalize' />
+								<SelectValue>{current_for_type_label}</SelectValue>
 							</SelectTrigger>
 							<SelectContent align='start'>
-								{article_for_types.map(item => (
-									<SelectItem value={item} key={item}>
-										<span className='capitalize'>{item}</span>
+								{for_type_items.map(item => (
+									<SelectItem value={item.value} key={item.value}>
+										<span>{item.label}</span>
 									</SelectItem>
 								))}
 							</SelectContent>

@@ -139,15 +139,12 @@ const Index = ({ active_tab }: IProps) => {
 							items-center justify-between
 							gap-2
 							px-2 py-1.5
-							rounded-lg
+							rounded-full
 							border border-border-light
 						'
 					>
 						<div className='min-w-0'>
 							<div className='text-xs font-medium'>{t('detail.frozen')}</div>
-							<div className='text-std-400 text-[11px]'>
-								{selected_agent.is_frozen ? t('detail.locked') : t('detail.writable')}
-							</div>
 						</div>
 						<Switch
 							size='sm'

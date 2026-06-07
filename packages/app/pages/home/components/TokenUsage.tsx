@@ -6,6 +6,20 @@ import { useModel } from '../context'
 const Index = () => {
 	const x = useModel()
 	const { t } = useTranslation('home')
+	const getUsageMetricTitle = (key: string, fallback: string) => {
+		switch (key) {
+			case 'total':
+				return String(t('model.total'))
+			case 'input':
+				return String(t('model.input'))
+			case 'output':
+				return String(t('model.output'))
+			case 'reasoning':
+				return String(t('model.reasoning'))
+			default:
+				return fallback
+		}
+	}
 
 	return (
 		<div className='flex flex-col gap-3'>
@@ -33,7 +47,9 @@ const Index = () => {
 							'
 							key={item.key}
 						>
-							<div className='text-std-400 text-xs font-medium uppercase'>{item.title}</div>
+							<div className='text-std-400 text-xs font-medium uppercase'>
+								{getUsageMetricTitle(item.key, item.title)}
+							</div>
 							<div className='font-mono text-2xl font-semibold tracking-tight'>
 								{item.value}
 							</div>

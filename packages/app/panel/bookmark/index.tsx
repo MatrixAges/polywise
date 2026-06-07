@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronDown, Eraser, LoaderCircle, Save } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { container } from 'tsyringe'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
@@ -13,14 +14,15 @@ import type { RPCInput } from '@/types'
 
 type BookmarkForType = Extract<RPCInput['save']['for'], 'memory' | 'wiki' | 'user'>
 
-const for_type_items: Array<{ value: BookmarkForType; label: string }> = [
-	{ value: 'wiki', label: 'Wiki' },
-	{ value: 'memory', label: 'Memory' },
-	{ value: 'user', label: 'User' }
-]
-
 const Index = () => {
 	const [x] = useState(() => container.resolve(Model))
+	const { t } = useTranslation()
+	const for_type_items: Array<{ value: BookmarkForType; label: string }> = [
+		{ value: 'wiki', label: t('bookmark_panel.for_wiki') },
+		{ value: 'memory', label: t('bookmark_panel.for_memory') },
+		{ value: 'user', label: t('bookmark_panel.for_user') }
+	]
+	const current_for_type_label = for_type_items.find(item => item.value === x.for_type)?.label || ''
 
 	return (
 		<div
@@ -66,14 +68,14 @@ const Index = () => {
 				<div className='flex min-w-0 items-center'>
 					<Switch
 						className='mr-1'
-						aria-label='Auto clean bookmark before save'
+						aria-label={t('bookmark_panel.auto_clean')}
 						checked={x.bookmark_auto_clean}
 						disabled={x.saving}
 						size='sm'
-						title='Auto clean bookmark before save'
+						title={t('bookmark_panel.auto_clean')}
 						onCheckedChange={x.setBookmarkAutoClean}
 					/>
-					<span className='mr-2 text-xs'>Auto Clean</span>
+					<span className='mr-2 text-xs'>{t('bookmark_panel.auto_clean_short')}</span>
 				</div>
 				<div className='flex shrink-0 items-center gap-2'>
 					<Select
@@ -95,7 +97,7 @@ const Index = () => {
 							noStyle
 							noActiveStyle
 						>
-							<SelectValue />
+							<SelectValue>{current_for_type_label}</SelectValue>
 							<ChevronDown className='size-3' />
 						</SelectTrigger>
 						<SelectContent align='start'>
@@ -109,7 +111,7 @@ const Index = () => {
 					<button
 						className='icon_button small text-std-800'
 						disabled={x.saving || x.content.length === 0}
-						title='Clear'
+						title={t('bookmark_panel.clear')}
 						type='button'
 						onClick={x.clear}
 					>
@@ -118,7 +120,7 @@ const Index = () => {
 					<button
 						className='icon_button small text-std-800'
 						disabled={x.saving || x.content.trim().length === 0}
-						title={x.saving ? 'Saving' : 'Save'}
+						title={x.saving ? t('bookmark_panel.saving') : t('bookmark_panel.save')}
 						type='button'
 						onClick={() => void x.save()}
 					>

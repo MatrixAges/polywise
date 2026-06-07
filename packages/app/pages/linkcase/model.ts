@@ -819,7 +819,7 @@ export default class Index {
 	getBatchTaskActionLabel(action: LinkcaseBatchAction) {
 		return action === 'fetch'
 			? $t('control.fetch', { ns: 'linkcase' })
-			: $t('selection.fetch', { ns: 'linkcase' })
+			: $t('selection.extract', { ns: 'linkcase' })
 	}
 
 	formatBatchAbsoluteTime(value: string | null) {

@@ -1,9 +1,11 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('home')
 
 	return (
 		<div className='flex flex-col gap-3'>
@@ -16,7 +18,7 @@ const Index = () => {
 					border-l-2 border-std-500
 				'
 			>
-				Session Activity
+				{t('sections.session_activity')}
 			</div>
 			<div
 				className='

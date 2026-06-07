@@ -6,7 +6,7 @@ import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
 import { ChartContainer, ChartTooltipContent } from '@/__shadcn__/components/ui/chart'
 
 import { useModel } from '../context'
-import { activity_trend_config, token_trend_config } from '../model'
+import { getActivityTrendConfig, getTokenTrendConfig } from '../model'
 
 import type { ChartConfig } from '@/__shadcn__/components/ui/chart'
 import type { ReactNode } from 'react'
@@ -66,6 +66,8 @@ const InlineLegend = (props: {
 const Index = () => {
 	const x = useModel()
 	const { t } = useTranslation('home')
+	const token_trend_config = getTokenTrendConfig()
+	const activity_trend_config = getActivityTrendConfig()
 	const token_legend_items = getLegendItems(token_trend_config, [
 		'input_tokens',
 		'output_tokens',

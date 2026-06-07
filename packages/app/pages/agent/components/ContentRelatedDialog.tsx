@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/__shadcn__/components/ui/popover'
 import { Tabs } from '@/components'
+import { getPostForTypeLabel } from '@/pages/post/utils'
 import { getAppRouteHref } from '@/utils'
 
 import { getArticleTabItems } from '../articleTabItems'
@@ -16,6 +17,12 @@ import type { ArticleForType } from '../types'
 
 const Index = () => {
 	const { t } = useTranslation(['agent', 'post', 'linkcase'])
+	const for_type_labels = {
+		wiki: t('tab.wiki', { ns: 'post' }),
+		memory: t('tab.memory', { ns: 'post' }),
+		user: t('tab.user', { ns: 'post' }),
+		linkcase: t('tab.linkcase', { ns: 'post' })
+	}
 	const article_tab_items = getArticleTabItems(t)
 	const {
 		related_articles_dialog_open,
@@ -137,8 +144,11 @@ const Index = () => {
 																{ ns: 'agent' }
 															)}
 													</div>
-													<div className='text-std-300 mt-1 text-[10px] uppercase'>
-														{item.for_type}
+													<div className='text-std-300 mt-1 text-[10px]'>
+														{getPostForTypeLabel({
+															value: item.for_type,
+															labels: for_type_labels
+														})}
 													</div>
 												</div>
 												<Button

@@ -12,6 +12,30 @@ export default {
 			month: 'Last 30 days',
 			year: 'Last 365 days',
 			total: 'All time'
+		},
+		window: {
+			day: 'today',
+			week: 'this week',
+			month: 'in the last 30 days',
+			year: 'in the last 365 days',
+			total: 'in total'
+		},
+		adjective: {
+			day: 'Daily',
+			week: 'Weekly',
+			month: 'Monthly',
+			year: 'Yearly',
+			total: 'Total'
+		},
+		relative: {
+			today: 'Today',
+			yesterday: 'Yesterday',
+			this_week: 'This week',
+			last_week: 'Last week',
+			this_month: 'This month',
+			last_month: 'Last month',
+			this_year: 'This year',
+			last_year: 'Last year'
 		}
 	},
 	sections: {
@@ -19,6 +43,7 @@ export default {
 		report: 'Report',
 		memory: 'Memory',
 		agent: 'Agent Overview',
+		session_activity: 'Session Activity',
 		activity_surface: 'Activity Surface',
 		top_agents: 'Top Agents',
 		top_groups: 'Top Groups',
@@ -40,6 +65,46 @@ export default {
 		more: 'More',
 		activities_summary: '{{count}} activities in the {{summary}}'
 	},
+	summary: {
+		sessions_total_running: '{{total}} total · {{running}} running now',
+		sessions_total_running_created: '{{total}} total · {{running}} running now · {{today}} created today',
+		messages_total: '{{total}} total',
+		messages_total_today: '{{total}} total · {{today}} today',
+		stale_unread_mix: '{{stale_24h}} stale 24h · {{stale_72h}} stale 72h',
+		tokens_total_per_reply: '{{total}} total · {{per_reply}} per reply',
+		posts_total_mix: '{{total}} total · {{user}} · {{wiki}} · {{memory}}',
+		pipeline_queued_now: '{{count}} queued now',
+		graph_growth_mix: '{{total}} total · +{{nodes}} nodes · +{{edges}} edges {{window}}',
+		token_trend: '{{window}} · {{total}} tokens · {{replies}} assistant replies',
+		activity_trend:
+			'{{window}} · {{messages}} messages · {{sessions}} sessions · {{posts}} posts · {{rewires}} rewires',
+		heatmap: '{{window}} · {{active_days}} active days · busiest {{date}} at {{score}}',
+		model_calls_source: '{{calls}} calls · source {{source}}',
+		provider_calls: '{{calls}} calls',
+		provider_calls_named: '{{provider}} · {{calls}} calls',
+		session_recency_mix:
+			'{{hours_24}} active within 24 hours · {{hours_72}} warm within 72 hours · {{days_7}} cooling within 7 days · {{dormant}} dormant',
+		cached_of_input_tokens: '{{cached}} cached of {{input}} input tokens',
+		reasoning_of_total_tokens: '{{reasoning}} reasoning of {{total}} total tokens',
+		period_vs_total_ratio:
+			'{{period_count}}/{{period_total}} {{window}} · {{total_count}}/{{total_total}} total',
+		posts_from_intake: '{{posts}} posts from {{intake}} new docs/articles/links {{window}}',
+		active_with_content_mix: '{{active}}/{{total}} active {{window}} · {{with_content}}/{{total}} with content',
+		with_messages_window: '{{value}} with messages {{window}}',
+		with_content_total: '{{with_content}} with content · {{total}} total',
+		staffed_total: '{{value}} staffed · {{total}} total',
+		messages_window: '{{value}} messages {{window}}',
+		top_agent_subtitle: '{{sessions}} active sessions · {{messages}} messages · {{replies}} replies',
+		top_agent_meta: '{{posts}} posts · {{docs}} docs · {{articles}} articles',
+		top_group_subtitle: '{{members}} members · {{sessions}} active sessions · {{messages}} messages',
+		top_group_meta: '{{replies}} replies · {{sessions}} linked sessions',
+		frozen_nodes_edges_combined: '{{total}} frozen nodes and edges combined',
+		window_messages: '{{value}} messages',
+		window_activity_desc: '{{sessions}} sessions · {{posts}} posts · {{tokens}} tokens',
+		total_post_think_reviews: '{{count}} total post-think reviews',
+		last_review_relative: '{{status}} · last review {{value}}',
+		last_output_mix: '{{articles}} articles · {{skills}} skills · {{tools}} tools'
+	},
 	model: {
 		no_review_generated: 'No review generated yet',
 		runtime_status_unavailable: 'Runtime status unavailable',
@@ -57,6 +122,7 @@ export default {
 		failed_load_report: 'Failed to load report.',
 		sessions: 'Sessions',
 		messages: 'Messages',
+		total: 'Total',
 		active_sessions: 'Active sessions',
 		unread_now: 'Unread now',
 		tokens: 'Tokens',

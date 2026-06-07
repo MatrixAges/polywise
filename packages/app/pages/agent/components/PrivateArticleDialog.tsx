@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/__shadcn__/c
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import { Textarea } from '@/__shadcn__/components/ui/textarea'
 import Editor from '@/components/Editor'
+import { getPostForTypeLabel } from '@/pages/post/utils'
 
 import { useModel } from '../context'
 import { private_article_for_types } from '../types'
@@ -27,6 +28,18 @@ const Index = () => {
 		submitPrivateArticleDialog
 	} = useModel()
 	const [character_count, setCharacterCount] = useState(0)
+	const for_type_labels = {
+		wiki: t('tab.wiki', { ns: 'post' }),
+		memory: t('tab.memory', { ns: 'post' }),
+		user: t('tab.user', { ns: 'post' }),
+		linkcase: t('tab.linkcase', { ns: 'post' })
+	}
+	const for_type_items = private_article_for_types.map(item => ({
+		value: item,
+		label: getPostForTypeLabel({ value: item, labels: for_type_labels })
+	}))
+	const current_for_type_label =
+		for_type_items.find(item => item.value === private_article_dialog_for)?.label || private_article_dialog_for
 
 	return (
 		<Dialog
@@ -105,12 +118,12 @@ const Index = () => {
 								noStyle
 								noActiveStyle
 							>
-								<SelectValue className='capitalize' />
+								<SelectValue>{current_for_type_label}</SelectValue>
 							</SelectTrigger>
 							<SelectContent align='start'>
-								{private_article_for_types.map(item => (
-									<SelectItem value={item} key={item}>
-										<span className='capitalize'>{item}</span>
+								{for_type_items.map(item => (
+									<SelectItem value={item.value} key={item.value}>
+										<span>{item.label}</span>
 									</SelectItem>
 								))}
 							</SelectContent>

@@ -69,7 +69,7 @@ export default class Index {
 
 			this.clear()
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to save bookmark.')
+			toast.error(error instanceof Error ? error.message : $t('bookmark_panel.save_failed'))
 		} finally {
 			this.saving = false
 		}

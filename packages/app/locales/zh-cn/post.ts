@@ -1,8 +1,9 @@
 export default {
 	tab: {
-		wiki: 'Wiki',
+		wiki: '百科',
 		memory: '记忆',
-		user: '用户',
+		user: '个人',
+		linkcase: '链接库',
 		agent: '智能体',
 		outline: '大纲',
 		related: '关联',
@@ -18,8 +19,8 @@ export default {
 		empty_content: '暂无内容',
 		related: '{{count}} 个关联',
 		load_more: '加载更多',
-		extract: '抽取',
-		reextract: '重新抽取',
+		extract: '提取',
+		reextract: '重新提取',
 		remove: '删除'
 	},
 	detail: {
@@ -57,8 +58,8 @@ export default {
 	toast: {
 		saved: '文章已保存。',
 		post_removed: '文章已删除。',
-		extract_queued: '已加入抽取队列。',
-		extract_completed: '抽取完成。'
+		extract_queued: '已加入提取队列。',
+		extract_completed: '提取完成。'
 	},
 	confirm: {
 		delete_post: '确认删除文章“{{title}}”？'

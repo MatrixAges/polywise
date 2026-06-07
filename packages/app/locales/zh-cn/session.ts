@@ -12,7 +12,9 @@ export default {
 		remove_desc: '确认删除这个项目以及所有相关会话吗？'
 	},
 	menu: {
-		im: 'IM',
+		im: '社交',
+		sessions: '会话',
+		projects: '项目',
 		loading: '加载中...',
 		load_more: '加载更多',
 		show_more: '显示更多',
@@ -20,6 +22,8 @@ export default {
 		unpin: '取消置顶'
 	},
 	side_panel: {
-		files: '文件'
+		files: '文件',
+		session: '会话',
+		file: '文件'
 	}
 } as const

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Ellipsis, PanelRight, RotateCcw } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { container } from 'tsyringe'
 
 import {
@@ -20,8 +21,21 @@ import Model from './model'
 const Index = () => {
 	const global = useGlobal()
 	const [x] = useState(() => container.resolve(Model))
+	const { t } = useTranslation('layout')
 
 	const s = global.setting
+	const getPanelTitle = (key: (typeof panel_tabs)[number]['key']) => {
+		switch (key) {
+			case 'session':
+				return t('panel.session')
+			case 'bookmark':
+				return t('panel.bookmark')
+			case 'pipeline':
+				return t('panel.pipeline')
+			case 'notification':
+				return t('panel.notification')
+		}
+	}
 
 	return (
 		<div
@@ -42,7 +56,12 @@ const Index = () => {
 					px-1.5
 				'
 			>
-				<Tabs small items={panel_tabs} active={x.active_tab} onClick={x.setActiveTab}></Tabs>
+				<Tabs
+					small
+					items={panel_tabs.map(item => ({ ...item, title: getPanelTitle(item.key) }))}
+					active={x.active_tab}
+					onClick={x.setActiveTab}
+				></Tabs>
 				<DropdownMenu>
 					<DropdownMenuTrigger>
 						<div className='icon_button small'>
@@ -51,14 +70,14 @@ const Index = () => {
 					</DropdownMenuTrigger>
 					<DropdownMenuContent className='min-w-[150px]'>
 						<DropdownMenuGroup>
-							<DropdownMenuLabel>Actions</DropdownMenuLabel>
+							<DropdownMenuLabel>{t('panel.actions')}</DropdownMenuLabel>
 							<DropdownMenuItem onClick={s.resetPanal}>
 								<RotateCcw></RotateCcw>
-								Reset
+								{t('panel.reset')}
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={s.togglePanel}>
 								<PanelRight />
-								Collapse
+								{t('panel.collapse')}
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 					</DropdownMenuContent>

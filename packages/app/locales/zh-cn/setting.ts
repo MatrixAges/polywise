@@ -191,7 +191,44 @@ export default {
 		crawl4ai_recreated: '已基于当前 Chrome 会话重建 Crawl4AI 配置档',
 		crawl4ai_created: '已基于当前 Chrome 会话创建 Crawl4AI 配置档',
 		crawl4ai_exists: 'Crawl4AI 配置档已存在',
-		action_failed: '提供方操作失败'
+		action_failed: '提供方操作失败',
+		provider_agent_browser_desc:
+			'原生浏览器自动化提供方，适合由 agent 驱动页面导航与内容提取，支持 Chrome 配置档和 CDP 附着。',
+		provider_opencli_desc: '基于 Browser Bridge 驱动你已登录 Chrome 会话的 CLI 浏览器/内容提供方。',
+		provider_crawl4ai_desc: '支持 Markdown 输出和托管 Chromium 配置档的 CLI 抓取器，适合复用本地已登录会话。',
+		provider_dokobot_desc: '可通过 Dokobot 扩展桥接读取你已登录 Chrome 会话的本地浏览器 agent CLI。',
+		check_ok: '已就绪',
+		check_warning: '警告',
+		check_missing: '缺失',
+		check_info: '信息',
+		check_browser_bridge: '浏览器桥接',
+		check_chrome_session_reuse: 'Chrome 会话复用',
+		check_managed_profiles: '托管配置档',
+		action_install_bridge: '安装桥接',
+		action_setup_guide: '配置指南',
+		action_session_docs: '会话文档',
+		drag_reorder: '拖拽以重排 {{name}}',
+		opencli_probe_deferred:
+			'运行时探测会延迟到你点击“刷新”或真正使用 OpenCLI 时才执行，因此打开此页面不会启动 Browser Bridge。',
+		opencli_bridge_connected: '已连接到本地 Chrome / Chromium 扩展。',
+		opencli_bridge_missing: 'Chrome 扩展尚未连接。',
+		opencli_install_first: '请先安装 opencli，再连接 Browser Bridge 扩展。',
+		opencli_no_output: 'opencli doctor 没有返回任何输出。',
+		agent_browser_cannot_inspect_profiles: '无法检查本地 Chrome 配置档，但 agent-browser 仍可通过 CDP 附着。',
+		agent_browser_no_profiles: 'CDP 附着可用，但未列出任何本地 Chrome 配置档。',
+		agent_browser_detected_profiles: 'CDP 附着可用；检测到 {{count}} 个本地 Chrome 配置档。',
+		crawl4ai_no_local_profile: '未检测到可用于会话克隆的本地 Chrome 配置档。',
+		crawl4ai_profile_ready:
+			'Polywise 托管配置档已就绪，路径为 {{path}}。它是从 Chrome 配置档 {{profile}} 克隆出的快照；后续可使用“重建配置档”刷新 Cookie 或登录状态。',
+		crawl4ai_profile_missing:
+			'尚未检测到托管配置档。点击“从 Chrome 创建”可克隆当前 Chrome 配置档 {{profile}} 的快照。',
+		dokobot_bridge_not_ready:
+			'Dokobot CLI 已安装，但本地浏览器桥接尚未就绪。请安装扩展、开启 Remote Control，并执行 `dokobot install-bridge`。',
+		dokobot_no_bridge_device:
+			'未检测到任何 Dokobot 本地桥接 / 设备。请安装扩展、开启 Remote Control，并执行 `dokobot install-bridge`。',
+		dokobot_bridge_responding: 'Dokobot 本地桥接已响应。',
+		dokobot_install_first: '请先安装 Dokobot CLI，再为本地模式配置扩展桥接。',
+		dokobot_bridge_lines: 'Dokobot 桥接 / 设备列表返回了 {{count}} 行。'
 	},
 	im: {
 		accounts_title: '已有账号',

@@ -6,11 +6,18 @@ import { Button } from '@/__shadcn__/components/ui/button'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { getAppRouteHref } from '@/utils'
 
+import { getPostForTypeLabel } from '../../utils'
 import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
 	const { t } = useTranslation(['post', 'agent', 'linkcase'])
+	const for_type_labels = {
+		wiki: t('tab.wiki', { ns: 'post' }),
+		memory: t('tab.memory', { ns: 'post' }),
+		user: t('tab.user', { ns: 'post' }),
+		linkcase: t('tab.linkcase', { ns: 'post' })
+	}
 
 	return (
 		<div className='flex h-full flex-col overflow-hidden'>
@@ -185,8 +192,11 @@ const Index = () => {
 									</a>
 								</div>
 								<div className='mt-2 flex items-center justify-between'>
-									<span className='text-std-300 text-[10px] uppercase'>
-										{item.for_type}
+									<span className='text-std-300 text-[10px]'>
+										{getPostForTypeLabel({
+											value: item.for_type,
+											labels: for_type_labels
+										})}
 									</span>
 									<span
 										className='icon_button small text-std-300'

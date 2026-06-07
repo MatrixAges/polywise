@@ -35,8 +35,8 @@ const Index = () => {
 					<Tabs
 						small
 						items={[
-							{ key: 'sessions', Icon: MessageCircleCheck },
-							{ key: 'projects', Icon: Folders },
+							{ key: 'sessions', title: t('menu.sessions'), Icon: MessageCircleCheck },
+							{ key: 'projects', title: t('menu.projects'), Icon: Folders },
 							{ key: 'im', title: t('menu.im'), Icon: Bot }
 						]}
 						active={menu_tab}

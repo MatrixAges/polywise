@@ -45,6 +45,7 @@ const Index = () => {
 	]
 	const period_items = active_tab === 'report' ? getHomeReportPeriodItems() : getHomeStatsPeriodItems()
 	const period_value = active_tab === 'report' ? x.report_period : x.stats_period
+	const current_period_label = period_items.find(item => item.value === period_value)?.label || ''
 
 	useEffect(() => {
 		void x.init()
@@ -101,7 +102,9 @@ const Index = () => {
 								arrowClassName='size-3.5 text-std-400'
 								noActiveStyle
 							>
-								<SelectValue className='text-std-400 text-sm' />
+								<SelectValue className='text-std-400 text-sm'>
+									{current_period_label}
+								</SelectValue>
 							</SelectTrigger>
 							<SelectContent align='end'>
 								{period_items.map(item => (

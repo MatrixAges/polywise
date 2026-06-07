@@ -68,7 +68,8 @@ export default {
 		separate_browser_notice:
 			'Chrome, Firefox, and Edge stay separated here. There is no combined import action.',
 		fetch_desc: 'Pull fresh markdown into Linkcase.',
-		extract_desc: 'Save content into vectors and generate triples through a Croner + fastq background queue.',
+		extract_desc:
+			'Extract content into vectors and generate triples through a Croner + fastq background queue.',
 		extract_concurrency_desc: 'fastq concurrency for scheduled extract runs',
 		auto_remove_dead_links_desc:
 			'Only for scheduled fetch. Removes obvious gone or empty pages, but keeps links blocked by verification.',
@@ -156,6 +157,9 @@ export default {
 		unselect_all: 'Unselect all',
 		submitting: 'Submitting',
 		fetch: 'Fetch',
+		extract: 'Extract',
+		reextract: 'Re-extract',
+		load_more: 'Load more',
 		clear: 'Clear',
 		removing: 'Removing',
 		delete: 'Delete'

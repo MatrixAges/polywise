@@ -13,6 +13,8 @@ export default {
 	},
 	menu: {
 		im: 'IM',
+		sessions: 'Sessions',
+		projects: 'Projects',
 		loading: 'Loading...',
 		load_more: 'Load more',
 		show_more: 'Show more',
@@ -20,6 +22,8 @@ export default {
 		unpin: 'Unpin'
 	},
 	side_panel: {
-		files: 'Files'
+		files: 'Files',
+		session: 'Session',
+		file: 'File'
 	}
 } as const

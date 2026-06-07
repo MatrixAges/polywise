@@ -39,8 +39,8 @@ const Index = () => {
 				<div className='flex items-center'>
 					<Tabs
 						items={[
-							{ key: 'session', Icon: MessageCircleCheck },
-							{ key: 'file', Icon: File }
+							{ key: 'session', title: t('side_panel.session'), Icon: MessageCircleCheck },
+							{ key: 'file', title: t('side_panel.file'), Icon: File }
 						]}
 						simple
 						active={content_tab}

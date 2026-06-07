@@ -124,7 +124,7 @@ const Index = () => {
 								<div className='flex items-center justify-between gap-3'>
 									<div>
 										<div className='text-sm font-medium'>
-											{t('selection.fetch')}
+											{t('selection.extract')}
 										</div>
 										<div className='text-std-400 text-xs'>
 											{t('control.extract_desc')}

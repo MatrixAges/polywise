@@ -6,13 +6,14 @@ import { useTranslation } from 'react-i18next'
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
 import Editor from '@/components/Editor'
+import { getPostForTypeLabel } from '@/pages/post/utils'
 import { alert, fromNow } from '@/utils'
 
 import { useModel } from '../context'
 import { article_for_types } from '../types'
 
 const Index = () => {
-	const { t } = useTranslation('agent')
+	const { t } = useTranslation(['agent', 'post'])
 	const {
 		selected_article,
 		article_loading,
@@ -31,6 +32,18 @@ const Index = () => {
 		saveSelectedArticle
 	} = useModel()
 	const [character_count, setCharacterCount] = useState(0)
+	const for_type_labels = {
+		wiki: t('tab.wiki', { ns: 'post' }),
+		memory: t('tab.memory', { ns: 'post' }),
+		user: t('tab.user', { ns: 'post' }),
+		linkcase: t('tab.linkcase', { ns: 'post' })
+	}
+	const for_type_items = article_for_types.map(item => ({
+		value: item,
+		label: getPostForTypeLabel({ value: item, labels: for_type_labels })
+	}))
+	const current_for_type_label =
+		for_type_items.find(item => item.value === article_draft_for)?.label || article_draft_for
 
 	const onRemove = async () => {
 		if (!selected_article) {
@@ -181,12 +194,12 @@ const Index = () => {
 								noStyle
 								noActiveStyle
 							>
-								<SelectValue className='capitalize' />
+								<SelectValue>{current_for_type_label}</SelectValue>
 							</SelectTrigger>
 							<SelectContent align='start'>
-								{article_for_types.map(item => (
-									<SelectItem value={item} key={item}>
-										<span className='capitalize'>{item}</span>
+								{for_type_items.map(item => (
+									<SelectItem value={item.value} key={item.value}>
+										<span>{item.label}</span>
 									</SelectItem>
 								))}
 							</SelectContent>

@@ -130,7 +130,7 @@ const Index = () => {
 					) : (
 						<Database className='size-3.5'></Database>
 					)}
-					<span>{extracted ? t('control.reextract') : t('selection.fetch')}</span>
+					<span>{extracted ? t('control.reextract') : t('selection.extract')}</span>
 				</Button>
 			</div>
 		</div>
