@@ -4,7 +4,7 @@ import { emitPipelineRefresh } from '@core/rpc/pipeline/emitter'
 import { writeFile } from 'atomically'
 import fs from 'fs-extra'
 
-export type SaveArticlePipelineTaskStatus = 'running' | 'done' | 'error'
+export type SaveArticlePipelineTaskStatus = 'queued' | 'running' | 'done' | 'error'
 
 export interface SaveArticlePipelineTask {
 	created_at: string
@@ -30,7 +30,8 @@ const normalizeTask = (value: unknown): SaveArticlePipelineTask | null => {
 	const item = value as Partial<SaveArticlePipelineTask>
 
 	if (typeof item.created_at !== 'string') return null
-	if (item.status !== 'running' && item.status !== 'done' && item.status !== 'error') return null
+	if (item.status !== 'queued' && item.status !== 'running' && item.status !== 'done' && item.status !== 'error')
+		return null
 	if (item.done_at !== null && typeof item.done_at !== 'string') return null
 	if (item.error_message !== undefined && item.error_message !== null && typeof item.error_message !== 'string')
 		return null
@@ -196,5 +197,27 @@ export const removePipelineTask = async (
 
 		await writeFile(pipeline_path, JSON.stringify(store, null, 4), 'utf8')
 		emitPipelineRefresh()
+	})
+}
+
+export const clearRunningPipelineTasks = async () => {
+	return runPipelineStoreMutation(async () => {
+		const store = await readPipelineStore()
+		const next_store = Object.entries(store).reduce<SaveArticlePipelineStore>((acc, [article_id, task]) => {
+			if (task.status !== 'running') {
+				acc[article_id] = task
+			}
+
+			return acc
+		}, {})
+
+		if (Object.keys(next_store).length === Object.keys(store).length) {
+			return 0
+		}
+
+		await writeFile(pipeline_path, JSON.stringify(next_store, null, 4), 'utf8')
+		emitPipelineRefresh()
+
+		return Object.keys(store).length - Object.keys(next_store).length
 	})
 }

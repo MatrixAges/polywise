@@ -26,7 +26,7 @@ import { emitPipelineRefresh } from '@core/rpc/pipeline/emitter'
 import { log } from '@core/utils'
 import { and, asc, eq, inArray, not, sql } from 'drizzle-orm'
 
-const AGENT_ARTICLE_PIPELINE_WAIT_MS = 90_000
+const AGENT_ARTICLE_PIPELINE_WAIT_MS = 10 * 60_000
 const AGENT_ARTICLE_PIPELINE_POLL_MS = 250
 const agent_article_extract_tasks = new Map<string, Promise<void>>()
 const agent_article_pipeline_batch_running_agents = new Set<string>()
@@ -34,6 +34,8 @@ const agent_article_pipeline_batch_tasks = new Map<string, Promise<void>>()
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const normalizeTripleText = (value: string) => value.replace(/\s+/g, ' ').trim()
+const isPipelineWaitTimeoutError = (error: unknown) =>
+	error instanceof Error && error.message.startsWith('Timed out while waiting for article pipeline:')
 
 const ensureAgentExists = async (agent_id: string) => {
 	const agent_item = await getAgent(eq(agent.id, agent_id))
@@ -382,7 +384,7 @@ const extractAgentPrivateArticle = async (args: { agent_id: string; article_id: 
 
 	const pipeline_task = (await readPipelineStore())[current_article.id]
 
-	if (pipeline_task?.status === 'running') {
+	if (pipeline_task?.status === 'running' || pipeline_task?.status === 'queued') {
 		await runAgentArticleExtractTask({
 			agent_id: args.agent_id,
 			article_id: current_article.id
@@ -446,6 +448,12 @@ const runAgentPrivateArticlePipelineBatch = (agent_id: string) => {
 
 					skipped_article_ids.delete(next_article.id)
 				} catch (error) {
+					if (isPipelineWaitTimeoutError(error)) {
+						await sleep(AGENT_ARTICLE_PIPELINE_POLL_MS)
+
+						continue
+					}
+
 					skipped_article_ids.add(next_article.id)
 
 					log('SAVE', 'agentPrivateArticleBatchItemError', () => ({

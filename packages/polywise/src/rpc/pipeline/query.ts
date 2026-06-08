@@ -8,7 +8,7 @@ export interface PipelineTaskItem {
 	task_key: string
 	article_id: string
 	title: string
-	status: 'running' | 'done' | 'error'
+	status: 'queued' | 'running' | 'done' | 'error'
 	created_at: string
 	done_at: string | null
 	error_message: string | null

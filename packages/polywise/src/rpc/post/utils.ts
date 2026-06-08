@@ -413,7 +413,7 @@ export const extractPostArticle = async (args: { id: string; force?: boolean }) 
 
 	const pipeline_task = (await readPipelineStore())[post.id]
 
-	if (pipeline_task?.status === 'running') {
+	if (pipeline_task?.status === 'running' || pipeline_task?.status === 'queued') {
 		return {
 			id: post.id,
 			title: post.title || '',

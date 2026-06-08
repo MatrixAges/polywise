@@ -2,6 +2,7 @@ import path from 'path'
 import { app } from '@core/consts'
 import { preset_providers } from '@core/consts/providers'
 import defaultSkillCreator from '@core/fst/agents/skill_creator/defaultSkill'
+import { clearRunningPipelineTasks } from '@core/io/save/pipelineStore'
 import { default_fetch_fallback_chain } from '@core/types'
 import { ensureWithValue } from '@core/utils'
 import fs from 'fs-extra'
@@ -169,6 +170,7 @@ export default async () => {
 	})
 
 	await ensureWithValue(pipeline_path, {})
+	await clearRunningPipelineTasks()
 	await ensureWithValue(pthink_path, {
 		running: false,
 		last_run_at: null,

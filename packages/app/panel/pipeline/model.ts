@@ -34,8 +34,12 @@ export default class Index {
 		return this.list.filter(item => item.status === 'running')
 	}
 
+	get queued_list() {
+		return this.list.filter(item => item.status === 'queued')
+	}
+
 	get recent_list() {
-		return this.list.filter(item => item.status !== 'running')
+		return this.list.filter(item => item.status !== 'running' && item.status !== 'queued')
 	}
 
 	watch() {

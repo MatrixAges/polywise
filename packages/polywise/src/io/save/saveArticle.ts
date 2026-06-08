@@ -166,12 +166,31 @@ const kickPipelineWorker = () => {
 		try {
 			while (true) {
 				const store = await readPipelineStore()
-				const next_tasks = Object.entries(store)
+				const running_tasks = Object.entries(store)
 					.filter(([, task]) => task.status === 'running')
 					.sort((a, b) => new Date(a[1].created_at).getTime() - new Date(b[1].created_at).getTime())
-					.slice(0, pipeline_worker_concurrency)
+				const available_slots = Math.max(0, pipeline_worker_concurrency - running_tasks.length)
+				const queued_tasks = Object.entries(store)
+					.filter(([, task]) => task.status === 'queued')
+					.sort((a, b) => new Date(a[1].created_at).getTime() - new Date(b[1].created_at).getTime())
+					.slice(0, available_slots)
 
-				if (next_tasks.length === 0) return
+				if (running_tasks.length === 0 && queued_tasks.length === 0) return
+
+				if (queued_tasks.length > 0) {
+					await Promise.all(
+						queued_tasks.map(([article_id, task]) =>
+							setPipelineTask(article_id, {
+								created_at: task.created_at,
+								status: 'running',
+								done_at: null,
+								error_message: null
+							})
+						)
+					)
+				}
+
+				const next_tasks = [...running_tasks, ...queued_tasks]
 
 				await Promise.all(
 					next_tasks.map(async ([article_id, task]) => {
@@ -289,7 +308,7 @@ export default async (args: ArgsSaveArticle) => {
 
 	await setPipelineTask(current_article_id, {
 		created_at,
-		status: 'running',
+		status: 'queued',
 		done_at: null,
 		error_message: null
 	})

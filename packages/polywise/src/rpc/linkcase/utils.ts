@@ -921,7 +921,7 @@ export const extractLinkcaseArticle = async (args: { id: string; force?: boolean
 
 		const pipeline_task = (await readPipelineStore())[article_item.id]
 
-		if (pipeline_task?.status === 'running') {
+		if (pipeline_task?.status === 'running' || pipeline_task?.status === 'queued') {
 			return {
 				id: item.id,
 				title: item.title,
