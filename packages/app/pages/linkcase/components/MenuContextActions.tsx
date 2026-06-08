@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 import {
 	ContextMenuContent,
@@ -11,6 +12,7 @@ import { useModel } from '../context'
 
 const Index = () => {
 	const x = useModel()
+	const { t } = useTranslation('linkcase')
 	const menu_target = x.menu_target_item
 	const menu_action_count = x.menu_action_ids.length
 
@@ -22,19 +24,23 @@ const Index = () => {
 		<ContextMenuContent>
 			{menu_action_count > 1 && (
 				<>
-					<ContextMenuLabel>{menu_action_count} links selected</ContextMenuLabel>
+					<ContextMenuLabel>
+						{t('selection.selected', { count: menu_action_count })}
+					</ContextMenuLabel>
 					<ContextMenuSeparator></ContextMenuSeparator>
 				</>
 			)}
 			<ContextMenuItem onClick={() => void x.fetchMenuLinks()}>
 				{menu_action_count > 1
-					? `Fetch selected (${menu_action_count})`
+					? `${t('control.fetch')} ${t('selection.selected', { count: menu_action_count })}`
 					: menu_target.article
-						? 'Refetch'
-						: 'Fetch'}
+						? t('control.refetch')
+						: t('control.fetch')}
 			</ContextMenuItem>
 			<ContextMenuItem variant='destructive' onClick={() => void x.removeMenuLinks()}>
-				{menu_action_count > 1 ? `Remove selected (${menu_action_count})` : 'Remove'}
+				{menu_action_count > 1
+					? `${t('selection.delete')} ${t('selection.selected', { count: menu_action_count })}`
+					: t('selection.delete')}
 			</ContextMenuItem>
 		</ContextMenuContent>
 	)

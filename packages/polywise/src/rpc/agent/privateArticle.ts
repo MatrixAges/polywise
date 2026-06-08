@@ -397,11 +397,6 @@ const runAgentPrivateArticlePipelineBatch = (agent_id: string) => {
 
 				const next_article = await getNextPendingAgentPrivateArticle(agent_id)
 
-				console.log('[agent.pipeline.batch] loop tick', {
-					agent_id,
-					next_article_id: next_article?.id ?? null
-				})
-
 				if (!next_article) {
 					break
 				}
@@ -440,8 +435,6 @@ export const getAgentPrivateArticlePipelineBatchState = async (agent_id: string)
 }
 
 export const setAgentPrivateArticlePipelineBatchState = async (args: { agent_id: string; running: boolean }) => {
-	console.log('[agent.pipeline.batch] set state', args)
-
 	await ensureAgentExists(args.agent_id)
 
 	if (!args.running) {
@@ -454,12 +447,6 @@ export const setAgentPrivateArticlePipelineBatchState = async (args: { agent_id:
 	await assertAgentWritableForKnowledge(args.agent_id)
 
 	const next_article = await getNextPendingAgentPrivateArticle(args.agent_id)
-
-	console.log('[agent.pipeline.batch] next pending article', {
-		agent_id: args.agent_id,
-		next_article_id: next_article?.id ?? null,
-		next_article_created_at: next_article?.created_at ?? null
-	})
 
 	if (!next_article) {
 		agent_article_pipeline_batch_running_agents.delete(args.agent_id)

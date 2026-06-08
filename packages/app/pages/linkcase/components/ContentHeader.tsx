@@ -16,6 +16,7 @@ const Index = () => {
 	const has_content = Boolean(x.detail?.article?.content?.trim())
 	const extracting = x.current_extracting_id === item?.id
 	const extracted = Boolean(x.detail?.article?.is_pipelined)
+	const fetched = Boolean(item?.article?.id || has_content)
 	const can_extract = Boolean(item && item.status === 'success' && has_content)
 
 	return (
@@ -116,7 +117,7 @@ const Index = () => {
 					) : (
 						<Bot className='size-3.5'></Bot>
 					)}
-					<span>{t('control.fetch')}</span>
+					<span>{fetched ? t('control.refetch') : t('control.fetch')}</span>
 				</Button>
 				<Button
 					className='h-7'

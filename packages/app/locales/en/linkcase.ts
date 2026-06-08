@@ -33,6 +33,7 @@ export default {
 		edit_link: 'Edit link',
 		assign_agents: 'Assign or relate agents',
 		fetch: 'Fetch',
+		refetch: 'Refetch',
 		reextract: 'Re-extract',
 		scheduled_tasks_title: 'Scheduled Tasks',
 		scheduled_tasks_desc:
@@ -157,6 +158,7 @@ export default {
 		unselect_all: 'Unselect all',
 		submitting: 'Submitting',
 		fetch: 'Fetch',
+		refetch: 'Refetch',
 		extract: 'Extract',
 		reextract: 'Re-extract',
 		load_more: 'Load more',
