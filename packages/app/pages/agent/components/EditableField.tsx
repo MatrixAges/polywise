@@ -11,13 +11,14 @@ interface IProps {
 	multiline?: boolean
 	placeholder?: string
 	class_name?: string
+	auto_width?: boolean
 	max_length?: number
 	on_submit: (value: string) => void
 	on_cancel: () => void
 }
 
 const Index = (props: IProps) => {
-	const { active, value, multiline, placeholder, class_name, max_length, on_submit, on_cancel } = props
+	const { active, value, multiline, placeholder, class_name, auto_width, max_length, on_submit, on_cancel } = props
 	const ref_input = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
 	const ref_is_composing = useRef(false)
 	const [draft_value, setDraftValue] = useState(value)
@@ -40,7 +41,19 @@ const Index = (props: IProps) => {
 	if (multiline) {
 		return (
 			<Textarea
-				className={$cx(class_name)}
+				className={$cx(
+					`
+					h-auto
+					min-h-auto
+					p-0
+					rounded-none
+					leading-4.5
+					bg-transparent!
+					border-none
+					ring-0!
+				`,
+					class_name
+				)}
 				value={draft_value}
 				placeholder={placeholder}
 				maxLength={max_length}
@@ -80,6 +93,7 @@ const Index = (props: IProps) => {
 				leading-5.5
 				bg-transparent!
 			`,
+				auto_width && 'field-sizing-content w-auto! max-w-full min-w-[1ch]',
 				class_name
 			)}
 			value={draft_value}
