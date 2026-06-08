@@ -30,6 +30,7 @@ interface ArgsSaveArticle {
 }
 
 let pipeline_processing = false
+const pipeline_worker_concurrency = 2
 const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error)) || 'Unknown error'
 
 const clearArticleChunks = async (article_id: string) => {
@@ -165,21 +166,24 @@ const kickPipelineWorker = () => {
 		try {
 			while (true) {
 				const store = await readPipelineStore()
-				const next_task = Object.entries(store)
+				const next_tasks = Object.entries(store)
 					.filter(([, task]) => task.status === 'running')
-					.sort(
-						(a, b) => new Date(a[1].created_at).getTime() - new Date(b[1].created_at).getTime()
-					)[0]
+					.sort((a, b) => new Date(a[1].created_at).getTime() - new Date(b[1].created_at).getTime())
+					.slice(0, pipeline_worker_concurrency)
 
-				if (!next_task) return
+				if (next_tasks.length === 0) return
 
-				try {
-					await processPipelineTask(next_task[0], next_task[1].created_at)
-				} catch (error) {
-					log('SAVE', 'pipelineWorkerError', () =>
-						error instanceof Error ? error.message : String(error)
-					)
-				}
+				await Promise.all(
+					next_tasks.map(async ([article_id, task]) => {
+						try {
+							await processPipelineTask(article_id, task.created_at)
+						} catch (error) {
+							log('SAVE', 'pipelineWorkerError', () =>
+								error instanceof Error ? error.message : String(error)
+							)
+						}
+					})
+				)
 			}
 		} finally {
 			pipeline_processing = false

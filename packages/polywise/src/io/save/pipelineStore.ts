@@ -22,6 +22,7 @@ export type SaveArticlePipelineStore = Record<string, SaveArticlePipelineTask>
 const empty_store: SaveArticlePipelineStore = {}
 const pipeline_logs_dir = path.resolve(logs_dir, 'pipeline')
 const pipeline_log_file_regex = /^(\d{4}-\d{2}-\d{2})\.jsonl$/
+let pipeline_store_mutation_queue = Promise.resolve()
 
 const normalizeTask = (value: unknown): SaveArticlePipelineTask | null => {
 	if (!value || typeof value !== 'object') return null
@@ -65,6 +66,17 @@ const appendPipelineLog = async (entry: SaveArticlePipelineLogEntry) => {
 
 	await fs.ensureDir(pipeline_logs_dir)
 	await fs.appendFile(getPipelineLogFilePath(date), JSON.stringify(entry) + '\n', 'utf8')
+}
+
+const runPipelineStoreMutation = async <T>(run: () => Promise<T>) => {
+	const next_promise = pipeline_store_mutation_queue.then(run, run)
+
+	pipeline_store_mutation_queue = next_promise.then(
+		() => undefined,
+		() => undefined
+	)
+
+	return next_promise
 }
 
 export const readPipelineStore = async () => {
@@ -143,14 +155,16 @@ export const readPipelineLogs = async (limit = 20) => {
 }
 
 export const setPipelineTask = async (article_id: string, task: SaveArticlePipelineTask) => {
-	const store = await readPipelineStore()
+	return runPipelineStoreMutation(async () => {
+		const store = await readPipelineStore()
 
-	store[article_id] = task
+		store[article_id] = task
 
-	await writeFile(pipeline_path, JSON.stringify(store, null, 4), 'utf8')
-	emitPipelineRefresh()
+		await writeFile(pipeline_path, JSON.stringify(store, null, 4), 'utf8')
+		emitPipelineRefresh()
 
-	return task
+		return task
+	})
 }
 
 export const removePipelineTask = async (
@@ -162,23 +176,25 @@ export const removePipelineTask = async (
 		error_message?: string | null
 	}
 ) => {
-	const store = await readPipelineStore()
-	const current_task = store[article_id]
+	return runPipelineStoreMutation(async () => {
+		const store = await readPipelineStore()
+		const current_task = store[article_id]
 
-	if (!current_task) return
+		if (!current_task) return
 
-	if (options?.archive !== false) {
-		await appendPipelineLog({
-			article_id,
-			created_at: current_task.created_at,
-			status: options?.status || 'done',
-			done_at: options?.done_at ?? new Date().toISOString(),
-			error_message: options?.error_message ?? current_task.error_message ?? null
-		})
-	}
+		if (options?.archive !== false) {
+			await appendPipelineLog({
+				article_id,
+				created_at: current_task.created_at,
+				status: options?.status || 'done',
+				done_at: options?.done_at ?? new Date().toISOString(),
+				error_message: options?.error_message ?? current_task.error_message ?? null
+			})
+		}
 
-	delete store[article_id]
+		delete store[article_id]
 
-	await writeFile(pipeline_path, JSON.stringify(store, null, 4), 'utf8')
-	emitPipelineRefresh()
+		await writeFile(pipeline_path, JSON.stringify(store, null, 4), 'utf8')
+		emitPipelineRefresh()
+	})
 }
