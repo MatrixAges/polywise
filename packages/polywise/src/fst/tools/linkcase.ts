@@ -35,7 +35,7 @@ const linkCreateInputSchema = object({
 	content: string()
 		.optional()
 		.describe(
-			'Optional cleaned core article body to save together with the link. Remove ads, related links, comments, and other non-body noise, but keep meaningful repo, download, demo, citation, source, and reference links that belong to the core body.'
+			'Optional cleaned core article body to save together with the link. Remove ads, related links, comments, and other non-body noise, but keep meaningful repo, download, demo, citation, source, and reference links that belong to the core body. Preserve the remaining body text verbatim instead of paraphrasing or summarizing it.'
 		)
 })
 
@@ -56,7 +56,7 @@ const inputSchema = object({
 		'commit_preview',
 		'mark_failed'
 	]).describe(
-		'The action to perform. create: add one or more new links, optionally with title and cleaned content. remove: delete one or more existing links and clean up orphaned fetched articles. status: count links by current status. list: list candidate links without fetching. fetch_next: automatically select and fetch the next batch. fetch_ids: fetch an explicit list of link ids. fetch_preview: fetch one link through one explicit provider without saving so the agent can inspect the result. read_preview: read another page from a previously fetched preview without switching providers. commit_preview: persist a previously inspected preview. mark_failed: finalize a failed AI-driven fetch attempt.'
+		'The action to perform. create: add one or more new links, optionally with title and cleaned content. remove: delete one or more existing links and clean up orphaned fetched articles. status: count links by current status. list: list candidate links without fetching. fetch_next: automatically select and fetch the next batch. fetch_ids: fetch an explicit list of link ids. fetch_preview: fetch one link through one explicit provider without saving so the agent can inspect the result. read_preview: read another page from a previously fetched preview without switching providers, optionally with a smaller page_size to narrow the body range. commit_preview: persist a previously inspected preview. mark_failed: finalize a failed AI-driven fetch attempt.'
 	),
 	url: string().url().optional().describe('[Required for create] Link URL to add.'),
 	title: string()
@@ -97,7 +97,7 @@ const inputSchema = object({
 	content: string()
 		.optional()
 		.describe(
-			'[Required for commit_preview, optional for create] Cleaned core article body to save. Remove ads, share widgets, related links, author cards, post navigation, comments, subscribe prompts, cookie notices, and any other non-body text. You may rewrite markdown formatting, but preserve the article meaning and keep meaningful repo, download, demo, citation, source, and reference links that are part of the core body.'
+			'[Required for commit_preview, optional for create] Cleaned core article body to save. Remove ads, share widgets, related links, author cards, post navigation, comments, subscribe prompts, cookie notices, and any other non-body text. Keep the remaining article body verbatim from the preview in the same order. Do not paraphrase, summarize, translate, shorten, merge, or otherwise rewrite it. Only minimal markdown or whitespace normalization is allowed, and meaningful repo, download, demo, citation, source, and reference links that are part of the core body must be kept.'
 		),
 	page: number()
 		.int()
@@ -105,6 +105,14 @@ const inputSchema = object({
 		.optional()
 		.describe(
 			'[Required for read_preview] 1-based preview page to read. Each page contains up to 30000 characters.'
+		),
+	page_size: number()
+		.int()
+		.min(1000)
+		.max(30000)
+		.optional()
+		.describe(
+			'[Optional for fetch_preview/read_preview] Preview page size in characters. Use a smaller value to narrow the article body range before commit_preview. Defaults to 30000.'
 		),
 	provider: Enum(['agent-browser', 'opencli', 'crawl4ai', 'dokobot', 'r.jina.ai'])
 		.optional()
@@ -313,8 +321,11 @@ export const createLinkcaseTool = (_s: Session) => {
 			'Fetching always uses the fallback chain and treats empty content as a failed attempt until a downstream provider succeeds or the chain is exhausted.',
 			'For AI-guided fetch validation, use fetch_preview with one provider at a time. Inspect the returned content_preview yourself, decide whether it is the real target content, and either continue with the next provider, commit_preview, or mark_failed.',
 			'fetch_preview caches up to max_chars characters, which defaults to 200000, and returns page 1 of that cached preview.',
-			'Use read_preview with the same preview_key to inspect later pages from the current provider before switching to another provider. Each preview page contains up to 30000 characters.',
-			'When using commit_preview, do not save the raw preview. First rewrite the result into cleaned core body content and pass that cleaned content through the content field.',
+			'Both fetch_preview and read_preview accept an optional page_size up to 30000 characters. Use smaller windows first when you need to narrow the article body range.',
+			'Use read_preview with the same preview_key to inspect later pages from the current provider before switching to another provider.',
+			'When using commit_preview, do not save the raw preview. First remove non-body noise and pass the cleaned core body through the content field.',
+			'For commit_preview, keep the remaining article body text verbatim from the preview in the same order. Do not paraphrase, summarize, translate, shorten, merge, or otherwise rewrite it.',
+			'Before commit_preview, use read_preview to locate the narrowest body range you need, then submit only that relevant body fragment instead of processing the entire cached preview.',
 			'If the current preview already contains the correct and substantially complete target article body, clean it and commit it immediately instead of trying more providers for cosmetic cleanup.',
 			'Use list or status first when you need to inspect the queue before fetching.'
 		].join('\n'),
@@ -584,7 +595,8 @@ export const createLinkcaseTool = (_s: Session) => {
 					...(await previewLinkcaseLinkWithProvider({
 						id: input.id,
 						provider: input.provider as WebfetchFallbackProvider,
-						max_chars: input.max_chars
+						max_chars: input.max_chars,
+						page_size: input.page_size
 					}))
 				}
 			}
@@ -608,7 +620,8 @@ export const createLinkcaseTool = (_s: Session) => {
 					action: 'read_preview' as const,
 					...(await readLinkcasePreview({
 						preview_key: input.preview_key,
-						page: input.page
+						page: input.page,
+						page_size: input.page_size
 					}))
 				}
 			}

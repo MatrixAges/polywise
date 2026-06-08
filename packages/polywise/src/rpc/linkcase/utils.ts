@@ -91,6 +91,7 @@ const linkcase_batch_running_state = {
 	started_at: 0
 }
 const LINKCASE_FETCH_PREVIEW_TTL_MS = 10 * 60 * 1000
+const LINKCASE_FETCH_PREVIEW_MIN_PAGE_SIZE = 1_000
 const LINKCASE_PIPELINE_WAIT_MS = 90_000
 const LINKCASE_PIPELINE_POLL_MS = 250
 const LINKCASE_TASK_BUSY_ERROR_PREFIX = 'Linkcase task is already running'
@@ -113,6 +114,118 @@ const normalizeKeyword = (keyword?: string) => keyword?.trim() ?? ''
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const normalizeTripleText = (value: string) => value.replace(/\s+/g, ' ').trim()
 const prepareLinkcaseArticleContent = (content: string) => content.replace(/\r\n?/g, '\n').trim()
+const isAbsoluteLinkcaseAssetUrl = (value: string) =>
+	/^[a-z][a-z\d+.-]*:/i.test(value) || value.startsWith('//') || value.startsWith('#')
+
+const resolveLinkcaseAssetUrl = (value: string, base_url: string) => {
+	if (!value || isAbsoluteLinkcaseAssetUrl(value)) {
+		return value
+	}
+
+	try {
+		return new URL(value, base_url).toString()
+	} catch {
+		return value
+	}
+}
+
+const normalizeLinkcaseImageSources = (args: { content: string; base_url: string }) =>
+	args.content
+		.replace(/!\[([^\]]*)\]\(([^)\s]+)([^)]*)\)/g, (_matched, alt, src, suffix) => {
+			const resolved_src = resolveLinkcaseAssetUrl(src, args.base_url)
+
+			return `![${alt}](${resolved_src}${suffix})`
+		})
+		.replace(/<img\b([^>]*?)\ssrc=(["'])([^"']+)\2([^>]*)>/gi, (_matched, before, quote, src, after) => {
+			const resolved_src = resolveLinkcaseAssetUrl(src, args.base_url)
+
+			return `<img${before} src=${quote}${resolved_src}${quote}${after}>`
+		})
+
+const normalizeLinkcaseComparableText = (content: string) =>
+	content
+		.replace(/\r\n?/g, '\n')
+		.replace(/!\[[^\]]*]\([^)]+\)/g, ' ')
+		.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '$1 $2')
+		.replace(/^[>\-+*#\d.\s|]+/gm, '')
+		.replace(/[`*_~]/g, '')
+		.replace(/\s+/g, ' ')
+		.trim()
+		.toLowerCase()
+
+const collectLinkcaseComparableBlocks = (content: string) => {
+	const paragraph_blocks = content
+		.split(/\n{2,}/)
+		.map(normalizeLinkcaseComparableText)
+		.filter(block => block.length >= 24)
+
+	if (paragraph_blocks.length > 0) {
+		return paragraph_blocks
+	}
+
+	return content
+		.split('\n')
+		.map(normalizeLinkcaseComparableText)
+		.filter(block => block.length >= 24)
+}
+
+const getLinkcaseComparableOverlap = (args: { cleaned_content: string; preview_content: string }) => {
+	const comparable_blocks = collectLinkcaseComparableBlocks(args.cleaned_content)
+
+	if (comparable_blocks.length === 0) {
+		return {
+			comparable_block_count: 0,
+			matched_block_count: 0,
+			total_length: 0,
+			matched_length: 0
+		}
+	}
+
+	const normalized_preview = normalizeLinkcaseComparableText(args.preview_content)
+
+	return comparable_blocks.reduce(
+		(total, block) => {
+			total.total_length += block.length
+
+			if (normalized_preview.includes(block)) {
+				total.matched_block_count += 1
+				total.matched_length += block.length
+			}
+
+			return total
+		},
+		{
+			comparable_block_count: comparable_blocks.length,
+			matched_block_count: 0,
+			total_length: 0,
+			matched_length: 0
+		}
+	)
+}
+
+const assertLinkcaseCommittedContentPreservesOriginalText = (args: { content: string; preview_content: string }) => {
+	const normalized_content = prepareLinkcaseArticleContent(args.content)
+	const overlap = getLinkcaseComparableOverlap({
+		cleaned_content: normalized_content,
+		preview_content: args.preview_content
+	})
+
+	if (overlap.comparable_block_count === 0 || overlap.total_length === 0) {
+		return normalized_content
+	}
+
+	const matched_block_ratio = overlap.matched_block_count / overlap.comparable_block_count
+	const matched_length_ratio = overlap.matched_length / overlap.total_length
+
+	if (matched_block_ratio < 0.6 || matched_length_ratio < 0.75) {
+		throw new Error(
+			'Committed Linkcase content must preserve the original article wording. Remove noise only and keep the remaining body text verbatim.'
+		)
+	}
+
+	return normalized_content
+}
+
 const normalizeLinkcaseVisibleUrl = (value: string) => {
 	const trimmed_value = value
 		.trim()
@@ -207,6 +320,34 @@ const preserveLinkcasePreviewKeyUrls = (args: { content: string; preview_content
 	return normalized_content ? `${normalized_content}\n\n${suffix}` : suffix
 }
 
+const hasLinkcaseFavicon = (favicon: unknown) => favicon instanceof Uint8Array && favicon.length > 0
+
+const refreshLinkcaseFaviconInBackground = (link_id: string) => {
+	void queueMicrotask(async () => {
+		try {
+			const current_link = await getLink(eq(link.id, link_id))
+
+			if (!current_link || hasLinkcaseFavicon(current_link.favicon)) {
+				return
+			}
+
+			const favicon = await getLinkFavicon(current_link.url).catch(() => null)
+
+			if (!hasLinkcaseFavicon(favicon)) {
+				return
+			}
+
+			await setLink(eq(link.id, link_id), {
+				favicon
+			})
+		} catch (error) {
+			log('SAVE', 'linkcaseFaviconRefreshError', () =>
+				error instanceof Error ? error.message : String(error)
+			)
+		}
+	})
+}
+
 const getRunningLinkcaseTask = (): LinkcaseRunningTask | null => {
 	const linkcase_session = SessionStore.get(global_linkcase_session_id)
 
@@ -256,7 +397,10 @@ const withLinkcaseBatchRunLock = async <T>(action: string, fn: () => Promise<T>)
 
 const getPreviewPage = (content: string, page: number, page_size = LINKCASE_FETCH_PREVIEW_PAGE_SIZE) => {
 	const safe_page = Math.max(1, page)
-	const safe_page_size = Math.max(1, page_size)
+	const safe_page_size = Math.min(
+		LINKCASE_FETCH_PREVIEW_PAGE_SIZE,
+		Math.max(LINKCASE_FETCH_PREVIEW_MIN_PAGE_SIZE, page_size)
+	)
 	const content_length = content.length
 	const page_count = Math.max(1, Math.ceil(content_length / safe_page_size))
 	const normalized_page = Math.min(safe_page, page_count)
@@ -522,9 +666,13 @@ const saveLinkcaseArticle = async (args: {
 	const current_title = args.title.trim()
 	const fetched_title = args.fetched_title?.trim() || ''
 	const final_title = current_title || fetched_title || args.url
+	const normalized_content = normalizeLinkcaseImageSources({
+		content: prepareLinkcaseArticleContent(args.content),
+		base_url: args.url
+	})
 	const article_id = await saveArticle({
 		title: final_title,
-		content: prepareLinkcaseArticleContent(args.content),
+		content: normalized_content,
 		for: 'linkcase',
 		exec_pipeline: args.exec_pipeline
 	})
@@ -533,13 +681,15 @@ const saveLinkcaseArticle = async (args: {
 
 	const article_item = await getArticle(eq(article.id, article_id))
 	const current_link = await getLink(eq(link.id, args.id))
-	const favicon = current_link ? await getLinkFavicon(current_link.url).catch(() => null) : null
 	const updated_link = await setLink(eq(link.id, args.id), {
 		...(!current_title && fetched_title ? { title: fetched_title } : {}),
 		status: 'success',
-		generate_at: new Date(),
-		...(favicon ? { favicon } : {})
+		generate_at: new Date()
 	})
+
+	if (current_link && !hasLinkcaseFavicon(current_link.favicon)) {
+		refreshLinkcaseFaviconInBackground(current_link.id)
+	}
 
 	return {
 		article: article_item ?? null,
@@ -816,6 +966,7 @@ export const previewLinkcaseLinkWithProvider = async (args: {
 	id: string
 	provider: WebfetchFallbackProvider
 	max_chars?: number
+	page_size?: number
 }) => {
 	const current_link = await getLink(eq(link.id, args.id))
 
@@ -828,7 +979,7 @@ export const previewLinkcaseLinkWithProvider = async (args: {
 	const max_chars = args.max_chars ?? DEFAULT_LINKCASE_FETCH_MAX_CHARS
 	const result = await fetchWithProvider(args.provider, current_link.url, max_chars)
 	const preview_key = crypto.randomUUID()
-	const preview_page = getPreviewPage(result.content, 1)
+	const preview_page = getPreviewPage(result.content, 1, args.page_size)
 
 	linkcase_fetch_preview_cache.set(preview_key, {
 		id: current_link.id,
@@ -861,7 +1012,7 @@ export const previewLinkcaseLinkWithProvider = async (args: {
 	}
 }
 
-export const readLinkcasePreview = async (args: { preview_key: string; page: number }) => {
+export const readLinkcasePreview = async (args: { preview_key: string; page: number; page_size?: number }) => {
 	cleanupLinkcaseFetchPreviewCache()
 
 	const cached = linkcase_fetch_preview_cache.get(args.preview_key)
@@ -870,7 +1021,7 @@ export const readLinkcasePreview = async (args: { preview_key: string; page: num
 		throw new Error(`Preview not found or expired: ${args.preview_key}`)
 	}
 
-	const preview_page = getPreviewPage(cached.content, args.page)
+	const preview_page = getPreviewPage(cached.content, args.page, args.page_size)
 
 	return {
 		ok: true as const,
@@ -912,13 +1063,18 @@ export const commitLinkcasePreview = async (args: {
 		throw new Error(`Link not found: ${cached.id}`)
 	}
 
+	const normalized_content = assertLinkcaseCommittedContentPreservesOriginalText({
+		content: args.content,
+		preview_content: cached.content
+	})
+
 	const saved = await saveLinkcaseArticle({
 		id: current_link.id,
 		url: current_link.url,
 		title: current_link.title,
 		fetched_title: cached.fetched_title,
 		content: preserveLinkcasePreviewKeyUrls({
-			content: args.content,
+			content: normalized_content,
 			preview_content: cached.content
 		}),
 		exec_pipeline: args.exec_pipeline
