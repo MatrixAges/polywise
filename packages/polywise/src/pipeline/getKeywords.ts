@@ -1,39 +1,24 @@
-// KeyBERT - https://github.com/MaartenGr/KeyBERT
-
 import getChunkWords from './getChunkWords'
-import getSimilarity from './getSimilarity'
-import getVectors from './getVectors'
 
 export default async (text: string) => {
-	const candidate_list = await getChunkWords(text)
+	const candidate_list = (await getChunkWords(text)).map(item => item.trim()).filter(Boolean)
 
 	if (!candidate_list.length) return []
 
-	const input_list = [text, ...candidate_list]
+	const normalized_candidate_list = candidate_list.map((word, index) => ({
+		word,
+		index,
+		normalized: word.toLowerCase().replace(/\s+/g, ' ').trim()
+	}))
 
-	const embedding_list = await getVectors(input_list)
+	const top_k = Math.max(12, Math.min(60, Math.round((text.length / 40) * 2.5)))
 
-	const doc_embedding = embedding_list[0]
-	const candidate_embedding_list = embedding_list.slice(1)
-
-	const result_list = candidate_list.map((word, index) => {
-		const score = getSimilarity(doc_embedding, candidate_embedding_list[index])
-		const vector = candidate_embedding_list[index]
-
-		return { word, score, vector }
-	})
-
-	const top_k = Math.max(8, Math.min(40, Math.round((text.length / 40) * 2)))
-
-	const sorted_list = result_list.sort((a, b) => b.score - a.score)
-	const filtered_list: Array<{ word: string; score: number; vector: Array<number> }> = []
+	const sorted_list = normalized_candidate_list.sort((a, b) => b.word.length - a.word.length || a.index - b.index)
+	const filtered_list: Array<(typeof normalized_candidate_list)[number]> = []
 
 	for (const item of sorted_list) {
 		const is_similar = filtered_list.some(selected => {
-			const is_text_similar = item.word.includes(selected.word) || selected.word.includes(item.word)
-			const is_vec_similar = getSimilarity(item.vector, selected.vector) > 0.85
-
-			return is_text_similar || is_vec_similar
+			return item.normalized.includes(selected.normalized) || selected.normalized.includes(item.normalized)
 		})
 
 		if (!is_similar) {
@@ -43,5 +28,5 @@ export default async (text: string) => {
 		}
 	}
 
-	return filtered_list.map(item => item.word.trim())
+	return filtered_list.map(item => item.word)
 }

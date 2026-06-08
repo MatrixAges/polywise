@@ -1,6 +1,12 @@
 import { config } from '@core/config'
 
-import { getRemoteEmbeddingRunner, resetRemoteEmbeddingRunner, setRemoteEmbeddingRunner } from './embeddingRunnerState'
+import {
+	getRemoteEmbeddingRunner,
+	getRemoteEmbeddingRunnerPromise,
+	resetRemoteEmbeddingRunner,
+	setRemoteEmbeddingRunner,
+	setRemoteEmbeddingRunnerPromise
+} from './embeddingRunnerState'
 import getRemoteEmbeddingModel from './getRemoteEmbeddingModel'
 import { isRemoteProvider } from './getRemoteModel'
 
@@ -57,7 +63,7 @@ const wrapRateLimitedEmbeddingRunner = (args: {
 	provider: string
 	policy: RetryPolicy
 }): EmbeddingRunner => {
-	const { runner, provider, policy } = args
+	const { runner, policy } = args
 	let cooldown_until = 0
 	let pending_task = Promise.resolve()
 
@@ -108,23 +114,41 @@ export default async () => {
 
 	if (remote_embedding_runner) return remote_embedding_runner
 
-	const result = await getRemoteEmbeddingModel()
+	const remote_embedding_runner_promise = getRemoteEmbeddingRunnerPromise()
 
-	if (!result) return null
+	if (remote_embedding_runner_promise) {
+		return remote_embedding_runner_promise
+	}
 
-	const provider = config.embedding_model?.provider
-	const runner =
-		provider && isRemoteProvider(provider)
-			? wrapRateLimitedEmbeddingRunner({
-					runner: result.run,
-					provider,
-					policy: default_remote_retry_policy
-				})
-			: result.run
+	const create_runner_promise = (async () => {
+		const result = await getRemoteEmbeddingModel()
 
-	setRemoteEmbeddingRunner(runner)
+		if (!result) return null
 
-	return getRemoteEmbeddingRunner()
+		const provider = config.embedding_model?.provider
+		const runner =
+			provider && isRemoteProvider(provider)
+				? wrapRateLimitedEmbeddingRunner({
+						runner: result.run,
+						provider,
+						policy: default_remote_retry_policy
+					})
+				: result.run
+
+		setRemoteEmbeddingRunner(runner)
+
+		return runner
+	})()
+
+	setRemoteEmbeddingRunnerPromise(create_runner_promise)
+
+	try {
+		return await create_runner_promise
+	} finally {
+		if (getRemoteEmbeddingRunnerPromise() === create_runner_promise) {
+			setRemoteEmbeddingRunnerPromise(null)
+		}
+	}
 }
 
 export { resetRemoteEmbeddingRunner }
