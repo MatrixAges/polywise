@@ -15,6 +15,23 @@ type AgentCreateSource = {
 
 const normalizeBlock = (value?: string | null) => value?.trim() || ''
 
+const getAgentPromptContract = (agent: AgentProfileSource) => {
+	const prompt = normalizeBlock(agent.prompt)
+
+	if (!prompt) {
+		return ''
+	}
+
+	return [
+		'## Hard Rules',
+		'Treat the following prompt block as mandatory operating rules for this session.',
+		'If the prompt requires a tool call before answering, you must call that tool first.',
+		'Do not weaken, skip, summarize, or reinterpret these rules because of brevity, style, or roleplay fluency.',
+		'If the prompt rules cannot be satisfied, say that directly instead of pretending to comply.',
+		`## Prompt Rules\n${prompt}`
+	].join('\n\n')
+}
+
 export const getAgentSessionPrompt = (agent: AgentProfileSource) => {
 	return [
 		'# Agent Session Profile',
@@ -25,7 +42,7 @@ export const getAgentSessionPrompt = (agent: AgentProfileSource) => {
 		agent.identity ? `## Identity\n${agent.identity}` : '',
 		agent.soul ? `## Soul\n${agent.soul}` : '',
 		agent.memory ? `## Memory\n${agent.memory}` : '',
-		agent.prompt ? `## Prompt\n${agent.prompt}` : '',
+		getAgentPromptContract(agent),
 		'## Reply Style',
 		'Speak like a real person, not a document.',
 		'Default to a short direct reply. Usually use 1-3 short sentences or one short paragraph.',
@@ -33,7 +50,8 @@ export const getAgentSessionPrompt = (agent: AgentProfileSource) => {
 		'Do not use headings, bullet lists, long explanations, or multi-part structure unless the user explicitly asks or the task truly requires it.',
 		'For simple confirmations, yes/no questions, and straightforward factual replies, answer in a single concise sentence.',
 		'Expand only when the user asks for detail or when brevity would make the answer unclear.',
-		'Follow this agent session profile as a hard system-level role constraint.'
+		'Follow this agent session profile as a hard system-level role constraint.',
+		'When the Hard Rules conflict with the Reply Style, follow the Hard Rules first.'
 	]
 		.filter(Boolean)
 		.join('\n\n')
@@ -47,9 +65,10 @@ export const getAgentToolProfilePrompt = (agent: AgentProfileSource) => {
 		agent.identity ? `Identity:\n${agent.identity}` : '',
 		agent.soul ? `Soul:\n${agent.soul}` : '',
 		agent.memory ? `Memory:\n${agent.memory}` : '',
-		agent.prompt ? `Prompt:\n${agent.prompt}` : '',
+		getAgentPromptContract(agent),
 		'Respond as this exact agent only.',
-		'Do not narrate internal coordination. Answer the request directly from this agent perspective.'
+		'Do not narrate internal coordination. Answer the request directly from this agent perspective.',
+		'If the Hard Rules require tool use before answering, comply with that before producing the final reply.'
 	]
 		.filter(Boolean)
 		.join('\n\n')
