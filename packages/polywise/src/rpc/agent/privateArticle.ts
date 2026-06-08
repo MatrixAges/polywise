@@ -24,7 +24,7 @@ import { readPipelineStore } from '@core/io/save/pipelineStore'
 import { getEmbedding, getTriples } from '@core/pipeline'
 import { emitPipelineRefresh } from '@core/rpc/pipeline/emitter'
 import { log } from '@core/utils'
-import { and, asc, eq, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, not, sql } from 'drizzle-orm'
 
 const AGENT_ARTICLE_PIPELINE_WAIT_MS = 90_000
 const AGENT_ARTICLE_PIPELINE_POLL_MS = 250
@@ -234,14 +234,42 @@ const clearAgentArticleGraph = async (agent_id: string, article_id: string) => {
 	await pruneAgentGraph(agent_id)
 }
 
-const getNextPendingAgentPrivateArticle = async (agent_id: string) => {
+const getPendingAgentPrivateArticleWhere = (agent_id: string) =>
+	and(eq(article.scope_type, 'agent'), eq(article.scope_id, agent_id), eq(article.is_pipelined, false))
+
+const getNextPendingAgentPrivateArticle = async (args: { agent_id: string; exclude_article_ids?: Array<string> }) => {
+	const { agent_id, exclude_article_ids = [] } = args
+	const pending_where = getPendingAgentPrivateArticleWhere(agent_id)
+	const pipeline_store = await readPipelineStore()
+	const errored_article_ids = Object.entries(pipeline_store)
+		.filter(([, task]) => task.status === 'error')
+		.map(([article_id]) => article_id)
+	const filtered_error_ids = errored_article_ids.filter(article_id => !exclude_article_ids.includes(article_id))
+	const filtered_exclude_ids = exclude_article_ids.filter(Boolean)
+
+	if (filtered_error_ids.length > 0) {
+		const errored_article = await env.db
+			.select()
+			.from(article)
+			.where(and(pending_where, inArray(article.id, filtered_error_ids)))
+			.orderBy(asc(article.created_at), asc(article.id))
+			.limit(1)
+			.then(rows => rows[0] ?? null)
+
+		if (errored_article) {
+			return errored_article
+		}
+	}
+
 	return env.db
 		.select()
 		.from(article)
 		.where(
-			and(eq(article.scope_type, 'agent'), eq(article.scope_id, agent_id), eq(article.is_pipelined, false))
+			filtered_exclude_ids.length > 0
+				? and(pending_where, not(inArray(article.id, filtered_exclude_ids)))
+				: pending_where
 		)
-		.orderBy(asc(article.created_at))
+		.orderBy(asc(article.created_at), asc(article.id))
 		.limit(1)
 		.then(rows => rows[0] ?? null)
 }
@@ -250,9 +278,7 @@ const getPendingAgentPrivateArticleCount = async (agent_id: string) => {
 	const row = await env.db
 		.select({ count: sql<number>`count(*)` })
 		.from(article)
-		.where(
-			and(eq(article.scope_type, 'agent'), eq(article.scope_id, agent_id), eq(article.is_pipelined, false))
-		)
+		.where(getPendingAgentPrivateArticleWhere(agent_id))
 		.then(rows => rows[0] ?? null)
 
 	return Number(row?.count ?? 0)
@@ -391,20 +417,43 @@ const runAgentPrivateArticlePipelineBatch = (agent_id: string) => {
 	}
 
 	const task = (async () => {
+		const skipped_article_ids = new Set<string>()
+
 		try {
 			while (agent_article_pipeline_batch_running_agents.has(agent_id)) {
 				await assertAgentWritableForKnowledge(agent_id)
 
-				const next_article = await getNextPendingAgentPrivateArticle(agent_id)
+				const next_article = await getNextPendingAgentPrivateArticle({
+					agent_id,
+					exclude_article_ids: Array.from(skipped_article_ids)
+				})
 
 				if (!next_article) {
+					if (skipped_article_ids.size > 0) {
+						skipped_article_ids.clear()
+
+						continue
+					}
+
 					break
 				}
 
-				await extractAgentPrivateArticle({
-					agent_id,
-					article_id: next_article.id
-				})
+				try {
+					await extractAgentPrivateArticle({
+						agent_id,
+						article_id: next_article.id
+					})
+
+					skipped_article_ids.delete(next_article.id)
+				} catch (error) {
+					skipped_article_ids.add(next_article.id)
+
+					log('SAVE', 'agentPrivateArticleBatchItemError', () => ({
+						agent_id,
+						article_id: next_article.id,
+						error: error instanceof Error ? error.message : String(error)
+					}))
+				}
 			}
 		} finally {
 			agent_article_pipeline_batch_running_agents.delete(agent_id)
@@ -445,8 +494,9 @@ export const setAgentPrivateArticlePipelineBatchState = async (args: { agent_id:
 	}
 
 	await assertAgentWritableForKnowledge(args.agent_id)
-
-	const next_article = await getNextPendingAgentPrivateArticle(args.agent_id)
+	const next_article = await getNextPendingAgentPrivateArticle({
+		agent_id: args.agent_id
+	})
 
 	if (!next_article) {
 		agent_article_pipeline_batch_running_agents.delete(args.agent_id)

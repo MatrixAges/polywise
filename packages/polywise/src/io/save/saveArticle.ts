@@ -62,6 +62,16 @@ const runArticlePipeline = async (article_id: string, content: string) => {
 
 	for (let i = 0; i < chunks.length; i++) {
 		const item = chunks[i]
+
+		if (!item.trim()) {
+			log('SAVE', 'skipEmptyChunk', () => ({
+				article_id,
+				chunk_index: i
+			}))
+
+			continue
+		}
+
 		const keywords = await getKeywords(item)
 
 		log('SAVE', 'getKeywords', () => `keywords: ${JSON.stringify(keywords)}`)
