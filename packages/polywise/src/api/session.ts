@@ -12,7 +12,6 @@ export const post = async (c: HonoContext) => {
 		message: Message
 		archive_before_submit?: boolean
 	}>()
-
 	const session = await connectSession({ id })
 
 	if (archive_before_submit) {

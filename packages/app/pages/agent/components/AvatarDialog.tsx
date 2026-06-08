@@ -68,7 +68,6 @@ const Index = () => {
 	return (
 		<Dialog
 			open={avatar_dialog_open}
-			maxHeight='max-h-[80vh]'
 			title={t('avatar.title')}
 			desc={t('avatar.desc')}
 			className='w-[360px]'

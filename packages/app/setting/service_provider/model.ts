@@ -91,8 +91,12 @@ export default class Index {
 		await this.refreshProviders(false)
 	}
 
-	onConfigChange(values: AppConfig) {
-		this.setting.setConfig('config', values)
+	onConfigChange(_values: AppConfig, changed?: Partial<AppConfig>) {
+		if (!changed || Object.keys(changed).length === 0) {
+			return
+		}
+
+		this.setting.setConfig('config', changed, true)
 	}
 
 	syncProviderOrder() {

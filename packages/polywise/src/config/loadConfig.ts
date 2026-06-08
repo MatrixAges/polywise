@@ -9,7 +9,14 @@ import fs from 'fs-extra'
 import { config_path, providers_path } from '../consts/app'
 import { config, providers } from './index'
 
-import type { AppReportConfig, ConfigProvider, PresetProvider, ProviderConfig } from '@core/types'
+import type {
+	AppReportConfig,
+	ConfigProvider,
+	DefaultModel,
+	PresetProvider,
+	Provider,
+	ProviderConfig
+} from '@core/types'
 
 const mergeable_provider_keys = ['apiKey', 'baseURL', 'headers', 'models'] as const
 const fetch_fallback_provider_set = new Set<string>(default_fetch_fallback_chain)
@@ -39,6 +46,67 @@ const default_report: AppReportConfig = {
 }
 const default_auth = {
 	enabled: false
+}
+const default_workspace_name = 'Default'
+const default_submit_mode = 'enter' as const
+const isValidDefaultModel = (value: unknown): value is DefaultModel => {
+	if (!value || typeof value !== 'object') {
+		return false
+	}
+
+	const { provider, model } = value as Partial<DefaultModel>
+
+	return typeof provider === 'string' && provider.trim() !== '' && typeof model === 'string' && model.trim() !== ''
+}
+
+const getDefaultConfigModel = (args: {
+	provider_config: ProviderConfig | null | undefined
+	type: 'text' | 'embedding' | 'rerank'
+}) => {
+	const { provider_config, type } = args
+	const providers = [...(provider_config?.providers ?? []), ...(provider_config?.custom_providers ?? [])] as Array<
+		Pick<Provider, 'name' | 'models'>
+	>
+
+	for (const provider of providers) {
+		const matched_model =
+			provider.models.find(model => model.enabled !== false && model.type === type) ??
+			(type === 'text'
+				? provider.models.find(
+						model => model.enabled !== false && (!model.type || model.type === 'text')
+					)
+				: undefined)
+
+		if (!matched_model) {
+			continue
+		}
+
+		return {
+			provider: provider.name,
+			model: matched_model.id
+		} satisfies DefaultModel
+	}
+
+	for (const provider of providers) {
+		const fallback_model = provider.models.find(model => model.enabled !== false)
+
+		if (!fallback_model) {
+			continue
+		}
+
+		return {
+			provider: provider.name,
+			model: fallback_model.id
+		} satisfies DefaultModel
+	}
+
+	const preset_provider = preset_providers[0]
+	const preset_model = preset_provider?.models[0]
+
+	return {
+		provider: preset_provider?.name || 'google_gemini',
+		model: preset_model?.id || 'gemini-3.1-pro-preview'
+	} satisfies DefaultModel
 }
 
 const mergePresetProvider = (local_provider: ConfigProvider | undefined, preset_provider: PresetProvider) => {
@@ -95,9 +163,77 @@ export default async () => {
 
 	if (err_config || err_providers) return initDefaults()
 
+	const { provider_config, has_changed_provider } = mergePresetProviders(res_providers)
+	const default_model = getDefaultConfigModel({
+		provider_config,
+		type: 'text'
+	})
+	const default_embedding_model = getDefaultConfigModel({
+		provider_config,
+		type: 'embedding'
+	})
+	const default_rerank_model = getDefaultConfigModel({
+		provider_config,
+		type: 'rerank'
+	})
+
 	clearObject(config)
 	Object.assign(config, res_config || {})
 	let has_changed_config = false
+
+	if (!Array.isArray(config.workspaces) || config.workspaces.length === 0) {
+		config.workspaces = [{ name: default_workspace_name }]
+		has_changed_config = true
+	}
+
+	if (
+		typeof config.current_workspace !== 'string' ||
+		!config.current_workspace.trim() ||
+		!config.workspaces.some(workspace => workspace?.name === config.current_workspace)
+	) {
+		config.current_workspace = config.workspaces[0]?.name || default_workspace_name
+		has_changed_config = true
+	}
+
+	if (config.submit_mode !== 'enter' && config.submit_mode !== 'ctrl+enter') {
+		config.submit_mode = default_submit_mode
+		has_changed_config = true
+	}
+
+	if (!isValidDefaultModel(config.default_model)) {
+		config.default_model = default_model
+		has_changed_config = true
+	}
+
+	if (!isValidDefaultModel(config.embedding_model)) {
+		config.embedding_model = default_embedding_model
+		has_changed_config = true
+	}
+
+	if (!isValidDefaultModel(config.rerank_model)) {
+		config.rerank_model = default_rerank_model
+		has_changed_config = true
+	}
+
+	if (typeof config.enable_triple !== 'boolean') {
+		config.enable_triple = false
+		has_changed_config = true
+	}
+
+	if (!isValidDefaultModel(config.triple_model)) {
+		config.triple_model = default_model
+		has_changed_config = true
+	}
+
+	if (typeof config.enable_rewrite !== 'boolean') {
+		config.enable_rewrite = false
+		has_changed_config = true
+	}
+
+	if (!isValidDefaultModel(config.rewrite_model)) {
+		config.rewrite_model = default_model
+		has_changed_config = true
+	}
 
 	if (!config.mcp) {
 		config.mcp = { enabled: true }
@@ -224,8 +360,6 @@ export default async () => {
 			has_changed_config = true
 		}
 	}
-
-	const { provider_config, has_changed_provider } = mergePresetProviders(res_providers)
 
 	clearObject(providers)
 	Object.assign(providers, provider_config)

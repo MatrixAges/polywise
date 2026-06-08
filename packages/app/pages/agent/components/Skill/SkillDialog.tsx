@@ -41,7 +41,6 @@ const Index = () => {
 				p-0
 			'
 			headerClassName='p-6 py-5 border-b border-border-light'
-			maxHeight='max-h-[80vh]'
 			setOpen={setSkillDialogOpen}
 		>
 			<Context value={x}>

@@ -27,8 +27,12 @@ const Index = () => {
 		s.getModelStatus()
 	}, [])
 
-	const onChange = useMemoizedFn(values => {
-		s.setConfig('config', values)
+	const onChange = useMemoizedFn((_values, changed?: Partial<AppConfig>) => {
+		if (!changed || Object.keys(changed).length === 0) {
+			return
+		}
+
+		s.setConfig('config', changed, true)
 	})
 
 	const { control } = useForm<AppConfig>({ values: $copy(s.config) }, onChange)

@@ -8,22 +8,81 @@ import fs from 'fs-extra'
 
 import { cron_path, pipeline_path, pthink_path, rewire_dir, temp_dir } from '../consts/app'
 
-import type { AppConfig, ProviderConfig } from '@core/types'
+import type { AppConfig, DefaultModel, Provider, ProviderConfig } from '@core/types'
 
 const configs = ['config', 'providers']
+const getDefaultConfigModel = (args: {
+	providers: Array<Pick<Provider, 'name' | 'models'>>
+	type: 'text' | 'embedding' | 'rerank'
+}) => {
+	const { providers, type } = args
+
+	for (const provider of providers) {
+		const matched_model =
+			provider.models.find(model => model.enabled !== false && model.type === type) ??
+			(type === 'text'
+				? provider.models.find(
+						model => model.enabled !== false && (!model.type || model.type === 'text')
+					)
+				: undefined)
+
+		if (!matched_model) {
+			continue
+		}
+
+		return {
+			provider: provider.name,
+			model: matched_model.id
+		} satisfies DefaultModel
+	}
+
+	for (const provider of providers) {
+		const fallback_model = provider.models.find(model => model.enabled !== false)
+
+		if (!fallback_model) {
+			continue
+		}
+
+		return {
+			provider: provider.name,
+			model: fallback_model.id
+		} satisfies DefaultModel
+	}
+
+	const preset_provider = providers[0]
+	const preset_model = preset_provider?.models[0]
+
+	return {
+		provider: preset_provider?.name || 'google_gemini',
+		model: preset_model?.id || 'gemini-3.1-pro-preview'
+	} satisfies DefaultModel
+}
 
 export default async () => {
 	for await (const name of configs) {
 		const config_path = path.resolve(`${app.app_path}/${name}.json`)
 
 		if (name === 'config') {
-			const preset = preset_providers[0]
-			const default_model = { provider: preset.name, model: preset.models[0].id }
+			const default_model = getDefaultConfigModel({
+				providers: preset_providers,
+				type: 'text'
+			})
+			const embedding_model = getDefaultConfigModel({
+				providers: preset_providers,
+				type: 'embedding'
+			})
+			const rerank_model = getDefaultConfigModel({
+				providers: preset_providers,
+				type: 'rerank'
+			})
 
 			await ensureWithValue(config_path, {
 				workspaces: [{ name: 'Default' }],
 				current_workspace: 'Default',
+				submit_mode: 'enter',
 				default_model,
+				embedding_model,
+				rerank_model,
 				page_bridge_enabled: false,
 				prompt_full_inject: false,
 				jina_api_key: '',

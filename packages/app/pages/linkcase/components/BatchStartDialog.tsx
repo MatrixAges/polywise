@@ -31,7 +31,6 @@ const Index = () => {
 			title={t('control.scheduled_tasks_title')}
 			desc={t('control.scheduled_tasks_desc')}
 			className='w-[560px] max-w-[92vw]! pb-4'
-			maxHeight='max-h-[76vh]'
 			setOpen={x.setStartDialogOpen}
 		>
 			<div className='flex flex-col gap-4'>

@@ -1249,11 +1249,11 @@ export default class Index {
 		this.current_ai_fetching_id = item.id
 		this.batch_last_error = ''
 		this.batch_last_run_at = Date.now()
+		this.session_dialog_open = true
 
 		try {
 			await this.submitSessionPrompt(this.buildAIFetchPrompt(item))
 			this.batch_runs += 1
-			this.session_dialog_open = true
 			toast.success($t('toast.ai_fetch_submitted', { ns: 'linkcase', title: item.title || item.url }))
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error)
@@ -1461,11 +1461,11 @@ export default class Index {
 		this.selection_fetch_submit_loading = true
 		this.batch_last_error = ''
 		this.batch_last_run_at = Date.now()
+		this.session_dialog_open = true
 
 		try {
 			await this.submitSessionPrompt(this.buildTargetFetchPrompt(target_items))
 			this.batch_runs += 1
-			this.session_dialog_open = true
 			toast.success($t('toast.fetch_batch_submitted', { ns: 'linkcase', count: target_items.length }))
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error)
