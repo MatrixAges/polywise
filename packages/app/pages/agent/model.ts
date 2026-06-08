@@ -106,6 +106,9 @@ export default class Index {
 	private_article_dialog_title = ''
 	private_article_dialog_content = ''
 	private_article_dialog_for = 'memory' as ArticleForType
+	private_article_pipeline_running = false
+	private_article_pipeline_loading = false
+	private_article_pipeline_request_key = 0
 	pins = [] as Array<AgentSessionItem>
 	session_items = [] as Array<AgentSessionItem>
 	pin_map = {} as Record<string, number>
@@ -294,6 +297,7 @@ export default class Index {
 		await this.refresh()
 		await this.hydrateSessionStatusMap()
 		this.watchSessionStatus()
+		this.watchPipeline()
 	}
 
 	async refresh() {
@@ -369,10 +373,14 @@ export default class Index {
 		if (this.selected_agent_id) {
 			await Promise.all([
 				this.refreshAgentRelated(),
+				this.refreshPrivateArticlePipelineState(),
 				this.refreshSessions(),
 				this.refreshToolLogs(),
 				this.refreshSkillLogs()
 			])
+		} else {
+			this.private_article_pipeline_running = false
+			this.private_article_pipeline_loading = false
 		}
 	}
 
@@ -414,6 +422,8 @@ export default class Index {
 			this.article_draft_for = 'memory'
 			this.article_saving = false
 			this.clearArticleSearch()
+			this.private_article_pipeline_running = false
+			this.private_article_pipeline_loading = false
 
 			return
 		}
@@ -508,6 +518,36 @@ export default class Index {
 		} finally {
 			if (this.article_request_key === request_key) {
 				this.article_loading_more = false
+			}
+		}
+	}
+
+	async refreshPrivateArticlePipelineState(agent_id = this.selected_agent_id) {
+		if (!agent_id) {
+			this.private_article_pipeline_running = false
+			this.private_article_pipeline_loading = false
+
+			return
+		}
+
+		const request_key = this.private_article_pipeline_request_key + 1
+
+		this.private_article_pipeline_request_key = request_key
+
+		try {
+			const response = await rpc.agent.getPrivateArticlePipelineBatch.query({ agent_id })
+
+			if (
+				this.private_article_pipeline_request_key !== request_key ||
+				this.selected_agent_id !== agent_id
+			) {
+				return
+			}
+
+			this.private_article_pipeline_running = response.running
+		} finally {
+			if (this.private_article_pipeline_request_key === request_key) {
+				this.private_article_pipeline_loading = false
 			}
 		}
 	}
@@ -721,6 +761,7 @@ export default class Index {
 
 		if (!same_agent) {
 			void this.refreshAgentRelated()
+			void this.refreshPrivateArticlePipelineState(agent_id)
 			void this.refreshSessions()
 			void this.refreshToolLogs()
 			void this.refreshSkillLogs()
@@ -1935,6 +1976,48 @@ export default class Index {
 		}
 	}
 
+	async togglePrivateArticlePipelineBatch() {
+		if (
+			!this.selected_agent_id ||
+			this.private_article_pipeline_loading ||
+			(!this.can_mutate_selected_agent_articles && !this.private_article_pipeline_running)
+		) {
+			return
+		}
+
+		const agent_id = this.selected_agent_id
+		const next_running = !this.private_article_pipeline_running
+
+		this.private_article_pipeline_loading = true
+
+		try {
+			const response = await rpc.agent.setPrivateArticlePipelineBatch.mutate({
+				agent_id,
+				running: next_running
+			})
+
+			if (this.selected_agent_id !== agent_id) {
+				return
+			}
+
+			this.private_article_pipeline_running = response.running
+
+			if (next_running && !response.running && response.pending_count === 0) {
+				toast.info($t('toast.article_pipeline_batch_empty', { ns: 'agent' }))
+			}
+		} catch (error) {
+			toast.error(
+				error instanceof Error
+					? error.message
+					: $t('toast.article_pipeline_batch_failed', { ns: 'agent' })
+			)
+		} finally {
+			if (this.selected_agent_id === agent_id) {
+				this.private_article_pipeline_loading = false
+			}
+		}
+	}
+
 	openAvatarDialog() {
 		const agent_item = this.selected_agent
 
@@ -2149,6 +2232,20 @@ export default class Index {
 				if (has_group_session_change) {
 					void this.refreshGroups()
 				}
+			}
+		})
+
+		this.util.acts.push(deinit.unsubscribe)
+	}
+
+	watchPipeline() {
+		const deinit = rpc.pipeline.watch.subscribe(undefined, {
+			onData: () => {
+				if (!this.selected_agent_id) {
+					return
+				}
+
+				void this.refreshPrivateArticlePipelineState()
 			}
 		})
 

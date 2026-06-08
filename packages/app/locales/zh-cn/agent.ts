@@ -12,6 +12,10 @@ export default {
 		remove_title: '删除智能体',
 		remove_desc: '确认删除这个智能体吗？',
 		frozen: '冻结',
+		start_pipeline: '开始 Pipeline',
+		pause_pipeline: '暂停 Pipeline',
+		starting_pipeline: '启动中...',
+		pausing_pipeline: '暂停中...',
 		locked: '锁定',
 		writable: '可编辑',
 		exporting: '导出中...',
@@ -181,6 +185,8 @@ export default {
 		export_failed: '导出智能体失败。',
 		article_saved: '文章已保存。',
 		article_save_failed: '保存文章失败。',
+		article_pipeline_batch_empty: '没有需要 Pipeline 的私有文章。',
+		article_pipeline_batch_failed: '私有文章批量 Pipeline 操作失败。',
 		content_required: '内容不能为空。',
 		article_added: '文章已添加。'
 	}

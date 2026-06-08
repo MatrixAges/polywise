@@ -6,6 +6,8 @@ import {
 	HardDriveUpload,
 	Info,
 	MessageSquareText,
+	Pause,
+	Play,
 	Sparkles,
 	Trash2,
 	UserRound,
@@ -41,12 +43,16 @@ const Index = ({ active_tab }: IProps) => {
 	const { t } = useTranslation('agent')
 	const {
 		export_agent_loading,
+		private_article_pipeline_loading,
+		private_article_pipeline_running,
 		selected_agent,
 		selected_agent_id,
+		can_mutate_selected_agent_articles,
 		setCurrentTab,
 		exportSelectedAgent,
 		removeAgent,
-		toggleAgentFrozen
+		toggleAgentFrozen,
+		togglePrivateArticlePipelineBatch
 	} = useModel()
 
 	const onRemove = async () => {
@@ -133,24 +139,54 @@ const Index = ({ active_tab }: IProps) => {
 				'
 			>
 				{selected_agent ? (
-					<div
-						className='
-							flex
-							items-center justify-between
-							gap-2
-							px-2 py-1.5
-							rounded-full
-							border border-border-light
-						'
-					>
-						<div className='min-w-0'>
-							<div className='text-xs font-medium'>{t('detail.frozen')}</div>
+					<div className='flex flex-col gap-2'>
+						<button
+							className='click_button small text-xs'
+							type='button'
+							disabled={
+								!selected_agent_id ||
+								private_article_pipeline_loading ||
+								(!can_mutate_selected_agent_articles &&
+									!private_article_pipeline_running)
+							}
+							onClick={() => void togglePrivateArticlePipelineBatch()}
+						>
+							{private_article_pipeline_running ? (
+								<Pause className='size-3'></Pause>
+							) : (
+								<Play className='size-3'></Play>
+							)}
+							<span>
+								{private_article_pipeline_loading
+									? private_article_pipeline_running
+										? t('detail.pausing_pipeline')
+										: t('detail.starting_pipeline')
+									: private_article_pipeline_running
+										? t('detail.pause_pipeline')
+										: t('detail.start_pipeline')}
+							</span>
+						</button>
+						<div
+							className='
+								flex
+								items-center justify-between
+								gap-2
+								px-2 py-1.5
+								rounded-full
+								border border-border-light
+							'
+						>
+							<div className='min-w-0'>
+								<div className='text-xs font-medium'>{t('detail.frozen')}</div>
+							</div>
+							<Switch
+								size='sm'
+								checked={Boolean(selected_agent.is_frozen)}
+								onCheckedChange={next_value =>
+									void toggleAgentFrozen(Boolean(next_value))
+								}
+							/>
 						</div>
-						<Switch
-							size='sm'
-							checked={Boolean(selected_agent.is_frozen)}
-							onCheckedChange={next_value => void toggleAgentFrozen(Boolean(next_value))}
-						/>
 					</div>
 				) : null}
 				<div className='flex items-center justify-between gap-2'>

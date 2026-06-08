@@ -5,6 +5,7 @@ import create from './create'
 import createSession from './createSession'
 import exportPack from './exportPack'
 import getArticles from './getArticles'
+import getPrivateArticlePipelineBatch from './getPrivateArticlePipelineBatch'
 import getPrivateArticles from './getPrivateArticles'
 import getRelatedArticles from './getRelatedArticles'
 import getSessions from './getSessions'
@@ -18,6 +19,7 @@ import remove from './remove'
 import removeArticle from './removeArticle'
 import savePrivateArticle from './savePrivateArticle'
 import searchArticles from './searchArticles'
+import setPrivateArticlePipelineBatch from './setPrivateArticlePipelineBatch'
 import setSkills from './setSkills'
 import sort from './sort'
 import sortPin from './sortPin'
@@ -29,6 +31,7 @@ export default r({
 	createSession,
 	exportPack,
 	getArticles,
+	getPrivateArticlePipelineBatch,
 	getPrivateArticles,
 	getRelatedArticles,
 	getSkillLogs,
@@ -42,6 +45,7 @@ export default r({
 	query,
 	savePrivateArticle,
 	searchArticles,
+	setPrivateArticlePipelineBatch,
 	setSkills,
 	sort,
 	sortPin,

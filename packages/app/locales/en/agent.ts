@@ -12,6 +12,10 @@ export default {
 		remove_title: 'Remove Agent',
 		remove_desc: 'Confirm remove this agent?',
 		frozen: 'Frozen',
+		start_pipeline: 'Start Pipeline',
+		pause_pipeline: 'Pause Pipeline',
+		starting_pipeline: 'Starting...',
+		pausing_pipeline: 'Pausing...',
 		locked: 'Locked',
 		writable: 'Writable',
 		exporting: 'Exporting...',
@@ -185,6 +189,8 @@ export default {
 		export_failed: 'Agent export failed.',
 		article_saved: 'Article saved.',
 		article_save_failed: 'Failed to save article.',
+		article_pipeline_batch_empty: 'No private articles need pipeline processing.',
+		article_pipeline_batch_failed: 'Failed to update the private article pipeline batch.',
 		content_required: 'Content is required.',
 		article_added: 'Article added.'
 	}

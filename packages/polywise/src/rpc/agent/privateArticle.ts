@@ -22,12 +22,15 @@ import { env } from '@core/env'
 import { saveArticle } from '@core/io'
 import { readPipelineStore } from '@core/io/save/pipelineStore'
 import { getEmbedding, getTriples } from '@core/pipeline'
+import { emitPipelineRefresh } from '@core/rpc/pipeline/emitter'
 import { log } from '@core/utils'
 import { and, asc, eq, sql } from 'drizzle-orm'
 
 const AGENT_ARTICLE_PIPELINE_WAIT_MS = 90_000
 const AGENT_ARTICLE_PIPELINE_POLL_MS = 250
 const agent_article_extract_tasks = new Map<string, Promise<void>>()
+const agent_article_pipeline_batch_running_agents = new Set<string>()
+const agent_article_pipeline_batch_tasks = new Map<string, Promise<void>>()
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const normalizeTripleText = (value: string) => value.replace(/\s+/g, ' ').trim()
@@ -231,6 +234,30 @@ const clearAgentArticleGraph = async (agent_id: string, article_id: string) => {
 	await pruneAgentGraph(agent_id)
 }
 
+const getNextPendingAgentPrivateArticle = async (agent_id: string) => {
+	return env.db
+		.select()
+		.from(article)
+		.where(
+			and(eq(article.scope_type, 'agent'), eq(article.scope_id, agent_id), eq(article.is_pipelined, false))
+		)
+		.orderBy(asc(article.created_at))
+		.limit(1)
+		.then(rows => rows[0] ?? null)
+}
+
+const getPendingAgentPrivateArticleCount = async (agent_id: string) => {
+	const row = await env.db
+		.select({ count: sql<number>`count(*)` })
+		.from(article)
+		.where(
+			and(eq(article.scope_type, 'agent'), eq(article.scope_id, agent_id), eq(article.is_pipelined, false))
+		)
+		.then(rows => rows[0] ?? null)
+
+	return Number(row?.count ?? 0)
+}
+
 const runAgentArticleExtractTask = (args: { agent_id: string; article_id: string }) => {
 	const previous_task = agent_article_extract_tasks.get(args.article_id) || Promise.resolve()
 
@@ -306,6 +333,146 @@ const runAgentArticleExtractTask = (args: { agent_id: string; article_id: string
 		})
 
 	return task
+}
+
+const extractAgentPrivateArticle = async (args: { agent_id: string; article_id: string }) => {
+	const current_article = await getArticle(eq(article.id, args.article_id))
+
+	if (!current_article || current_article.scope_type !== 'agent' || current_article.scope_id !== args.agent_id) {
+		throw new Error(`Agent private article not found: ${args.article_id}`)
+	}
+
+	if (current_article.is_pipelined) {
+		return
+	}
+
+	const running_extract_task = agent_article_extract_tasks.get(current_article.id)
+
+	if (running_extract_task) {
+		await running_extract_task
+
+		return
+	}
+
+	const pipeline_task = (await readPipelineStore())[current_article.id]
+
+	if (pipeline_task?.status === 'running') {
+		await runAgentArticleExtractTask({
+			agent_id: args.agent_id,
+			article_id: current_article.id
+		})
+
+		return
+	}
+
+	const article_id = await saveArticle({
+		article_id: current_article.id,
+		title: current_article.title,
+		content: current_article.content,
+		for: current_article.for,
+		scope_type: 'agent',
+		scope_id: args.agent_id,
+		source: current_article.source ?? 'agent',
+		metadata: current_article.metadata,
+		exec_pipeline: true
+	})
+
+	await runAgentArticleExtractTask({
+		agent_id: args.agent_id,
+		article_id
+	})
+}
+
+const runAgentPrivateArticlePipelineBatch = (agent_id: string) => {
+	const running_task = agent_article_pipeline_batch_tasks.get(agent_id)
+
+	if (running_task) {
+		return running_task
+	}
+
+	const task = (async () => {
+		try {
+			while (agent_article_pipeline_batch_running_agents.has(agent_id)) {
+				await assertAgentWritableForKnowledge(agent_id)
+
+				const next_article = await getNextPendingAgentPrivateArticle(agent_id)
+
+				console.log('[agent.pipeline.batch] loop tick', {
+					agent_id,
+					next_article_id: next_article?.id ?? null
+				})
+
+				if (!next_article) {
+					break
+				}
+
+				await extractAgentPrivateArticle({
+					agent_id,
+					article_id: next_article.id
+				})
+			}
+		} finally {
+			agent_article_pipeline_batch_running_agents.delete(agent_id)
+			agent_article_pipeline_batch_tasks.delete(agent_id)
+			emitPipelineRefresh()
+		}
+	})()
+
+	agent_article_pipeline_batch_tasks.set(agent_id, task)
+
+	void task.catch((error: unknown) => {
+		log('SAVE', 'agentPrivateArticlePipelineBatchError', () => ({
+			agent_id,
+			error: error instanceof Error ? error.message : String(error)
+		}))
+	})
+
+	return task
+}
+
+export const getAgentPrivateArticlePipelineBatchState = async (agent_id: string) => {
+	await ensureAgentExists(agent_id)
+
+	return {
+		running: agent_article_pipeline_batch_running_agents.has(agent_id),
+		pending_count: await getPendingAgentPrivateArticleCount(agent_id)
+	}
+}
+
+export const setAgentPrivateArticlePipelineBatchState = async (args: { agent_id: string; running: boolean }) => {
+	console.log('[agent.pipeline.batch] set state', args)
+
+	await ensureAgentExists(args.agent_id)
+
+	if (!args.running) {
+		agent_article_pipeline_batch_running_agents.delete(args.agent_id)
+		emitPipelineRefresh()
+
+		return getAgentPrivateArticlePipelineBatchState(args.agent_id)
+	}
+
+	await assertAgentWritableForKnowledge(args.agent_id)
+
+	const next_article = await getNextPendingAgentPrivateArticle(args.agent_id)
+
+	console.log('[agent.pipeline.batch] next pending article', {
+		agent_id: args.agent_id,
+		next_article_id: next_article?.id ?? null,
+		next_article_created_at: next_article?.created_at ?? null
+	})
+
+	if (!next_article) {
+		agent_article_pipeline_batch_running_agents.delete(args.agent_id)
+		emitPipelineRefresh()
+
+		return getAgentPrivateArticlePipelineBatchState(args.agent_id)
+	}
+
+	agent_article_pipeline_batch_running_agents.add(args.agent_id)
+	emitPipelineRefresh()
+	runAgentPrivateArticlePipelineBatch(args.agent_id)
+
+	return getAgentPrivateArticlePipelineBatchState(args.agent_id)
 }
 
 export const savePrivateAgentArticle = async (args: {
