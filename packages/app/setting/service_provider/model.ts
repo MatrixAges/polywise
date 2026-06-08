@@ -4,7 +4,6 @@ import { makeAutoObservable } from 'mobx'
 import { toast } from 'sonner'
 import { injectable } from 'tsyringe'
 
-import { Setting } from '@/models'
 import { rpc } from '@/utils'
 
 import type { AppConfig } from '@core/types'
@@ -58,13 +57,11 @@ export default class Index {
 	loading = false
 	installing_id = null as string | null
 	managing_action_id = null as string | null
+	current_config = {} as Partial<AppConfig>
+	write_config = null as null | ((changed: Partial<AppConfig>) => void)
 
-	constructor(public setting: Setting) {
-		makeAutoObservable(this, { setting: false }, { autoBind: true })
-	}
-
-	get current_config() {
-		return (this.setting.config ? $copy(this.setting.config) : {}) as Partial<AppConfig>
+	constructor() {
+		makeAutoObservable(this, { write_config: false }, { autoBind: true })
 	}
 
 	get fallback_chain() {
@@ -87,6 +84,13 @@ export default class Index {
 		} as AppConfig
 	}
 
+	syncConfig(args: { config?: Partial<AppConfig> | null; writeConfig: (changed: Partial<AppConfig>) => void }) {
+		const { config, writeConfig } = args
+
+		this.current_config = (config ? $copy(config) : {}) as Partial<AppConfig>
+		this.write_config = writeConfig
+	}
+
 	async init() {
 		await this.refreshProviders(false)
 	}
@@ -96,7 +100,7 @@ export default class Index {
 			return
 		}
 
-		this.setting.setConfig('config', changed, true)
+		this.write_config?.(changed)
 	}
 
 	syncProviderOrder() {
@@ -181,6 +185,6 @@ export default class Index {
 		)
 
 		this.providers = next_providers
-		this.setting.setConfig('config', { fetch_fallback_chain: next_chain } as AppConfig, true)
+		this.write_config?.({ fetch_fallback_chain: next_chain } as AppConfig)
 	}
 }
