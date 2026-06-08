@@ -7,6 +7,18 @@ export default {
 	models: [
 		{
 			enabled: true,
+			id: 'nomic-ai/nomic-embed-text-v1.5',
+			name: 'Nomic Embed Text v1.5',
+			type: 'embedding'
+		},
+		{
+			enabled: true,
+			id: 'accounts/fireworks/models/qwen3-reranker-8b',
+			name: 'Qwen3 Reranker 8B',
+			type: 'rerank'
+		},
+		{
+			enabled: true,
 			id: 'accounts/fireworks/models/deepseek-r1',
 			name: 'Deepseek R1'
 		},

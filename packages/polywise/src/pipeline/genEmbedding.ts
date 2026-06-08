@@ -2,12 +2,21 @@ import { config } from '@core/config'
 
 import { getRemoteEmbeddingRunner, resetRemoteEmbeddingRunner, setRemoteEmbeddingRunner } from './embeddingRunnerState'
 import getRemoteEmbeddingModel from './getRemoteEmbeddingModel'
+import { isRemoteProvider } from './getRemoteModel'
 
 type EmbeddingRunner = (value: string) => Promise<Array<number>>
 
-const jina_retry_base_delay_ms = 1500
-const jina_retry_max_delay_ms = 12000
-const jina_retry_limit = 4
+interface RetryPolicy {
+	base_delay_ms: number
+	max_delay_ms: number
+	retry_limit: number
+}
+
+const default_remote_retry_policy = {
+	base_delay_ms: 2000,
+	max_delay_ms: 20000,
+	retry_limit: 5
+} satisfies RetryPolicy
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -35,14 +44,20 @@ const isRateLimitError = (error: unknown) => {
 	)
 }
 
-const getRetryDelay = (attempt_index: number) => {
-	const base_delay = Math.min(jina_retry_max_delay_ms, jina_retry_base_delay_ms * 2 ** attempt_index)
+const getRetryDelay = (args: { attempt_index: number; policy: RetryPolicy }) => {
+	const { attempt_index, policy } = args
+	const base_delay = Math.min(policy.max_delay_ms, policy.base_delay_ms * 2 ** attempt_index)
 	const jitter = Math.floor(Math.random() * 250)
 
 	return base_delay + jitter
 }
 
-const wrapJinaEmbeddingRunner = (runner: EmbeddingRunner): EmbeddingRunner => {
+const wrapRateLimitedEmbeddingRunner = (args: {
+	runner: EmbeddingRunner
+	provider: string
+	policy: RetryPolicy
+}): EmbeddingRunner => {
+	const { runner, provider, policy } = args
 	let cooldown_until = 0
 	let pending_task = Promise.resolve()
 
@@ -64,11 +79,13 @@ const wrapJinaEmbeddingRunner = (runner: EmbeddingRunner): EmbeddingRunner => {
 			try {
 				return await runner(value)
 			} catch (error) {
-				if (!isRateLimitError(error) || attempt_index >= jina_retry_limit) {
+				if (!isRateLimitError(error) || attempt_index >= policy.retry_limit) {
 					throw error
 				}
 
-				cooldown_until = Math.max(cooldown_until, Date.now() + getRetryDelay(attempt_index))
+				const retry_delay = getRetryDelay({ attempt_index, policy })
+
+				cooldown_until = Math.max(cooldown_until, Date.now() + retry_delay)
 				attempt_index += 1
 			}
 		}
@@ -95,7 +112,15 @@ export default async () => {
 
 	if (!result) return null
 
-	const runner = config.embedding_model?.provider === 'jina' ? wrapJinaEmbeddingRunner(result.run) : result.run
+	const provider = config.embedding_model?.provider
+	const runner =
+		provider && isRemoteProvider(provider)
+			? wrapRateLimitedEmbeddingRunner({
+					runner: result.run,
+					provider,
+					policy: default_remote_retry_policy
+				})
+			: result.run
 
 	setRemoteEmbeddingRunner(runner)
 

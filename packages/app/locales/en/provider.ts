@@ -10,7 +10,7 @@ export default {
 		cerebras: 'Cerebras',
 		cohere: 'Cohere',
 		deepinfra: 'Deepinfra',
-		fireworks: 'Firworks',
+		fireworks: 'Fireworks',
 		groq: 'Groq',
 		lmstudio: 'LMStudio',
 		mistral: 'Mistral',

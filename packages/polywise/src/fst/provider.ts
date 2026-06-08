@@ -38,6 +38,16 @@ export interface GetModelArgs<T extends ModelType = 'text'> {
 	model_tool?: boolean
 }
 
+interface FireworksRerankItem {
+	index?: number
+	relevance_score?: number
+}
+
+interface FireworksRerankResponse {
+	data?: Array<FireworksRerankItem>
+	results?: Array<FireworksRerankItem>
+}
+
 const effort_ranks = ['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'] as const
 
 type EffortValue = (typeof effort_ranks)[number]
@@ -114,6 +124,106 @@ const normalizeOpenResponsesUrl = (value?: string) => {
 	}
 
 	return `${normalized}/v1/responses`
+}
+
+const getFireworksBaseUrl = (value?: string) => {
+	return (value || 'https://api.fireworks.ai/inference/v1').replace(/\/+$/, '')
+}
+
+const requireFireworksApiKey = (options?: GetModelArgs['options']) => {
+	const api_key = options?.apiKey || process.env.FIREWORKS_API_KEY
+
+	if (!api_key) {
+		throw new Error('Fireworks API key is required for rerank models.')
+	}
+
+	return api_key
+}
+
+const getFireworksRequestHeaders = (args: { api_key: string; headers?: Record<string, string> }) => {
+	const { api_key, headers } = args
+
+	return {
+		Authorization: `Bearer ${api_key}`,
+		'Content-Type': 'application/json',
+		...(headers || {})
+	}
+}
+
+const toIndexedScores = (args: { values: Array<string>; items?: Array<FireworksRerankItem> }) => {
+	const { values, items } = args
+	const scores = values.map(() => 0)
+
+	items?.forEach(item => {
+		if (
+			typeof item.index === 'number' &&
+			item.index >= 0 &&
+			item.index < scores.length &&
+			typeof item.relevance_score === 'number'
+		) {
+			scores[item.index] = item.relevance_score
+		}
+	})
+
+	return scores
+}
+
+const createFireworksEmbeddingResult = async (args: { model: string; options?: GetModelArgs['options'] }) => {
+	const { model, options } = args
+	const target_fireworks = (await import('@ai-sdk/fireworks')).createFireworks(options)
+	const embedding_model = target_fireworks.embeddingModel(model)
+
+	return {
+		run: async (value: string) => {
+			const { embedding } = await embed({
+				model: embedding_model,
+				value
+			})
+
+			return embedding
+		}
+	} satisfies EmbeddingResult
+}
+
+const createFireworksRerankResult = (args: { model: string; options?: GetModelArgs['options'] }) => {
+	const { model, options } = args
+	const api_key = requireFireworksApiKey(options)
+	const base_url = getFireworksBaseUrl(options?.baseURL)
+	const headers = getFireworksRequestHeaders({
+		api_key,
+		headers: options?.headers as Record<string, string> | undefined
+	})
+
+	return {
+		run: async (query: string, values: Array<string>) => {
+			if (values.length === 0) return []
+
+			const response = await fetch(`${base_url}/rerank`, {
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					model,
+					query,
+					documents: values,
+					top_n: values.length,
+					return_documents: false
+				})
+			})
+
+			if (!response.ok) {
+				throw new Error(
+					`Fireworks rerank request failed (${response.status}): ${await response.text()}`
+				)
+			}
+
+			const data = (await response.json()) as FireworksRerankResponse
+
+			return toIndexedScores({
+				values,
+				items: data.data ?? data.results
+			})
+		}
+	} satisfies RerankResult
 }
 
 const mergeProviderOptions = (...values: Array<ProviderOptions | undefined>) => {
@@ -515,6 +625,20 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 			case 'vercel':
 				return { model: (await import('@ai-sdk/vercel')).createVercel(options)(model) }
 			case 'fireworks':
+				if (type === 'embedding') {
+					return createFireworksEmbeddingResult({
+						model,
+						options
+					})
+				}
+
+				if (type === 'rerank') {
+					return createFireworksRerankResult({
+						model,
+						options
+					})
+				}
+
 				return {
 					model: (await import('@ai-sdk/fireworks')).createFireworks(options)(model),
 					provider_options: effort_provider_options
