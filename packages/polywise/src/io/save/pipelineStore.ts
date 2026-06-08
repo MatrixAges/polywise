@@ -11,6 +11,7 @@ export interface SaveArticlePipelineTask {
 	status: SaveArticlePipelineTaskStatus
 	done_at: string | null
 	error_message?: string | null
+	status_text?: string | null
 }
 
 export interface SaveArticlePipelineLogEntry extends SaveArticlePipelineTask {
@@ -22,7 +23,10 @@ export type SaveArticlePipelineStore = Record<string, SaveArticlePipelineTask>
 const empty_store: SaveArticlePipelineStore = {}
 const pipeline_logs_dir = path.resolve(logs_dir, 'pipeline')
 const pipeline_log_file_regex = /^(\d{4}-\d{2}-\d{2})\.jsonl$/
+const cancelled_pipeline_task_map = new Map<string, string>()
 let pipeline_store_mutation_queue = Promise.resolve()
+const pipeline_task_cancelled_message = 'Pipeline task cancelled'
+const pipeline_task_interrupted_message = 'Pipeline task interrupted by server stop'
 
 const normalizeTask = (value: unknown): SaveArticlePipelineTask | null => {
 	if (!value || typeof value !== 'object') return null
@@ -35,12 +39,15 @@ const normalizeTask = (value: unknown): SaveArticlePipelineTask | null => {
 	if (item.done_at !== null && typeof item.done_at !== 'string') return null
 	if (item.error_message !== undefined && item.error_message !== null && typeof item.error_message !== 'string')
 		return null
+	if (item.status_text !== undefined && item.status_text !== null && typeof item.status_text !== 'string')
+		return null
 
 	return {
 		created_at: item.created_at,
 		status: item.status,
 		done_at: item.done_at,
-		error_message: item.error_message ?? null
+		error_message: item.error_message ?? null,
+		status_text: item.status_text ?? null
 	}
 }
 
@@ -104,6 +111,66 @@ export const readPipelineStore = async () => {
 	return store
 }
 
+export const getPipelineTask = async (article_id: string) => {
+	const store = await readPipelineStore()
+
+	return store[article_id] ?? null
+}
+
+export const requestPipelineTaskCancel = async (article_id: string) => {
+	return runPipelineStoreMutation(async () => {
+		const store = await readPipelineStore()
+		const current_task = store[article_id]
+
+		if (!current_task) {
+			return {
+				cancelled: false,
+				status: null
+			}
+		}
+
+		cancelled_pipeline_task_map.set(article_id, current_task.created_at)
+
+		if (current_task.status === 'queued') {
+			delete store[article_id]
+			await writeFile(pipeline_path, JSON.stringify(store, null, 4), 'utf8')
+			emitPipelineRefresh({ article_id })
+
+			return {
+				cancelled: true,
+				status: 'queued' as const
+			}
+		}
+
+		store[article_id] = {
+			...current_task,
+			status_text: 'Cancelling'
+		}
+
+		await writeFile(pipeline_path, JSON.stringify(store, null, 4), 'utf8')
+		emitPipelineRefresh({ article_id })
+
+		return {
+			cancelled: true,
+			status: current_task.status
+		}
+	})
+}
+
+export const createPipelineTaskCancelledError = () => new Error(pipeline_task_cancelled_message)
+
+export const isPipelineTaskCancelledError = (error: unknown) => {
+	return error instanceof Error && error.message === pipeline_task_cancelled_message
+}
+
+export const assertPipelineTaskNotCancelled = (args: { article_id: string; created_at?: string | null }) => {
+	const { article_id, created_at } = args
+
+	if (created_at && cancelled_pipeline_task_map.get(article_id) === created_at) {
+		throw createPipelineTaskCancelledError()
+	}
+}
+
 export const readPipelineLogs = async (limit = 20) => {
 	if (limit <= 0) {
 		return [] as Array<SaveArticlePipelineLogEntry>
@@ -159,12 +226,36 @@ export const setPipelineTask = async (article_id: string, task: SaveArticlePipel
 	return runPipelineStoreMutation(async () => {
 		const store = await readPipelineStore()
 
+		cancelled_pipeline_task_map.delete(article_id)
 		store[article_id] = task
 
 		await writeFile(pipeline_path, JSON.stringify(store, null, 4), 'utf8')
-		emitPipelineRefresh()
+		emitPipelineRefresh({ article_id })
 
 		return task
+	})
+}
+
+export const patchPipelineTask = async (args: { article_id: string; task: Partial<SaveArticlePipelineTask> }) => {
+	const { article_id, task } = args
+
+	return runPipelineStoreMutation(async () => {
+		const store = await readPipelineStore()
+		const current_task = store[article_id]
+
+		if (!current_task) {
+			return null
+		}
+
+		store[article_id] = {
+			...current_task,
+			...task
+		}
+
+		await writeFile(pipeline_path, JSON.stringify(store, null, 4), 'utf8')
+		emitPipelineRefresh({ article_id })
+
+		return store[article_id]
 	})
 }
 
@@ -189,20 +280,28 @@ export const removePipelineTask = async (
 				created_at: current_task.created_at,
 				status: options?.status || 'done',
 				done_at: options?.done_at ?? new Date().toISOString(),
-				error_message: options?.error_message ?? current_task.error_message ?? null
+				error_message: options?.error_message ?? current_task.error_message ?? null,
+				status_text: current_task.status_text ?? null
 			})
 		}
 
+		cancelled_pipeline_task_map.delete(article_id)
 		delete store[article_id]
 
 		await writeFile(pipeline_path, JSON.stringify(store, null, 4), 'utf8')
-		emitPipelineRefresh()
+		emitPipelineRefresh({ article_id })
 	})
 }
 
 export const clearRunningPipelineTasks = async () => {
 	return runPipelineStoreMutation(async () => {
 		const store = await readPipelineStore()
+		const running_entries = Object.entries(store).filter(([, task]) => task.status === 'running')
+
+		if (running_entries.length === 0) {
+			return 0
+		}
+
 		const next_store = Object.entries(store).reduce<SaveArticlePipelineStore>((acc, [article_id, task]) => {
 			if (task.status !== 'running') {
 				acc[article_id] = task
@@ -211,13 +310,21 @@ export const clearRunningPipelineTasks = async () => {
 			return acc
 		}, {})
 
-		if (Object.keys(next_store).length === Object.keys(store).length) {
-			return 0
+		for (const [article_id, task] of running_entries) {
+			await appendPipelineLog({
+				article_id,
+				created_at: task.created_at,
+				status: 'error',
+				done_at: new Date().toISOString(),
+				error_message: pipeline_task_interrupted_message,
+				status_text: task.status_text ?? null
+			})
 		}
 
+		cancelled_pipeline_task_map.clear()
 		await writeFile(pipeline_path, JSON.stringify(next_store, null, 4), 'utf8')
 		emitPipelineRefresh()
 
-		return Object.keys(store).length - Object.keys(next_store).length
+		return running_entries.length
 	})
 }

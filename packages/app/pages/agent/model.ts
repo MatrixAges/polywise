@@ -19,6 +19,7 @@ import type {
 	AgentArticleSearchItem,
 	AgentAvatarConfig,
 	AgentCreateMode,
+	AgentGraphResponse,
 	AgentItem,
 	AgentMenuScope,
 	AgentPageMode,
@@ -91,6 +92,11 @@ export default class Index {
 	related_article_loading_more = false
 	article_request_key = 0
 	related_article_request_key = 0
+	graph_data = null as AgentGraphResponse | null
+	graph_agent_id = ''
+	graph_loading = false
+	graph_expanding = false
+	graph_request_key = 0
 	article_search = ''
 	article_search_list = [] as Array<AgentArticleSearchItem>
 	article_search_loading = false
@@ -100,6 +106,7 @@ export default class Index {
 	article_draft_content = ''
 	article_draft_for = 'memory' as ArticleForType
 	article_saving = false
+	article_extracting = false
 	related_articles_dialog_open = false
 	private_article_dialog_open = false
 	private_article_dialog_loading = false
@@ -226,6 +233,14 @@ export default class Index {
 		return this.article_for === 'wiki' || this.article_for === 'memory' || this.article_for === 'user'
 	}
 
+	get selected_graph_node_id() {
+		return this.graph_data?.selected_node_id || ''
+	}
+
+	get should_refresh_graph() {
+		return this.current_tab === 'graph' || this.graph_data !== null
+	}
+
 	constructor(
 		public util: Util,
 		public setting: Setting,
@@ -341,8 +356,10 @@ export default class Index {
 			this.article_draft_content = ''
 			this.article_draft_for = 'memory'
 			this.article_saving = false
+			this.article_extracting = false
 			this.private_article_dialog_for = 'memory'
 			this.related_articles_dialog_open = false
+			this.resetGraph()
 			this.clearArticleSearch()
 			this.pins = []
 			this.session_items = []
@@ -373,6 +390,7 @@ export default class Index {
 		if (this.selected_agent_id) {
 			await Promise.all([
 				this.refreshAgentRelated(),
+				this.current_tab === 'graph' ? this.refreshGraph() : Promise.resolve(),
 				this.refreshPrivateArticlePipelineState(),
 				this.refreshSessions(),
 				this.refreshToolLogs(),
@@ -407,7 +425,9 @@ export default class Index {
 		}
 	}
 
-	async refreshAgentRelated() {
+	async refreshAgentRelated(args: { silent?: boolean; preserve_draft?: boolean } = {}) {
+		const { silent = false, preserve_draft = false } = args
+
 		if (!this.selected_agent_id) {
 			this.skill_items = []
 			this.article_items = []
@@ -421,6 +441,8 @@ export default class Index {
 			this.article_draft_content = ''
 			this.article_draft_for = 'memory'
 			this.article_saving = false
+			this.article_extracting = false
+			this.resetGraph()
 			this.clearArticleSearch()
 			this.private_article_pipeline_running = false
 			this.private_article_pipeline_loading = false
@@ -430,22 +452,29 @@ export default class Index {
 
 		const agent_id = this.selected_agent_id
 		const request_key = this.article_request_key + 1
+		const article_page_size = Math.max(20, this.article_page * 20)
+		const related_article_page_size = Math.max(20, this.related_article_page * 20)
 
 		this.article_request_key = request_key
-		this.article_loading = true
+
+		if (!silent) {
+			this.article_loading = true
+		}
 
 		try {
 			const [skill_items, article_response, related_response] = await Promise.all([
-				rpc.agent.getSkills.query({ agent_id }),
+				silent ? Promise.resolve(this.skill_items) : rpc.agent.getSkills.query({ agent_id }),
 				rpc.agent.getPrivateArticles.query({
 					agent_id,
 					for_type: this.article_for,
-					page: 1
+					page: 1,
+					page_size: article_page_size
 				}),
 				rpc.agent.getRelatedArticles.query({
 					agent_id,
 					for_type: this.related_article_for,
-					page: 1
+					page: 1,
+					page_size: related_article_page_size
 				})
 			])
 
@@ -457,20 +486,22 @@ export default class Index {
 			this.article_items = article_response.list as Array<AgentArticleItem>
 			this.related_article_items = (related_response as AgentRelatedArticleResponse)
 				.list as Array<AgentArticleItem>
-			this.article_page = 1
+			this.article_page = Math.max(1, Math.ceil(this.article_items.length / 20))
 			this.article_has_more = article_response.has_more
-			this.related_article_page = 1
+			this.related_article_page = Math.max(1, Math.ceil(this.related_article_items.length / 20))
 			this.related_article_has_more = (related_response as AgentRelatedArticleResponse).has_more
-			this.syncSelectedArticleAfterRefresh()
+			this.syncSelectedArticleAfterRefresh({ preserve_draft })
 			this.scheduleArticleSearch()
 		} finally {
-			if (this.article_request_key === request_key) {
+			if (!silent && this.article_request_key === request_key) {
 				this.article_loading = false
 			}
 		}
 	}
 
-	syncSelectedArticleAfterRefresh() {
+	syncSelectedArticleAfterRefresh(args: { preserve_draft?: boolean } = {}) {
+		const { preserve_draft = false } = args
+		const previous_selected_id = this.selected_article_id
 		const next_selected_id = this.article_items.some(item => item.id === this.selected_article_id)
 			? this.selected_article_id
 			: (this.article_items[0]?.id ?? '')
@@ -478,6 +509,10 @@ export default class Index {
 		this.selected_article_id = next_selected_id
 
 		const article_item = this.article_items.find(item => item.id === next_selected_id) || null
+
+		if (preserve_draft && previous_selected_id === next_selected_id && article_item) {
+			return
+		}
 
 		this.article_draft_title = article_item?.title || ''
 		this.article_draft_content = article_item?.content || ''
@@ -760,7 +795,11 @@ export default class Index {
 		}
 
 		if (!same_agent) {
+			this.resetGraph()
 			void this.refreshAgentRelated()
+			if (this.current_tab === 'graph') {
+				void this.refreshGraph()
+			}
 			void this.refreshPrivateArticlePipelineState(agent_id)
 			void this.refreshSessions()
 			void this.refreshToolLogs()
@@ -776,6 +815,10 @@ export default class Index {
 
 		this.current_tab = tab
 		this.edit_field_key = ''
+
+		if (tab === 'graph') {
+			void this.refreshGraph()
+		}
 	}
 
 	setPageMode(mode: AgentPageMode) {
@@ -1139,6 +1182,74 @@ export default class Index {
 		}
 	}
 
+	resetGraph() {
+		this.graph_data = null
+		this.graph_agent_id = ''
+		this.graph_loading = false
+		this.graph_expanding = false
+	}
+
+	async refreshGraph(args?: { center_node_id?: string; expand?: boolean }) {
+		if (!this.selected_agent_id) {
+			this.resetGraph()
+
+			return
+		}
+
+		const agent_id = this.selected_agent_id
+		const request_key = this.graph_request_key + 1
+		const visible_node_ids = this.graph_data?.nodes.map(item => item.id) ?? []
+		const center_node_id = args?.center_node_id || this.selected_graph_node_id || undefined
+
+		this.graph_request_key = request_key
+
+		if (args?.expand) {
+			this.graph_expanding = true
+		} else {
+			this.graph_loading = true
+		}
+
+		try {
+			const response = (await rpc.agent.getGraph.query({
+				agent_id,
+				center_node_id,
+				expand: args?.expand,
+				visible_node_ids
+			})) as AgentGraphResponse
+
+			if (this.graph_request_key !== request_key || this.selected_agent_id !== agent_id) {
+				return
+			}
+
+			this.graph_data = response
+			this.graph_agent_id = agent_id
+		} finally {
+			if (this.graph_request_key === request_key) {
+				this.graph_loading = false
+				this.graph_expanding = false
+			}
+		}
+	}
+
+	selectGraphNode(node_id: string) {
+		if (!node_id) {
+			return
+		}
+
+		void this.refreshGraph({ center_node_id: node_id })
+	}
+
+	expandGraphNode() {
+		if (!this.selected_graph_node_id) {
+			return
+		}
+
+		void this.refreshGraph({
+			center_node_id: this.selected_graph_node_id,
+			expand: true
+		})
+	}
+
 	async saveSelectedArticle(options?: { silent?: boolean }) {
 		const article_item = this.selected_article
 
@@ -1175,6 +1286,10 @@ export default class Index {
 				this.selected_article_id = saved_article.id
 				await this.refreshAgentRelated()
 
+				if (this.should_refresh_graph) {
+					await this.refreshGraph({ center_node_id: this.selected_graph_node_id || undefined })
+				}
+
 				if (!options?.silent) {
 					toast.success($t('toast.article_saved', { ns: 'agent' }))
 				}
@@ -1202,6 +1317,10 @@ export default class Index {
 			this.article_draft_content = saved_article.content || ''
 			this.article_draft_for = saved_article.for as ArticleForType
 
+			if (this.should_refresh_graph) {
+				await this.refreshGraph({ center_node_id: this.selected_graph_node_id || undefined })
+			}
+
 			if (!options?.silent) {
 				toast.success($t('toast.article_saved', { ns: 'agent' }))
 			}
@@ -1209,6 +1328,56 @@ export default class Index {
 			toast.error(error instanceof Error ? error.message : $t('toast.article_save_failed', { ns: 'agent' }))
 		} finally {
 			this.article_saving = false
+		}
+	}
+
+	async extractSelectedArticle() {
+		if (
+			!this.selected_agent_id ||
+			!this.selected_article ||
+			this.article_extracting ||
+			!this.can_mutate_selected_agent_articles
+		) {
+			return
+		}
+
+		await this.saveSelectedArticle({ silent: true })
+
+		const article_item = this.selected_article
+
+		if (!article_item || !this.selected_agent_id) {
+			return
+		}
+
+		const agent_id = this.selected_agent_id
+
+		this.article_extracting = true
+
+		try {
+			const response = await rpc.agent.extractPrivateArticle.mutate({
+				agent_id,
+				article_id: article_item.id
+			})
+
+			if (this.selected_agent_id !== agent_id) {
+				return
+			}
+
+			void this.refreshPrivateArticlePipelineState(agent_id)
+
+			toast.success(
+				response.queued
+					? $t('toast.article_extract_queued', { ns: 'agent' })
+					: $t('toast.article_extract_ready', { ns: 'agent' })
+			)
+		} catch (error) {
+			toast.error(
+				error instanceof Error ? error.message : $t('toast.article_extract_failed', { ns: 'agent' })
+			)
+		} finally {
+			if (this.selected_agent_id === agent_id) {
+				this.article_extracting = false
+			}
 		}
 	}
 
@@ -1289,6 +1458,10 @@ export default class Index {
 			this.article_for = saved_article.for as ArticleForType
 			await this.refreshAgentRelated()
 			this.setSelectedArticle(saved_article.id)
+
+			if (this.should_refresh_graph) {
+				await this.refreshGraph()
+			}
 			toast.success($t('toast.article_added', { ns: 'agent' }))
 		} catch (error) {
 			toast.error(error instanceof Error ? error.message : $t('toast.article_save_failed', { ns: 'agent' }))
@@ -1950,6 +2123,10 @@ export default class Index {
 
 		await rpc.agent.removeArticle.mutate({ agent_id: this.selected_agent_id, article_id })
 		await this.refreshAgentRelated()
+
+		if (this.should_refresh_graph) {
+			await this.refreshGraph({ center_node_id: this.selected_graph_node_id || undefined })
+		}
 	}
 
 	async toggleAgentFrozen(next_value: boolean) {
@@ -2240,12 +2417,23 @@ export default class Index {
 
 	watchPipeline() {
 		const deinit = rpc.pipeline.watch.subscribe(undefined, {
-			onData: () => {
+			onData: payload => {
 				if (!this.selected_agent_id) {
 					return
 				}
 
-				void this.refreshPrivateArticlePipelineState()
+				const affects_visible_articles =
+					!payload.article_id ||
+					this.article_items.some(item => item.id === payload.article_id) ||
+					this.related_article_items.some(item => item.id === payload.article_id)
+
+				if (!payload.article_id || affects_visible_articles) {
+					void this.refreshPrivateArticlePipelineState()
+				}
+
+				if (this.should_refresh_graph && affects_visible_articles) {
+					void this.refreshGraph({ center_node_id: this.selected_graph_node_id || undefined })
+				}
 			}
 		})
 

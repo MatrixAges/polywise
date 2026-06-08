@@ -1,12 +1,32 @@
 import path from 'path'
-import { getNodeRowid, insertNodeVector } from '@core/db/prepare'
+import {
+	deleteEdgeFts,
+	deleteNodeFts,
+	getEdgeRowid,
+	getNodeRowid,
+	insertEdgeFts,
+	insertNodeFts
+} from '@core/db/prepare'
 import { article, chunk, edge, node, post_article, post_project, post_session, project } from '@core/db/schema'
-import { addEdge, addNode, addSession, getArticle, getChunks, getEdge, getNode } from '@core/db/services'
+import { addEdge, addNode, addSession, getArticle, getChunks, getEdge, getNode, setArticle } from '@core/db/services'
 import { addEdgeArticle, addNodeChunk, addPostSession, getPostSessions } from '@core/db/services/externals'
 import { env } from '@core/env'
 import { remove, saveArticle } from '@core/io'
-import { readPipelineStore } from '@core/io/save/pipelineStore'
-import { getEmbedding, getTriples } from '@core/pipeline'
+import {
+	assertPipelineTaskNotCancelled,
+	getPipelineTask,
+	isPipelineTaskCancelledError,
+	patchPipelineTask,
+	readPipelineStore,
+	removePipelineTask
+} from '@core/io/save/pipelineStore'
+import {
+	getArticleMetadataObject,
+	getUpdatedAtToken,
+	isArticleChunkPipelineReady,
+	isArticleGraphBackfillDoneCurrent
+} from '@core/io/save/saveArticle'
+import { getTriples } from '@core/pipeline'
 import { log } from '@core/utils'
 import grep from '@core/utils/grep'
 import dayjs from 'dayjs'
@@ -76,6 +96,7 @@ type PostRecord = {
 	id: string
 	title: string | null
 	content: string
+	metadata: unknown
 	for_type: PostForType
 	is_pipelined: boolean
 	created_at: Date | null
@@ -88,6 +109,7 @@ const mapPostRow = (row: {
 	id: string
 	title: string | null
 	content: string
+	metadata: unknown
 	for_type: string
 	is_pipelined: boolean
 	created_at: Date | null
@@ -98,6 +120,7 @@ const mapPostRow = (row: {
 	id: row.id,
 	title: row.title,
 	content: row.content,
+	metadata: row.metadata,
 	for_type: normalizePostForType(row.for_type),
 	is_pipelined: Boolean(row.is_pipelined),
 	created_at: row.created_at,
@@ -112,6 +135,7 @@ export const getPostById = async (id: string) => {
 			id: article.id,
 			title: article.title,
 			content: article.content,
+			metadata: article.metadata,
 			for_type: article.for,
 			is_pipelined: article.is_pipelined,
 			created_at: article.created_at,
@@ -208,7 +232,7 @@ const waitForArticlePipeline = async (article_id: string) => {
 			throw new Error(pipeline_task.error_message || `Article pipeline failed: ${article_id}`)
 		}
 
-		if (current_article?.is_pipelined) {
+		if (current_article?.is_pipelined || (current_article && isArticleChunkPipelineReady(current_article))) {
 			return current_chunks
 		}
 
@@ -235,17 +259,24 @@ const ensureGlobalNode = async (name: string) => {
 		agent_id: null,
 		name: normalized_name
 	})
-	const embedding = await getEmbedding(normalized_name)
 	const row = getNodeRowid().get(inserted.id) as { rowid: number } | undefined
 
 	if (row) {
-		insertNodeVector().run(BigInt(row.rowid), Buffer.from(new Float32Array(embedding).buffer))
+		deleteNodeFts().run(BigInt(row.rowid))
+		insertNodeFts().run(BigInt(row.rowid), normalized_name)
 	}
 
 	return inserted
 }
 
-const ensureGlobalEdge = async (source_id: string, target_id: string, relation: string) => {
+const ensureGlobalEdge = async (args: {
+	source_id: string
+	target_id: string
+	source_name: string
+	target_name: string
+	relation: string
+}) => {
+	const { source_id, target_id, source_name, target_name, relation } = args
 	const normalized_relation = normalizeTripleText(relation)
 
 	if (!normalized_relation) {
@@ -258,12 +289,20 @@ const ensureGlobalEdge = async (source_id: string, target_id: string, relation: 
 		return existing
 	}
 
-	return addEdge({
+	const inserted = await addEdge({
 		agent_id: null,
 		source_id,
 		target_id,
 		relation: normalized_relation
 	})
+	const row = getEdgeRowid().get(inserted.id) as { rowid: number } | undefined
+
+	if (row) {
+		deleteEdgeFts().run(BigInt(row.rowid))
+		insertEdgeFts().run(BigInt(row.rowid), `${source_name} ${normalized_relation} ${target_name}`.trim())
+	}
+
+	return inserted
 }
 
 const findRelatedChunks = (content_chunks: Awaited<ReturnType<typeof getChunks>>, entity_names: Array<string>) => {
@@ -320,9 +359,20 @@ const runPostExtractTask = (args: { id: string; article_id: string; content: str
 
 	const task = (async () => {
 		const content_chunks = await waitForArticlePipeline(args.article_id)
+		const created_at = (await getPipelineTask(args.article_id))?.created_at ?? null
 		const triples = await getTriples(args.content)
+		const total_count = triples.length
 
-		for (const triple of triples) {
+		await patchPipelineTask({
+			article_id: args.article_id,
+			task: {
+				status_text: `Extracting graph 0/${total_count}`
+			}
+		})
+
+		for (const [index, triple] of triples.entries()) {
+			assertPipelineTaskNotCancelled({ article_id: args.article_id, created_at })
+
 			const head_name = normalizeTripleText(triple.head)
 			const tail_name = normalizeTripleText(triple.tail)
 			const relation = normalizeTripleText(triple.relation)
@@ -340,13 +390,52 @@ const runPostExtractTask = (args: { id: string; article_id: string; content: str
 				continue
 			}
 
-			const edge_item = await ensureGlobalEdge(head_node.id, tail_node.id, relation)
+			const edge_item = await ensureGlobalEdge({
+				source_id: head_node.id,
+				target_id: tail_node.id,
+				source_name: head_name,
+				target_name: tail_name,
+				relation
+			})
 
 			if (edge_item) {
 				await addEdgeArticle(edge_item.id, args.article_id)
 			}
 
 			await linkNodesToChunks([head_node.id, tail_node.id], content_chunks, [head_name, tail_name])
+
+			await patchPipelineTask({
+				article_id: args.article_id,
+				task: {
+					status_text: `Extracting graph ${index + 1}/${total_count}`
+				}
+			})
+		}
+
+		const current_article = await getArticle(eq(article.id, args.article_id))
+
+		if (current_article) {
+			const metadata_object = getArticleMetadataObject(current_article.metadata)
+			const article_updated_at = current_article.updated_at || new Date()
+
+			await setArticle(eq(article.id, args.article_id), {
+				metadata: {
+					...metadata_object,
+					graph_backfill: {
+						status: 'done',
+						synced_at: new Date().toISOString(),
+						article_updated_at: getUpdatedAtToken(article_updated_at),
+						triple_count: triples.length
+					}
+				},
+				is_pipelined: true,
+				updated_at: article_updated_at
+			})
+
+			await removePipelineTask(args.article_id, {
+				done_at: new Date().toISOString(),
+				status: 'done'
+			})
 		}
 	})()
 
@@ -354,6 +443,22 @@ const runPostExtractTask = (args: { id: string; article_id: string; content: str
 
 	void task
 		.catch(error => {
+			if (isPipelineTaskCancelledError(error)) {
+				void removePipelineTask(args.article_id, { archive: false })
+
+				return
+			}
+
+			void patchPipelineTask({
+				article_id: args.article_id,
+				task: {
+					status: 'error',
+					done_at: new Date().toISOString(),
+					error_message: error instanceof Error ? error.message : String(error),
+					status_text: null
+				}
+			})
+
 			log('SAVE', 'postExtractTaskError', () => ({
 				id: args.id,
 				article_id: args.article_id,
@@ -380,7 +485,7 @@ export const extractPostArticle = async (args: { id: string; force?: boolean }) 
 		throw new Error('No content available to extract.')
 	}
 
-	if (post.is_pipelined && !args.force) {
+	if (isArticleGraphBackfillDoneCurrent(post) && !args.force) {
 		const content_chunks = await getChunks({
 			where: eq(chunk.article_id, post.id),
 			orderBy: asc(chunk.position)
@@ -431,7 +536,8 @@ export const extractPostArticle = async (args: { id: string; force?: boolean }) 
 		title: post.title,
 		content: post.content,
 		for: post.for_type,
-		exec_pipeline: true
+		exec_pipeline: true,
+		await_graph_sync: true
 	})
 	runPostExtractTask({
 		id: post.id,
@@ -1001,6 +1107,7 @@ export const queryPosts = async (args: { page: number; tab?: string; for_type?: 
 			id: article.id,
 			title: article.title,
 			content: article.content,
+			metadata: article.metadata,
 			for_type: article.for,
 			is_pipelined: article.is_pipelined,
 			created_at: article.created_at,

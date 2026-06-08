@@ -1,3 +1,4 @@
+import { clearRunningPipelineTasks } from '@core/io/save/pipelineStore'
 import { array, boolean, number, object, string } from 'zod'
 
 import { scheduleRuntimeRestart } from '../utils/runtimeControl'
@@ -23,6 +24,8 @@ export default p
 	})
 	.output(output_type)
 	.mutation(async () => {
+		await clearRunningPipelineTasks()
+
 		return {
 			ok: true,
 			action: 'restart',

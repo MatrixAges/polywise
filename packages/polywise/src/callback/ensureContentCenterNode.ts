@@ -1,7 +1,6 @@
-import { getNodeRowid, insertNodeVector } from '@core/db/prepare'
+import { deleteNodeFts, getNodeRowid, insertNodeFts } from '@core/db/prepare'
 import { node } from '@core/db/schema'
 import { addNode, getNode } from '@core/db/services'
-import { getEmbedding } from '@core/pipeline'
 import { and, eq, sql } from 'drizzle-orm'
 
 import { content_callback_query_prefix } from './constants'
@@ -46,11 +45,11 @@ export default async (query: string, agent_id?: string | null) => {
 		throw new Error(`Failed to ensure content center node: ${node_name}`)
 	}
 
-	const embedding = await getEmbedding(node_name)
 	const row = getNodeRowid().get(inserted.id) as { rowid: number } | undefined
 
 	if (row) {
-		insertNodeVector().run(BigInt(row.rowid), Buffer.from(new Float32Array(embedding).buffer))
+		deleteNodeFts().run(BigInt(row.rowid))
+		insertNodeFts().run(BigInt(row.rowid), node_name)
 	}
 
 	return {

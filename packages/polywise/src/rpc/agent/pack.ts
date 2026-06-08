@@ -5,17 +5,7 @@ import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import { config } from '@core/config'
 import { app } from '@core/consts'
-import {
-	getAgentRowid,
-	getChunkRowid,
-	getEdgeRowid,
-	getNodeRowid,
-	insertAgentVector,
-	insertChunkFts,
-	insertChunkVector,
-	insertEdgeVector,
-	insertNodeVector
-} from '@core/db/prepare'
+import { getAgentRowid, getChunkRowid, insertAgentVector, insertChunkFts, insertChunkVector } from '@core/db/prepare'
 import {
 	agent,
 	agent_article,
@@ -318,8 +308,8 @@ const copyDirIfExists = async (source_dir: string, target_dir: string) => {
 
 const collectVectorRecords = (args: {
 	entity_type: VectorRecord['entity_type']
-	table_name: 'agent' | 'chunk' | 'node' | 'edge'
-	vec_table_name: 'agent_vec' | 'chunk_vec' | 'node_vec' | 'edge_vec'
+	table_name: 'agent' | 'chunk'
+	vec_table_name: 'agent_vec' | 'chunk_vec'
 	ids: Array<string>
 }) => {
 	const { entity_type, table_name, vec_table_name, ids } = args
@@ -439,18 +429,6 @@ const collectSnapshot = async (agent_id: string): Promise<AgentPackSnapshot> => 
 		vec_table_name: 'chunk_vec',
 		ids: chunk_ids
 	})
-	const node_vectors = collectVectorRecords({
-		entity_type: 'node',
-		table_name: 'node',
-		vec_table_name: 'node_vec',
-		ids: nodes.map(item => item.id)
-	})
-	const edge_vectors = collectVectorRecords({
-		entity_type: 'edge',
-		table_name: 'edge',
-		vec_table_name: 'edge_vec',
-		ids: edge_ids
-	})
 	const skill_assets = [] as Array<SkillAssetRecord>
 
 	for (let index = 0; index < sorted_skills.length; index += 1) {
@@ -528,8 +506,8 @@ const collectSnapshot = async (agent_id: string): Promise<AgentPackSnapshot> => 
 		vectors: {
 			agent: agent_vectors,
 			chunk: chunk_vectors,
-			node: node_vectors,
-			edge: edge_vectors
+			node: [],
+			edge: []
 		}
 	}
 }
@@ -968,8 +946,6 @@ export const importAgentPack = async (file_path: string) => {
 			}
 
 			const chunk_rowid_map = new Map<string, number>()
-			const node_rowid_map = new Map<string, number>()
-			const edge_rowid_map = new Map<string, number>()
 			const agent_rowid_map = new Map<string, number>()
 
 			env.sqlite.transaction(() => {
@@ -1233,33 +1209,11 @@ export const importAgentPack = async (file_path: string) => {
 					}
 				}
 
-				for (const [source_id, next_id] of node_id_map) {
-					const row = getNodeRowid().get(next_id) as { rowid: number } | undefined
-
-					if (row) {
-						node_rowid_map.set(source_id, row.rowid)
-					}
-				}
-
-				for (const [source_id, next_id] of edge_id_map) {
-					const row = getEdgeRowid().get(next_id) as { rowid: number } | undefined
-
-					if (row) {
-						edge_rowid_map.set(source_id, row.rowid)
-					}
-				}
-
 				insertVectorRecords(snapshot.vectors.agent, agent_rowid_map, (rowid, vector) =>
 					insertAgentVector().run(rowid, vector)
 				)
 				insertVectorRecords(snapshot.vectors.chunk, chunk_rowid_map, (rowid, vector) =>
 					insertChunkVector().run(rowid, vector)
-				)
-				insertVectorRecords(snapshot.vectors.node, node_rowid_map, (rowid, vector) =>
-					insertNodeVector().run(rowid, vector)
-				)
-				insertVectorRecords(snapshot.vectors.edge, edge_rowid_map, (rowid, vector) =>
-					insertEdgeVector().run(rowid, vector)
 				)
 
 				for (const [source_id, next_rowid] of chunk_rowid_map) {

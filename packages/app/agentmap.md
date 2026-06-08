@@ -24,7 +24,7 @@ This document is the outline-level map and code-style routing table for `package
 		"pages": {
 			"home": "Workspace and landing surface.",
 			"session": "Session-centric working surface.",
-			"agent": "Agent management surface.",
+			"agent": "Agent management, detail, and graph surfaces.",
 			"post": "Post editing and detail surface.",
 			"todo": "Task board and detail surface.",
 			"linkcase": "Linkcase browsing and curation surface.",

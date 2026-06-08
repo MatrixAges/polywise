@@ -1,10 +1,11 @@
 import { Fragment, useState } from 'react'
-import { Loader2, Plus, Save, Trash2 } from 'lucide-react'
+import { Database, Loader2, Plus, Save, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 
 import { Input } from '@/__shadcn__/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/__shadcn__/components/ui/select'
+import { Tooltip } from '@/components'
 import Editor from '@/components/Editor'
 import { getPostForTypeLabel } from '@/pages/post/utils'
 import { alert, fromNow } from '@/utils'
@@ -22,8 +23,10 @@ const Index = () => {
 		article_draft_for,
 		article_dirty,
 		article_saving,
+		article_extracting,
 		can_manage_private_articles,
 		can_mutate_selected_agent_articles,
+		extractSelectedArticle,
 		openCreatePrivateArticleDialog,
 		removeArticle,
 		setArticleDraftTitle,
@@ -44,6 +47,9 @@ const Index = () => {
 	}))
 	const current_for_type_label =
 		for_type_items.find(item => item.value === article_draft_for)?.label || article_draft_for
+	const extract_tooltip = selected_article.is_pipelined
+		? t('list.reextract', { ns: 'post' })
+		: t('list.extract', { ns: 'post' })
 
 	const onRemove = async () => {
 		if (!selected_article) {
@@ -131,6 +137,26 @@ const Index = () => {
 							<Save className='size-3'></Save>
 						)}
 					</button>
+					<Tooltip title={extract_tooltip}>
+						<div>
+							<button
+								className='icon_button small text-std-800!'
+								type='button'
+								disabled={
+									!can_mutate_selected_agent_articles ||
+									article_saving ||
+									article_extracting
+								}
+								onClick={() => void extractSelectedArticle()}
+							>
+								{article_extracting ? (
+									<Loader2 className='size-3 animate-spin'></Loader2>
+								) : (
+									<Database className='size-3'></Database>
+								)}
+							</button>
+						</div>
+					</Tooltip>
 				</div>
 			</div>
 			<div

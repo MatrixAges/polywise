@@ -1,4 +1,4 @@
-import { chunk_vector_top_k, keyword_search_limit, node_vector_top_k } from '@core/consts/search'
+import { chunk_vector_top_k, keyword_search_limit } from '@core/consts/search'
 import { env } from '@core/env'
 
 import type Database from 'better-sqlite3'
@@ -54,16 +54,35 @@ export const insertChunkFts = (): Database.Statement => {
 	return env.sqlite.prepare('INSERT INTO chunk_keywords_fts(rowid, keywords) VALUES (?, ?)')
 }
 
+export const insertNodeFts = (): Database.Statement => {
+	return env.sqlite.prepare('INSERT INTO node_name_fts(rowid, name) VALUES (?, ?)')
+}
+
+export const deleteNodeFts = (): Database.Statement => {
+	return env.sqlite.prepare('DELETE FROM node_name_fts WHERE rowid = ?')
+}
+
+export const searchNodeByText = (): Database.Statement => {
+	return env.sqlite.prepare(`
+		SELECT n.id, n.name, n.rowid, bm25(node_name_fts) as score
+		FROM node_name_fts
+		JOIN node n ON n.rowid = node_name_fts.rowid
+		WHERE node_name_fts MATCH ?
+		ORDER BY score
+		LIMIT 50
+	`)
+}
+
 export const getEdgeRowid = (): Database.Statement => {
 	return env.sqlite.prepare('SELECT rowid FROM edge WHERE id = ?')
 }
 
-export const insertEdgeVector = (): Database.Statement => {
-	return env.sqlite.prepare('INSERT INTO vec.edge_vec(rowid, vectors) VALUES (?, ?)')
+export const insertEdgeFts = (): Database.Statement => {
+	return env.sqlite.prepare('INSERT INTO edge_text_fts(rowid, text) VALUES (?, ?)')
 }
 
-export const deleteEdgeVector = (): Database.Statement => {
-	return env.sqlite.prepare('DELETE FROM vec.edge_vec WHERE rowid = ?')
+export const deleteEdgeFts = (): Database.Statement => {
+	return env.sqlite.prepare('DELETE FROM edge_text_fts WHERE rowid = ?')
 }
 
 export const getAgentRowid = (): Database.Statement => {
@@ -76,14 +95,6 @@ export const insertAgentVector = (): Database.Statement => {
 
 export const getNodeRowid = (): Database.Statement => {
 	return env.sqlite.prepare('SELECT rowid FROM node WHERE id = ?')
-}
-
-export const insertNodeVector = (): Database.Statement => {
-	return env.sqlite.prepare('INSERT INTO vec.node_vec(rowid, vectors) VALUES (?, ?)')
-}
-
-export const deleteNodeVector = (): Database.Statement => {
-	return env.sqlite.prepare('DELETE FROM vec.node_vec WHERE rowid = ?')
 }
 
 export const getAgentByName = (): Database.Statement => {
@@ -115,12 +126,14 @@ export const getNodeByName = (count: number): Database.Statement => {
 	`)
 }
 
-export const getNodeByVector = (): Database.Statement => {
+export const searchEdgeByText = (): Database.Statement => {
 	return env.sqlite.prepare(`
-		SELECT n.id, n.name, n.rowid, distance
-		FROM vec.node_vec v JOIN node n ON n.rowid = v.rowid
-		WHERE v.vectors MATCH vec_f32(?) AND k = ${node_vector_top_k}
-		ORDER BY distance
+		SELECT e.id, e.source_id, e.target_id, e.relation, e.rowid, bm25(edge_text_fts) as score
+		FROM edge_text_fts
+		JOIN edge e ON e.rowid = edge_text_fts.rowid
+		WHERE edge_text_fts MATCH ?
+		ORDER BY score
+		LIMIT 50
 	`)
 }
 

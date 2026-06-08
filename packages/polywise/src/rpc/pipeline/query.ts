@@ -12,6 +12,7 @@ export interface PipelineTaskItem {
 	created_at: string
 	done_at: string | null
 	error_message: string | null
+	status_text: string | null
 	source: 'active' | 'history'
 }
 
@@ -66,6 +67,7 @@ export default p
 				created_at: task.created_at,
 				done_at: task.done_at,
 				error_message: task.error_message ?? null,
+				status_text: task.status_text ?? null,
 				source: task.source
 			}))
 			.sort(

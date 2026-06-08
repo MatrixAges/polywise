@@ -4,7 +4,9 @@ import addArticle from './addArticle'
 import create from './create'
 import createSession from './createSession'
 import exportPack from './exportPack'
+import extractPrivateArticle from './extractPrivateArticle'
 import getArticles from './getArticles'
+import getGraph from './getGraph'
 import getPrivateArticlePipelineBatch from './getPrivateArticlePipelineBatch'
 import getPrivateArticles from './getPrivateArticles'
 import getRelatedArticles from './getRelatedArticles'
@@ -29,8 +31,10 @@ export default r({
 	addArticle,
 	create,
 	createSession,
+	extractPrivateArticle,
 	exportPack,
 	getArticles,
+	getGraph,
 	getPrivateArticlePipelineBatch,
 	getPrivateArticles,
 	getRelatedArticles,

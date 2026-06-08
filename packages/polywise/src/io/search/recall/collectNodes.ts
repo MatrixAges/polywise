@@ -1,38 +1,119 @@
-import { getNodeByName, getNodeByVector } from '@core/db/prepare'
-import { getEmbedding } from '@core/pipeline'
+import { getNodeById, getNodeByName, searchEdgeByText, searchNodeByText } from '@core/db/prepare'
 
-export default async (kw: string) => {
-	const kws = kw
+const normalizeSearchTerm = (value: string) => {
+	return value
+		.toLowerCase()
+		.replace(/[^\p{L}\p{N}\s]+/gu, ' ')
+		.replace(/\s+/g, ' ')
+		.trim()
+}
+
+const getSearchTerms = (kw: string) => {
+	const parts = kw
 		.split(',')
-		.map(k => k.trim())
+		.flatMap(item => normalizeSearchTerm(item).split(' '))
+		.map(item => item.trim())
 		.filter(Boolean)
 
-	const params = kws.flatMap(k => [`%${k}%`, `%${k}%`])
+	return Array.from(new Set(parts))
+}
 
-	const name_results = getNodeByName(kws.length * 2).all(...params) as Array<{
+const getTextSearchQuery = (search_terms: Array<string>) => {
+	return search_terms.map(item => `${item.replace(/"/g, '""')}*`).join(' OR ')
+}
+
+const getRankSimilarity = (index: number, floor: number) => {
+	return Math.max(floor, 1 - index * 0.08)
+}
+
+const setNodeResult = (
+	result_map: Map<number, { id: string; name: string; rowid: number; similarity: number }>,
+	value: { id: string; name: string; rowid: number; similarity: number }
+) => {
+	const existing = result_map.get(value.rowid)
+
+	if (!existing || value.similarity > existing.similarity) {
+		result_map.set(value.rowid, value)
+	}
+}
+
+export default async (kw: string) => {
+	const search_terms = getSearchTerms(kw)
+
+	if (!search_terms.length) {
+		return []
+	}
+
+	const params = search_terms.map(item => `%${item}%`)
+	const text_search_query = getTextSearchQuery(search_terms)
+	const name_results = getNodeByName(search_terms.length).all(...params) as Array<{
 		id: string
 		name: string
 		rowid: number
 	}>
-
-	const vec = await getEmbedding(kws.join(' '))
-
-	const vec_results = getNodeByVector().all(Buffer.from(new Float32Array(vec).buffer)) as Array<{
+	const text_results = searchNodeByText().all(text_search_query) as Array<{
 		id: string
 		name: string
 		rowid: number
-		distance: number
+		score: number
 	}>
+	const edge_results = searchEdgeByText().all(text_search_query) as Array<{
+		id: string
+		source_id: string
+		target_id: string
+		relation: string
+		rowid: number
+		score: number
+	}>
+	const edge_node_ids = Array.from(
+		new Set(edge_results.flatMap(item => [item.source_id, item.target_id]).filter(Boolean))
+	)
+	const edge_nodes = edge_node_ids.length
+		? (getNodeById(edge_node_ids.length).all(...edge_node_ids) as Array<{
+				id: string
+				name: string
+				rowid: number
+			}>)
+		: []
+	const edge_rank_map = new Map<string, number>()
+	const result_map = new Map<number, { id: string; name: string; rowid: number; similarity: number }>()
 
-	const map = new Map<number, { id: string; name: string; rowid: number; similarity: number }>()
+	name_results.forEach((item, index) =>
+		setNodeResult(result_map, {
+			...item,
+			similarity: getRankSimilarity(index, 0.82)
+		})
+	)
 
-	name_results.forEach(i => map.set(i.rowid, { ...i, similarity: 1.0 }))
+	text_results.forEach((item, index) =>
+		setNodeResult(result_map, {
+			...item,
+			similarity: getRankSimilarity(index, 0.64)
+		})
+	)
 
-	vec_results.forEach(i => {
-		const sim = 1 - Math.min(i.distance, 1)
-		const e = map.get(i.rowid)
-		if (!e || sim > e.similarity) map.set(i.rowid, { id: i.id, name: i.name, rowid: i.rowid, similarity: sim })
+	edge_results.forEach((item, index) => {
+		const similarity = getRankSimilarity(index, 0.48)
+		const source_similarity = edge_rank_map.get(item.source_id) ?? 0
+		const target_similarity = edge_rank_map.get(item.target_id) ?? 0
+
+		if (similarity > source_similarity) {
+			edge_rank_map.set(item.source_id, similarity)
+		}
+
+		if (similarity > target_similarity) {
+			edge_rank_map.set(item.target_id, similarity)
+		}
 	})
 
-	return Array.from(map.values())
+	edge_nodes.forEach(item =>
+		setNodeResult(result_map, {
+			...item,
+			similarity: edge_rank_map.get(item.id) ?? 0.48
+		})
+	)
+
+	return Array.from(result_map.values()).sort(
+		(left_item, right_item) => right_item.similarity - left_item.similarity
+	)
 }
