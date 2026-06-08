@@ -35,7 +35,7 @@ const linkCreateInputSchema = object({
 	content: string()
 		.optional()
 		.describe(
-			'Optional cleaned core article body to save together with the link. Remove ads, related links, comments, and other non-body noise.'
+			'Optional cleaned core article body to save together with the link. Remove ads, related links, comments, and other non-body noise, but keep meaningful repo, download, demo, citation, source, and reference links that belong to the core body.'
 		)
 })
 
@@ -97,7 +97,7 @@ const inputSchema = object({
 	content: string()
 		.optional()
 		.describe(
-			'[Required for commit_preview, optional for create] Cleaned core article body to save. Remove ads, share widgets, related links, author cards, post navigation, comments, subscribe prompts, cookie notices, and any other non-body text. You may rewrite markdown formatting, but preserve the article meaning.'
+			'[Required for commit_preview, optional for create] Cleaned core article body to save. Remove ads, share widgets, related links, author cards, post navigation, comments, subscribe prompts, cookie notices, and any other non-body text. You may rewrite markdown formatting, but preserve the article meaning and keep meaningful repo, download, demo, citation, source, and reference links that are part of the core body.'
 		),
 	page: number()
 		.int()

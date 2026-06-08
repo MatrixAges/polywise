@@ -35,7 +35,7 @@ const Index = (props: IProps) => {
 						overflow-y-auto
 						w-full
 					`,
-						maxHeight ?? 'max-h-[60vh]'
+						maxHeight
 					)}
 				>
 					{children}

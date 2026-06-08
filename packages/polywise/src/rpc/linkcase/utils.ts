@@ -95,6 +95,9 @@ const LINKCASE_PIPELINE_WAIT_MS = 90_000
 const LINKCASE_PIPELINE_POLL_MS = 250
 const LINKCASE_TASK_BUSY_ERROR_PREFIX = 'Linkcase task is already running'
 const LINKCASE_EXTRACT_FASTQ_MAX_CONCURRENCY = 10
+const linkcase_markdown_label_url_regexp = /\[((?:https?:\/\/)[^\]]+)\]\((https?:\/\/[^\s)]+)\)/g
+const linkcase_markdown_href_url_regexp = /\[[^\]]+\]\((https?:\/\/[^\s)]+)\)/g
+const linkcase_visible_url_regexp = /(?<!\]\()https?:\/\/[^\s)<>\]]+/g
 
 const cleanupLinkcaseFetchPreviewCache = () => {
 	const cutoff = Date.now() - LINKCASE_FETCH_PREVIEW_TTL_MS
@@ -110,6 +113,100 @@ const normalizeKeyword = (keyword?: string) => keyword?.trim() ?? ''
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const normalizeTripleText = (value: string) => value.replace(/\s+/g, ' ').trim()
 const prepareLinkcaseArticleContent = (content: string) => content.replace(/\r\n?/g, '\n').trim()
+const normalizeLinkcaseVisibleUrl = (value: string) => {
+	const trimmed_value = value
+		.trim()
+		.replace(/…+$/u, '')
+		.replace(/\.{3,}$/g, '')
+		.replace(/[)\],;!?]+$/g, '')
+		.replace(/[。．，、；：！？）】》〉」』]+$/u, '')
+
+	try {
+		return normalizeLinkUrl(trimmed_value)
+	} catch {
+		return null
+	}
+}
+
+const collectRegexpUrls = (args: { content: string; regexp: RegExp; index: number }) => {
+	const matched_urls = [] as Array<string>
+
+	args.regexp.lastIndex = 0
+
+	for (const matched of args.content.matchAll(args.regexp)) {
+		const url = matched[args.index]
+
+		if (!url) {
+			continue
+		}
+
+		const normalized_url = normalizeLinkcaseVisibleUrl(url)
+
+		if (!normalized_url) {
+			continue
+		}
+
+		matched_urls.push(normalized_url)
+	}
+
+	return matched_urls
+}
+
+const dedupeUrls = (values: Array<string>) => Array.from(new Set(values))
+
+const collectLinkcasePreviewKeyUrls = (content: string) =>
+	dedupeUrls([
+		...collectRegexpUrls({
+			content,
+			regexp: linkcase_markdown_label_url_regexp,
+			index: 1
+		}),
+		...collectRegexpUrls({
+			content,
+			regexp: linkcase_visible_url_regexp,
+			index: 0
+		})
+	])
+
+const collectLinkcaseSavedUrls = (content: string) =>
+	dedupeUrls([
+		...collectRegexpUrls({
+			content,
+			regexp: linkcase_markdown_label_url_regexp,
+			index: 1
+		}),
+		...collectRegexpUrls({
+			content,
+			regexp: linkcase_markdown_href_url_regexp,
+			index: 1
+		}),
+		...collectRegexpUrls({
+			content,
+			regexp: linkcase_visible_url_regexp,
+			index: 0
+		})
+	])
+
+const preserveLinkcasePreviewKeyUrls = (args: { content: string; preview_content: string }) => {
+	const normalized_content = prepareLinkcaseArticleContent(args.content)
+	const preview_urls = collectLinkcasePreviewKeyUrls(args.preview_content)
+
+	if (preview_urls.length === 0) {
+		return normalized_content
+	}
+
+	const saved_url_set = new Set(collectLinkcaseSavedUrls(normalized_content))
+	const missing_urls = preview_urls.filter(url => !saved_url_set.has(url))
+
+	if (missing_urls.length === 0) {
+		return normalized_content
+	}
+
+	const suffix = missing_urls.map(url => `- ${url}`).join('\n')
+
+	return normalized_content ? `${normalized_content}\n\n${suffix}` : suffix
+}
+
 const getRunningLinkcaseTask = (): LinkcaseRunningTask | null => {
 	const linkcase_session = SessionStore.get(global_linkcase_session_id)
 
@@ -820,7 +917,10 @@ export const commitLinkcasePreview = async (args: {
 		url: current_link.url,
 		title: current_link.title,
 		fetched_title: cached.fetched_title,
-		content: args.content,
+		content: preserveLinkcasePreviewKeyUrls({
+			content: args.content,
+			preview_content: cached.content
+		}),
 		exec_pipeline: args.exec_pipeline
 	})
 

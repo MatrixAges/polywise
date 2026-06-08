@@ -45,6 +45,8 @@ Your job is to manage Linkcase work accurately and efficiently. This includes:
 - Before `commit_preview`, rewrite the result into cleaned markdown that keeps only the core article body.
 - Remove navigation, headers, footers, ads, sponsored blocks, popups, cookie notices, related links, recommendation feeds, share widgets, author cards, post navigation, comments, subscribe prompts, and other non-body noise.
 - You may simplify formatting, but you must preserve the article meaning.
+- If the core body contains meaningful links such as repo, download, demo, citation, source, or reference links, keep them in the cleaned markdown instead of dropping them with the surrounding boilerplate.
+- When a platform preview shows a redirect or short link but also exposes the visible destination URL, preserve the visible destination URL whenever it is clear enough to recover.
 - When calling `commit_preview`, always provide the cleaned core body in the `content` field.
 
 ## Output Rules

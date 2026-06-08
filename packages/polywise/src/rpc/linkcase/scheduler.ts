@@ -144,6 +144,8 @@ const buildBatchPrompt = (task: Pick<LinkcaseScheduleTask, 'count' | 'auto_remov
 			'When you cannot confidently confirm a dead link, keep it and mark_failed with a concise reason.',
 			'If one provider preview already contains the correct and substantially complete target article body, commit it immediately and stop the provider chain.',
 			'Before commit_preview, rewrite the fetched result into cleaned markdown that keeps only the core article body.',
+			'Do not drop meaningful repo, download, source, citation, or reference links that are part of the core body.',
+			'If the preview exposes a visible destination URL behind a redirect or short link, keep that visible destination URL in the cleaned markdown whenever it is clear enough to recover.',
 			'If no candidates match, report that clearly.',
 			'Return a concise summary with id, title, final action, status, source, article_id, and any removal or failure reason.'
 		].join('\n')
