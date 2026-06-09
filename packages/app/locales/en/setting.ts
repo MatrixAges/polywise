@@ -7,6 +7,7 @@ export default {
 		model_provider: 'Model Provider',
 		model_setting: 'Model Setting',
 		mcp: 'MCP Config',
+		oauth_provider: 'OAuth Provider',
 		service_provider: 'Service Provider',
 		im: 'IM Integration',
 		about_feedback: 'About & Feedback'
@@ -175,6 +176,41 @@ export default {
 		option_local: 'Local',
 		option_remote: 'Remote',
 		toast_saved: 'MCP config saved.'
+	},
+	oauth_provider: {
+		title: 'OAuth Providers',
+		desc: 'Detect and connect local OAuth-capable CLI providers in one place. OpenCode Go and Zen sync their models automatically after login, so no manual API setup is needed on the Model Provider page.',
+		refresh: 'Refresh',
+		status_connected: 'Connected',
+		status_disconnected: 'Disconnected',
+		status_needs_sync: 'Needs model sync',
+		status_not_installed: 'Not installed',
+		connect: 'Connect',
+		reconnect: 'Reconnect',
+		sync_models: 'Sync Models',
+		resync_models: 'Resync Models',
+		open_docs: 'Docs',
+		detected_via: 'Detection',
+		connection_ready: 'Detected {{label}}.',
+		connection_ready_fallback: 'Detected reusable local credentials.',
+		connection_codex_pending:
+			'Detected {{label}}. Polywise is reusing the local `~/.codex` login state, but the native Codex model runtime is not wired into the model picker yet.',
+		connection_ready_needs_sync: 'Detected {{label}}, but its models have not been synced locally yet.',
+		connection_synced: '{{name}} synced {{count}} models and is ready to use from Model Settings.',
+		connection_missing:
+			'Detected {{client}}. Click Connect to start the native login flow in a local terminal.',
+		cli_missing: '{{client}} was not found in PATH. Install the matching CLI before connecting.',
+		models_synced: '{{count}} models synced',
+		models_not_synced: 'Models not synced',
+		provider_codex_desc:
+			'Connect Codex through the shared `~/.codex` auth state used by both the Codex CLI and desktop app.',
+		provider_opencode_go_desc: 'Connect the OpenCode Go OAuth provider through the OpenCode CLI.',
+		provider_opencode_zen_desc: 'Connect the OpenCode Zen OAuth provider through the OpenCode CLI.',
+		load_failed: 'Failed to load OAuth providers',
+		connect_failed: 'Failed to start OAuth login',
+		connect_started: 'Opened a terminal window. Finish {{name}} login there.',
+		sync_failed: 'Failed to sync OAuth-backed models',
+		sync_started: 'Synced {{count}} models for {{name}}.'
 	},
 	service_provider: {
 		providers_title: 'Linkcase Content Providers',

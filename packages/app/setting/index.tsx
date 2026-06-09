@@ -38,6 +38,8 @@ const Index = () => {
 				return t('menu.model_setting')
 			case 'mcp':
 				return t('menu.mcp')
+			case 'oauth_provider':
+				return t('menu.oauth_provider')
 			case 'service_provider':
 				return t('menu.service_provider')
 			case 'im':

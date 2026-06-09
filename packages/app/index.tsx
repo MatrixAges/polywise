@@ -75,6 +75,10 @@ const routes: Array<RouteObject> = [
 								lazy: () => import('@/setting/mcp')
 							},
 							{
+								path: 'oauth_provider',
+								lazy: () => import('@/setting/oauth_provider')
+							},
+							{
 								path: 'service_provider',
 								lazy: () => import('@/setting/service_provider')
 							},

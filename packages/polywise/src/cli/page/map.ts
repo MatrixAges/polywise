@@ -84,6 +84,14 @@ export const page_map: Array<PageMapItem> = [
 		params_hint: []
 	},
 	{
+		id: 'setting.oauth_provider',
+		kind: 'route',
+		title: 'setting.oauth_provider',
+		summary: 'OAuth provider settings route.',
+		route_path: '/setting/oauth_provider',
+		params_hint: []
+	},
+	{
 		id: 'setting.service_provider',
 		kind: 'route',
 		title: 'setting.service_provider',

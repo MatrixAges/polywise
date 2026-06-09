@@ -10,6 +10,7 @@ import im from './im'
 import linkcase from './linkcase'
 import llama from './llama'
 import notification from './notification'
+import oauthProvider from './oauthProvider'
 import pipeline from './pipeline'
 import post from './post'
 import project from './project'
@@ -53,6 +54,7 @@ export const router = r({
 	report,
 	pipeline,
 	notification,
+	oauthProvider,
 	llama,
 	heartbeat,
 	search,
