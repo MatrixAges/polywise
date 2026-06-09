@@ -1,5 +1,6 @@
 import { config } from '@core/config'
 import { preset_providers } from '@core/consts/providers'
+import { normalizeAgentTools } from '@core/db/agentTool'
 import { agent } from '@core/db/schema'
 import { env } from '@core/env'
 import { asc, SQL } from 'drizzle-orm'
@@ -11,21 +12,6 @@ interface ArgsGetAgents {
 	where?: SQL
 	orderBy?: SQL | Array<SQL>
 	limit?: number
-}
-
-const normalizeAgentTools = (value: unknown): Array<string> => {
-	if (!Array.isArray(value)) {
-		return []
-	}
-
-	return Array.from(
-		new Set(
-			value
-				.filter((item): item is string => typeof item === 'string')
-				.map(item => item.trim())
-				.filter(Boolean)
-		)
-	)
 }
 
 const normalizeAgentRole = (value: unknown) => {

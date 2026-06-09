@@ -32,9 +32,19 @@ export default async (text: string, onTextChunk?: ((text: string) => void) | und
 		items: {
 			type: 'object',
 			properties: {
-				head: { type: 'string', description: 'Head entity (subject)' },
-				relation: { type: 'string', description: 'Relation (predicate)' },
-				tail: { type: 'string', description: 'Tail entity (object)' }
+				head: {
+					type: 'string',
+					description: 'Canonical head entity, concept, or event; never a full sentence'
+				},
+				relation: {
+					type: 'string',
+					description: 'Short canonical predicate in source language; never generic connectors'
+				},
+				tail: {
+					type: 'string',
+					description:
+						'Canonical tail entity, concept, event, absolute date, or normalized value; never a full sentence'
+				}
 			},
 			required: ['head', 'relation', 'tail'],
 			additionalProperties: false

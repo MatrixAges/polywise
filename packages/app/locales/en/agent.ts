@@ -129,9 +129,13 @@ export default {
 		create: 'Create'
 	},
 	tools: {
+		tab_tools: 'Tools',
+		tab_logs: 'Logs',
 		placeholder: 'Search and select custom tools for agent',
 		empty: 'No tools found.',
-		log_empty: 'No tool call logs for this date.'
+		log_empty: 'No tool call logs for this date.',
+		enabled: 'On',
+		disabled: 'Off'
 	},
 	group: {
 		create: 'Create Group',

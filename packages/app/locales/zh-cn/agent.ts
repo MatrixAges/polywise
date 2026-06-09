@@ -127,9 +127,13 @@ export default {
 		create: '创建'
 	},
 	tools: {
+		tab_tools: '工具',
+		tab_logs: '日志',
 		placeholder: '搜索并为智能体选择自定义工具',
 		empty: '没有找到工具。',
-		log_empty: '该日期没有工具调用日志。'
+		log_empty: '该日期没有工具调用日志。',
+		enabled: '开启',
+		disabled: '关闭'
 	},
 	group: {
 		create: '创建群组',

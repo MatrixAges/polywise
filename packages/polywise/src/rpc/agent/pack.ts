@@ -5,6 +5,7 @@ import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import { config } from '@core/config'
 import { app } from '@core/consts'
+import { getAgentToolNames, normalizeAgentTools } from '@core/db/agentTool'
 import { getAgentRowid, getChunkRowid, insertAgentVector, insertChunkFts, insertChunkVector } from '@core/db/prepare'
 import {
 	agent,
@@ -444,11 +445,7 @@ const collectSnapshot = async (agent_id: string): Promise<AgentPackSnapshot> => 
 	}
 
 	const tool_assets = [] as Array<ToolAssetRecord>
-	const selected_tool_names = unique(
-		Array.isArray(target_agent.tools)
-			? target_agent.tools.filter((item): item is string => typeof item === 'string' && item.trim() !== '')
-			: []
-	)
+	const selected_tool_names = unique(getAgentToolNames(target_agent.tools))
 
 	for (let index = 0; index < selected_tool_names.length; index += 1) {
 		const tool_name = selected_tool_names[index]
@@ -529,7 +526,7 @@ const buildManifest = (snapshot: AgentPackSnapshot): AgentPackManifest => ({
 		snapshot.node_chunk_rows.length > 0 ||
 		snapshot.edge_article_rows.length > 0,
 	counts: {
-		tools: unique(snapshot.agent.tools || []).length,
+		tools: unique(getAgentToolNames(snapshot.agent.tools)).length,
 		skills: snapshot.skills.length,
 		tool_assets: snapshot.tool_assets.length,
 		skill_assets: snapshot.skill_assets.length,
@@ -815,8 +812,6 @@ export const importAgentPack = async (file_path: string) => {
 		const created_dirs = [] as Array<string>
 		const tool_asset_path_map = new Map(snapshot.tool_assets.map(item => [item.tool_name, item.asset_dir]))
 		const skill_asset_path_map = new Map(snapshot.skill_assets.map(item => [item.skill_id, item.asset_dir]))
-		const imported_tool_names = [] as Array<string>
-
 		for (const item of snapshot.skills) {
 			const next_name = await resolveUniqueName({
 				base_name: item.name,
@@ -832,7 +827,7 @@ export const importAgentPack = async (file_path: string) => {
 			})
 		}
 
-		for (const tool_name of unique(snapshot.agent.tools || [])) {
+		for (const tool_name of unique(getAgentToolNames(snapshot.agent.tools))) {
 			const has_asset = tool_asset_path_map.has(tool_name)
 			const next_name = has_asset
 				? await resolveUniqueName({
@@ -846,10 +841,6 @@ export const importAgentPack = async (file_path: string) => {
 				existing_tool_names.add(next_name)
 				tool_name_map.set(tool_name, next_name)
 			}
-		}
-
-		for (const tool_name of snapshot.agent.tools || []) {
-			imported_tool_names.push(tool_name_map.get(tool_name) ?? tool_name)
 		}
 
 		try {
@@ -960,7 +951,10 @@ export const importAgentPack = async (file_path: string) => {
 							? new Uint8Array(snapshot.agent.photo as Uint8Array)
 							: null,
 						avatar: snapshot.agent.avatar,
-						tools: imported_tool_names,
+						tools: normalizeAgentTools(snapshot.agent.tools).map(tool_item => ({
+							name: tool_name_map.get(tool_item.name) ?? tool_item.name,
+							enabled: tool_item.enabled
+						})),
 						prompt: snapshot.agent.prompt,
 						soul: snapshot.agent.soul,
 						identity: snapshot.agent.identity,

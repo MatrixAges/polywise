@@ -7,9 +7,13 @@ import getRemoteModel from './getRemoteModel'
 import type { Triples } from '@core/types'
 
 const triple_item_schema = z.object({
-	head: z.string().describe('Head entity (subject)'),
-	relation: z.string().describe('Relation (predicate)'),
-	tail: z.string().describe('Tail entity (object)')
+	head: z.string().describe('Canonical head entity, concept, or event; never a full sentence'),
+	relation: z.string().describe('Short canonical predicate in source language; never generic connectors'),
+	tail: z
+		.string()
+		.describe(
+			'Canonical tail entity, concept, event, absolute date, or normalized value; never a full sentence'
+		)
 })
 
 const triple_schema = z.object({

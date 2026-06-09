@@ -1,6 +1,7 @@
 import { blob, index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { getId } from 'stk/utils'
 
+import type { AgentToolBinding } from '@core/db/agentTool'
 import type { TableModel } from '@core/types'
 
 export default sqliteTable(
@@ -18,7 +19,7 @@ export default sqliteTable(
 		// Agent avatar: generate by program
 		avatar: text('avatar', { mode: 'json' }).$type<any>(),
 		// Enabled custom tools for this agent
-		tools: text('tools', { mode: 'json' }).$type<Array<string>>().default([]).notNull(),
+		tools: text('tools', { mode: 'json' }).$type<Array<AgentToolBinding>>().default([]).notNull(),
 		// How agent run
 		prompt: text('prompt'),
 		// What's in agent's mind

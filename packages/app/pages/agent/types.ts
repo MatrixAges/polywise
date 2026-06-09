@@ -21,6 +21,7 @@ export type AgentSkillLogResponse = RPCOutput['agent']['getSkillLogs']
 export type AgentSkillLogItem = AgentSkillLogResponse['items'][number]
 export type SkillItem = RPCOutput['skill']['query'][number]
 export type AgentToolItem = RPCOutput['tool']['query'][number]
+export type AgentToolBinding = NonNullable<AgentItem['tools']>[number]
 export type AgentToolLogResponse = RPCOutput['agent']['getToolLogs']
 export type AgentToolLogItem = AgentToolLogResponse['items'][number]
 export type AgentPageMode = 'sessions' | 'detail'
@@ -104,7 +105,7 @@ export interface IUpdateAgentArgs {
 	soul?: string
 	identity?: string
 	memory?: string
-	tools?: Array<string>
+	tools?: Array<AgentToolBinding>
 	model?: DefaultModel
 	photo?: Uint8Array | null
 	avatar?: AgentAvatarConfig | null

@@ -29,6 +29,7 @@ import type {
 	AgentSkillLogItem,
 	AgentSkillLogResponse,
 	AgentTab,
+	AgentToolBinding,
 	AgentToolItem,
 	AgentToolLogItem,
 	AgentToolLogResponse,
@@ -196,6 +197,10 @@ export default class Index {
 	}
 
 	get selected_tool_names() {
+		return this.selected_tool_bindings.map(item => item.name)
+	}
+
+	get selected_tool_bindings() {
 		return this.selected_agent?.tools || []
 	}
 
@@ -2072,9 +2077,33 @@ export default class Index {
 	async setTools(tool_names: Array<string>) {
 		if (!this.selected_agent_id || !this.can_edit_selected_agent_behavior) return
 
+		const current_binding_map = new Map<string, AgentToolBinding>(
+			this.selected_tool_bindings.map(item => [item.name, item])
+		)
+		const next_tools = tool_names.map(tool_name => {
+			const current_binding = current_binding_map.get(tool_name)
+
+			return current_binding || { name: tool_name, enabled: true }
+		})
+
 		await this.updateAgent({
 			id: this.selected_agent_id,
-			tools: tool_names
+			tools: next_tools
+		})
+	}
+
+	async setToolEnabled(args: { tool_name: string; enabled: boolean }) {
+		const { tool_name, enabled } = args
+
+		if (!this.selected_agent_id || !this.can_edit_selected_agent_behavior) return
+
+		const next_tools = this.selected_tool_bindings.map(item =>
+			item.name === tool_name ? { ...item, enabled } : item
+		)
+
+		await this.updateAgent({
+			id: this.selected_agent_id,
+			tools: next_tools
 		})
 	}
 

@@ -1,3 +1,4 @@
+import { normalizeAgentTools } from '@core/db/agentTool'
 import { agent_create_input_schema } from '@core/db/schemas'
 import { addAgent, getAgents, normalizeAgentModel } from '@core/db/services'
 import { getDefaultToolModel, runToolAgent } from '@core/fst/agents'
@@ -132,6 +133,7 @@ export default p
 			soul,
 			identity,
 			memory,
+			tools: normalizeAgentTools(input.tools),
 			model: normalizeAgentModel(input.model),
 			order: Date.now()
 		})

@@ -10,6 +10,10 @@ const agent_model_schema = z.object({
 	effort: z.string().optional(),
 	options: z.unknown().optional()
 })
+const agent_tool_binding_schema = z.object({
+	name: z.string().trim().min(1),
+	enabled: z.boolean().optional()
+})
 const agent_role_schema = z.string().trim().min(1).max(20)
 
 const todo_timestamp_schema = z.number().int()
@@ -61,7 +65,7 @@ export const agent_insert_schema = createInsertSchema(agent, {
 	role: agent_role_schema,
 	photo: z.unknown().optional(),
 	avatar: z.unknown().optional(),
-	tools: z.array(z.string()).optional(),
+	tools: z.array(z.union([z.string(), agent_tool_binding_schema])).optional(),
 	model: agent_model_schema,
 	created_at: todo_timestamp_schema.optional(),
 	updated_at: todo_timestamp_schema.optional()

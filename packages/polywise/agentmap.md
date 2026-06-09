@@ -57,7 +57,7 @@ This document is the outline-level map and code-style routing table for `package
 	"data_and_shared_foundations": {
 		"src/db": {
 			"schema": "Drizzle tables and relation declarations.",
-			"services": "Database repositories and projection helpers.",
+			"services": "Database repositories, normalization helpers, and projection helpers.",
 			"runtime": "DB init, migration, and prepared statement wiring."
 		},
 		"src/config": "Runtime config loading and watch lifecycle.",
