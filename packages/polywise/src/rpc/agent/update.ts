@@ -1,6 +1,7 @@
+import { patchAgentRuntimeConfig } from '@core/db/agentConfig'
 import { agent } from '@core/db/schema'
 import { agent_update_input_schema } from '@core/db/schemas'
-import { getAgentOrThrow, setAgent, setAgentFrozenState } from '@core/db/services'
+import { getAgent, getAgentOrThrow, setAgent, setAgentFrozenState } from '@core/db/services'
 import { p, SessionStore } from '@core/utils'
 import { eq } from 'drizzle-orm'
 import { omit } from 'es-toolkit'
@@ -41,20 +42,49 @@ export default p
 		}
 
 		if ('is_frozen' in next_values && typeof next_values.is_frozen === 'boolean') {
-			const { is_frozen, ...rest } = next_values
+			const { is_frozen, tools, ...rest } = next_values
+
+			if ('tools' in next_values) {
+				await patchAgentRuntimeConfig({
+					agent_id: input.id,
+					patch: {
+						tools: Array.isArray(tools) ? tools : []
+					}
+				})
+			}
 
 			if (Object.keys(rest).length > 0) {
 				await setAgent(eq(agent.id, input.id), rest)
 			}
 
-			const next_agent = await setAgentFrozenState(input.id, is_frozen)
+			await setAgentFrozenState(input.id, is_frozen)
+			const next_agent = await getAgent(eq(agent.id, input.id))
+
+			if (!next_agent) {
+				throw new Error(`Agent not found: ${input.id}`)
+			}
 
 			await syncLiveAgentSessions(input.id, next_agent)
 
 			return next_agent
 		}
 
-		const next_agent = await setAgent(eq(agent.id, input.id), next_values)
+		const { tools, ...rest } = next_values
+
+		if ('tools' in next_values) {
+			await patchAgentRuntimeConfig({
+				agent_id: input.id,
+				patch: {
+					tools: Array.isArray(tools) ? tools : []
+				}
+			})
+		}
+
+		if (Object.keys(rest).length > 0) {
+			await setAgent(eq(agent.id, input.id), rest)
+		}
+
+		const next_agent = await getAgent(eq(agent.id, input.id))
 
 		if (!next_agent) {
 			throw new Error(`Agent not found: ${input.id}`)

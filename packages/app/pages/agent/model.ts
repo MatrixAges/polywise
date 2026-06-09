@@ -26,6 +26,7 @@ import type {
 	AgentPageMode,
 	AgentRelatedArticleResponse,
 	AgentSessionItem,
+	AgentSkillBinding,
 	AgentSkillItem,
 	AgentSkillLogItem,
 	AgentSkillLogResponse,
@@ -196,6 +197,10 @@ export default class Index {
 
 	get selected_skill_ids() {
 		return this.skill_items.map(item => item.id)
+	}
+
+	get selected_skill_bindings() {
+		return this.skill_items
 	}
 
 	get selected_tool_names() {
@@ -2101,14 +2106,44 @@ export default class Index {
 	async setSkills(skill_ids: Array<string>) {
 		if (!this.selected_agent_id || !this.can_edit_selected_agent_behavior) return
 
+		const current_binding_map = new Map<string, AgentSkillBinding>(
+			this.selected_skill_bindings.map(item => [item.id, item])
+		)
+		const skills = skill_ids.map(skill_id => {
+			const current_binding = current_binding_map.get(skill_id)
+
+			return {
+				skill_id,
+				enabled: current_binding?.enabled !== false
+			}
+		})
+
 		await rpc.agent.setSkills.mutate({
 			agent_id: this.selected_agent_id,
-			skill_ids
+			skills
 		})
 
 		const next_skill_items = await rpc.agent.getSkills.query({ agent_id: this.selected_agent_id })
 
 		this.skill_items = next_skill_items as Array<AgentSkillItem>
+	}
+
+	async setSkillEnabled(args: { skill_id: string; enabled: boolean }) {
+		const { skill_id, enabled } = args
+
+		if (!this.selected_agent_id || !this.can_edit_selected_agent_behavior) return
+
+		const skills = this.selected_skill_bindings.map(item => ({
+			skill_id: item.id,
+			enabled: item.id === skill_id ? enabled : item.enabled !== false
+		}))
+
+		await rpc.agent.setSkills.mutate({
+			agent_id: this.selected_agent_id,
+			skills
+		})
+
+		this.skill_items = this.skill_items.map(item => (item.id === skill_id ? { ...item, enabled } : item))
 	}
 
 	async setTools(tool_names: Array<string>) {

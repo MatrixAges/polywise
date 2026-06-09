@@ -34,10 +34,14 @@ export default {
 		groups: 'Groups'
 	},
 	skills: {
+		tab_skills: 'Skills',
+		tab_logs: 'Logs',
 		placeholder: 'Search and select skills for agent',
 		empty: 'No skills found.',
 		log_empty: 'No skill call logs for this date.',
-		select_skill: 'Select a skill'
+		select_skill: 'Select a skill',
+		enabled: 'On',
+		disabled: 'Off'
 	},
 	info: {
 		role_placeholder: 'Agent role',

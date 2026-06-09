@@ -1,3 +1,4 @@
+import { readAgentRuntimeConfig } from '@core/db/agentConfig'
 import { getDisabledAgentToolNames } from '@core/db/agentTool'
 import { configurable_session_tool_items } from '@core/fst/session/config/shared'
 import { to } from 'await-to-js'
@@ -14,9 +15,15 @@ export default async (s: Index) => {
 		'system_tool'
 	])
 	const [err, res] = await to(fs.readJSON(s.config_dir))
-	const owner_agent_disable_map = s.owner_agent
-		? getDisabledAgentToolNames(s.owner_agent.tools).filter(item => runtime_tool_name_set.has(item))
-		: []
+	const owner_agent_config = s.owner_agent ? await readAgentRuntimeConfig(s.owner_agent.id) : null
+	const owner_agent_disable_map =
+		s.owner_agent && owner_agent_config?.has_tools
+			? getDisabledAgentToolNames(owner_agent_config.config.tools).filter(item =>
+					runtime_tool_name_set.has(item)
+				)
+			: s.owner_agent
+				? getDisabledAgentToolNames(s.owner_agent.tools).filter(item => runtime_tool_name_set.has(item))
+				: []
 
 	if (!err && res && typeof res === 'object') {
 		const config = normalizeSessionRuntimeConfig(res as any)

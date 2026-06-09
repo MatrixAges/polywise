@@ -34,10 +34,14 @@ export default {
 		groups: '群组'
 	},
 	skills: {
+		tab_skills: '技能',
+		tab_logs: '日志',
 		placeholder: '搜索并为智能体选择技能',
 		empty: '没有找到技能。',
 		log_empty: '该日期没有技能调用日志。',
-		select_skill: '选择一个技能'
+		select_skill: '选择一个技能',
+		enabled: '开启',
+		disabled: '关闭'
 	},
 	info: {
 		role_placeholder: '智能体角色',

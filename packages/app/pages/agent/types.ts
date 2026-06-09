@@ -9,6 +9,7 @@ export type GroupItem = RPCOutput['group']['query'][number]
 export type AgentSessionResponse = RPCOutput['agent']['getSessions']
 export type AgentSessionItem = AgentSessionResponse['sessions'][number]
 export type AgentSkillItem = RPCOutput['agent']['getSkills'][number]
+export type AgentSkillBinding = AgentSkillItem
 export type AgentPrivateArticleResponse = RPCOutput['agent']['getPrivateArticles']
 export type AgentArticleItem = AgentPrivateArticleResponse['list'][number]
 export type AgentRelatedArticleResponse = RPCOutput['agent']['getRelatedArticles']

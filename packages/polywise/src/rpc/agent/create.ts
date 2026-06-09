@@ -1,8 +1,11 @@
+import { patchAgentRuntimeConfig } from '@core/db/agentConfig'
 import { normalizeAgentTools } from '@core/db/agentTool'
+import { agent } from '@core/db/schema'
 import { agent_create_input_schema } from '@core/db/schemas'
-import { addAgent, getAgents, normalizeAgentModel } from '@core/db/services'
+import { addAgent, getAgent, getAgents, normalizeAgentModel } from '@core/db/services'
 import { getDefaultToolModel, runToolAgent } from '@core/fst/agents'
 import { p } from '@core/utils'
+import { eq } from 'drizzle-orm'
 import { object, string } from 'zod'
 
 import { getAgentCreateInstructions, getAgentCreateProfilePrompt } from '../../consts/prompts/getAgentPrompt'
@@ -133,13 +136,21 @@ export default p
 			soul,
 			identity,
 			memory,
-			tools: normalizeAgentTools(input.tools),
+			tools: [],
 			model: normalizeAgentModel(input.model),
 			order: Date.now()
 		})
 
 		if (next_agent?.id) {
+			await patchAgentRuntimeConfig({
+				agent_id: next_agent.id,
+				patch: {
+					tools: normalizeAgentTools(input.tools)
+				}
+			})
 			await readPinList(next_agent.id)
+
+			return getAgent(eq(agent.id, next_agent.id))
 		}
 
 		return next_agent

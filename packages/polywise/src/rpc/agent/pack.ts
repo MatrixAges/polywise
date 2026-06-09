@@ -5,6 +5,7 @@ import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import { config } from '@core/config'
 import { app } from '@core/consts'
+import { patchAgentRuntimeConfig, readAgentRuntimeConfig } from '@core/db/agentConfig'
 import { getAgentToolNames, normalizeAgentTools } from '@core/db/agentTool'
 import { getAgentRowid, getChunkRowid, insertAgentVector, insertChunkFts, insertChunkVector } from '@core/db/prepare'
 import {
@@ -72,7 +73,7 @@ type ToolAssetRecord = {
 type AgentPackSnapshot = {
 	agent: Agent
 	skills: Array<Skill>
-	agent_skill_rows: Array<{ agent_id: string; skill_id: string; created_at: Date | null }>
+	agent_skill_rows: Array<{ agent_id: string; skill_id: string; enabled: boolean; created_at: Date | null }>
 	skill_assets: Array<SkillAssetRecord>
 	tool_assets: Array<ToolAssetRecord>
 	related_articles: Array<{ agent_id: string; article_id: string; created_at: Date | null }>
@@ -355,6 +356,12 @@ const collectSnapshot = async (agent_id: string): Promise<AgentPackSnapshot> => 
 			env.db.select().from(node).where(eq(node.agent_id, agent_id)),
 			env.db.select().from(edge).where(eq(edge.agent_id, agent_id))
 		])
+	const agent_runtime_config = await readAgentRuntimeConfig(agent_id)
+	const skill_enabled_map = new Map(
+		agent_runtime_config.has_skills
+			? agent_runtime_config.config.skills.map(item => [item.skill_id, item.enabled] as const)
+			: []
+	)
 
 	const skill_ids = unique(agent_skill_rows.map(item => item.skill_id))
 	const related_article_ids = unique(raw_related_rows.map(item => item.article_id))
@@ -465,6 +472,7 @@ const collectSnapshot = async (agent_id: string): Promise<AgentPackSnapshot> => 
 		agent_skill_rows: agent_skill_rows.map(item => ({
 			agent_id: item.agent_id,
 			skill_id: item.skill_id,
+			enabled: skill_enabled_map.get(item.skill_id) ?? true,
 			created_at: item.created_at
 		})),
 		skill_assets,
@@ -657,7 +665,7 @@ const readSnapshot = async (temp_dir: string) => {
 		agent: await readJsonFile<Agent>(path.resolve(payload_dir, 'agent.json')),
 		skills: await readJsonFile<Array<Skill>>(path.resolve(payload_dir, 'skills.json')),
 		agent_skill_rows: await readJsonFile<
-			Array<{ agent_id: string; skill_id: string; created_at: Date | null }>
+			Array<{ agent_id: string; skill_id: string; enabled: boolean; created_at: Date | null }>
 		>(path.resolve(payload_dir, 'agent_skills.json')),
 		skill_assets: await readOptionalJson<Array<SkillAssetRecord>>(
 			path.resolve(payload_dir, 'skill_assets.json'),
@@ -938,6 +946,24 @@ export const importAgentPack = async (file_path: string) => {
 
 			const chunk_rowid_map = new Map<string, number>()
 			const agent_rowid_map = new Map<string, number>()
+			const imported_agent_tools = normalizeAgentTools(snapshot.agent.tools).map(tool_item => ({
+				name: tool_name_map.get(tool_item.name) ?? tool_item.name,
+				enabled: tool_item.enabled
+			}))
+			const imported_agent_skills = snapshot.agent_skill_rows
+				.map(item => {
+					const next_skill_id = skill_id_map.get(item.skill_id)
+
+					if (!next_skill_id) {
+						return null
+					}
+
+					return {
+						skill_id: next_skill_id,
+						enabled: item.enabled
+					}
+				})
+				.filter(item => item !== null)
 
 			env.sqlite.transaction(() => {
 				env.db
@@ -951,10 +977,7 @@ export const importAgentPack = async (file_path: string) => {
 							? new Uint8Array(snapshot.agent.photo as Uint8Array)
 							: null,
 						avatar: snapshot.agent.avatar,
-						tools: normalizeAgentTools(snapshot.agent.tools).map(tool_item => ({
-							name: tool_name_map.get(tool_item.name) ?? tool_item.name,
-							enabled: tool_item.enabled
-						})),
+						tools: [],
 						prompt: snapshot.agent.prompt,
 						soul: snapshot.agent.soul,
 						identity: snapshot.agent.identity,
@@ -1220,6 +1243,14 @@ export const importAgentPack = async (file_path: string) => {
 					insertChunkFts().run(BigInt(next_rowid), source_chunk.keywords)
 				}
 			})()
+
+			await patchAgentRuntimeConfig({
+				agent_id: next_agent_id,
+				patch: {
+					tools: imported_agent_tools,
+					skills: imported_agent_skills
+				}
+			})
 
 			await rebuildGlobalSkillMap()
 			await rebuildCustomToolsMap({ tools_dir: getToolsDir(), custom_tools_map: [] } as never)

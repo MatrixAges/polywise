@@ -58,54 +58,171 @@ const Index = () => {
 		<div
 			className='
 				flex flex-col
-				w-full
+				w-full h-full
 				min-h-0
-				gap-3
 			'
 		>
-			<Tabs
-				items={tab_items}
-				active={active_tab}
-				onClick={value => setActiveTab(value as 'tools' | 'logs')}
-			/>
-			<Separator />
-			{active_tab === 'tools' ? (
-				<div className='flex flex-col gap-3'>
-					<div
-						className='
-							flex flex-col
-							gap-3
-							p-3
-							rounded-2xl
-							border border-border-light
-						'
-					>
-						<div className='flex flex-col gap-1'>
-							<div className='text-sm font-medium'>{t('tools.runtime_title')}</div>
-							<div className='text-std-400 text-xs'>{t('tools.runtime_desc')}</div>
-						</div>
-						<div className='flex flex-col'>
-							{runtime_tool_items.map((item, index) => {
-								const enabled = runtime_tool_enabled_map.get(item.key) ?? true
+			<div
+				className='
+					shrink-0
+					h-9
+					mt-[-13.5]
+				'
+			>
+				<Tabs
+					small
+					items={tab_items}
+					active={active_tab}
+					onClick={value => setActiveTab(value as 'tools' | 'logs')}
+				/>
+				<Separator className='mt-3' />
+			</div>
+			<div
+				className='
+					overflow-y-auto
+					flex-1
+					min-h-0
+				'
+			>
+				{active_tab === 'tools' ? (
+					<div className='flex flex-col gap-3 pb-6'>
+						<div
+							className='
+								flex flex-col
+								gap-3
+								p-3
+								rounded-2xl
+								border border-border-light
+							'
+						>
+							<div className='flex flex-col gap-1'>
+								<div className='text-sm font-medium'>{t('tools.runtime_title')}</div>
+								<div className='text-std-400 text-xs'>{t('tools.runtime_desc')}</div>
+							</div>
+							<div className='flex flex-col'>
+								{runtime_tool_items.map((item, index) => {
+									const enabled = runtime_tool_enabled_map.get(item.key) ?? true
 
-								return (
-									<div key={item.key}>
-										{index > 0 ? (
-											<Separator className='bg-border-light my-0' />
-										) : null}
+									return (
+										<div key={item.key}>
+											{index > 0 ? (
+												<Separator className='bg-border-light my-0' />
+											) : null}
+											<div
+												className='
+												flex
+												items-center justify-between
+												gap-3
+												py-3
+											'
+											>
+												<div className='min-w-0 flex-1'>
+													<div className='text-sm font-medium'>
+														{item.label}
+													</div>
+													<div className='text-std-400 text-xs'>
+														{item.description}
+													</div>
+												</div>
+												<div className='flex items-center gap-2'>
+													<span className='text-std-400 text-xs'>
+														{enabled
+															? t('tools.enabled')
+															: t('tools.disabled')}
+													</span>
+													<Switch
+														size='sm'
+														checked={enabled}
+														disabled={
+															!can_edit_selected_agent_behavior
+														}
+														onCheckedChange={next_value =>
+															void setRuntimeToolEnabled({
+																tool_key: item.key,
+																enabled: Boolean(
+																	next_value
+																)
+															})
+														}
+													/>
+												</div>
+											</div>
+										</div>
+									)
+								})}
+							</div>
+						</div>
+						<Separator />
+						<div className='flex flex-col gap-1'>
+							<div className='text-sm font-medium'>{t('tools.custom_title')}</div>
+							<div className='text-std-400 text-xs'>{t('tools.custom_desc')}</div>
+						</div>
+						<div
+							className={$cx(
+								!can_edit_selected_agent_behavior && 'pointer-events-none opacity-50'
+							)}
+						>
+							<Combobox<IToolOption, true>
+								multiple
+								items={tool_options}
+								value={selected_items}
+								onValueChange={value => setTools(value.map(item => item.value))}
+								isItemEqualToValue={(item_value, value) =>
+									item_value.value === value.value
+								}
+							>
+								<ComboboxChips
+									className='
+										w-full
+										bg-transparent!
+										focus-within:ring-0
+									'
+									ref={ref_anchor}
+								>
+									{selected_items.map(item => (
+										<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
+									))}
+									<ComboboxChipsInput placeholder={t('tools.placeholder')} />
+								</ComboboxChips>
+								<ComboboxContent anchor={ref_anchor}>
+									<ComboboxEmpty>{t('tools.empty')}</ComboboxEmpty>
+									<ComboboxList>
+										{(item: IToolOption) => (
+											<ComboboxItem value={item} key={item.value}>
+												<div className='flex min-w-0 flex-col'>
+													<span>{item.label}</span>
+													<span className='text-std-400 truncate text-xs'>
+														{item.description}
+													</span>
+												</div>
+											</ComboboxItem>
+										)}
+									</ComboboxList>
+								</ComboboxContent>
+							</Combobox>
+						</div>
+						{selected_items.length > 0 && (
+							<div className='flex flex-col gap-2'>
+								{selected_items.map(item => {
+									const enabled = selected_binding_map.get(item.value) ?? true
+
+									return (
 										<div
+											key={item.value}
 											className='
 											flex
 											items-center justify-between
 											gap-3
-											py-3
+											px-3 py-2
+											rounded-xl
+											border border-border-light
 										'
 										>
 											<div className='min-w-0 flex-1'>
-												<div className='text-sm font-medium'>
+												<div className='truncate text-sm font-medium'>
 													{item.label}
 												</div>
-												<div className='text-std-400 text-xs'>
+												<div className='text-std-400 truncate text-xs'>
 													{item.description}
 												</div>
 											</div>
@@ -118,135 +235,38 @@ const Index = () => {
 												<Switch
 													size='sm'
 													checked={enabled}
-													disabled={
-														!can_edit_selected_agent_behavior
-													}
 													onCheckedChange={next_value =>
-														void setRuntimeToolEnabled({
-															tool_key: item.key,
+														void setToolEnabled({
+															tool_name: item.value,
 															enabled: Boolean(next_value)
 														})
 													}
 												/>
 											</div>
 										</div>
-									</div>
-								)
-							})}
-						</div>
-					</div>
-					<Separator />
-					<div className='flex flex-col gap-1'>
-						<div className='text-sm font-medium'>{t('tools.custom_title')}</div>
-						<div className='text-std-400 text-xs'>{t('tools.custom_desc')}</div>
-					</div>
-					<div
-						className={$cx(
-							!can_edit_selected_agent_behavior && 'pointer-events-none opacity-50'
+									)
+								})}
+							</div>
 						)}
-					>
-						<Combobox<IToolOption, true>
-							multiple
-							items={tool_options}
-							value={selected_items}
-							onValueChange={value => setTools(value.map(item => item.value))}
-							isItemEqualToValue={(item_value, value) => item_value.value === value.value}
-						>
-							<ComboboxChips
-								className='
-									w-full
-									bg-transparent!
-									focus-within:ring-0
-								'
-								ref={ref_anchor}
-							>
-								{selected_items.map(item => (
-									<ComboboxChip key={item.value}>{item.label}</ComboboxChip>
-								))}
-								<ComboboxChipsInput placeholder={t('tools.placeholder')} />
-							</ComboboxChips>
-							<ComboboxContent anchor={ref_anchor}>
-								<ComboboxEmpty>{t('tools.empty')}</ComboboxEmpty>
-								<ComboboxList>
-									{(item: IToolOption) => (
-										<ComboboxItem value={item} key={item.value}>
-											<div className='flex min-w-0 flex-col'>
-												<span>{item.label}</span>
-												<span className='text-std-400 truncate text-xs'>
-													{item.description}
-												</span>
-											</div>
-										</ComboboxItem>
-									)}
-								</ComboboxList>
-							</ComboboxContent>
-						</Combobox>
 					</div>
-					{selected_items.length > 0 && (
-						<div className='flex flex-col gap-2'>
-							{selected_items.map(item => {
-								const enabled = selected_binding_map.get(item.value) ?? true
-
-								return (
-									<div
-										key={item.value}
-										className='
-										flex
-										items-center justify-between
-										gap-3
-										px-3 py-2
-										rounded-xl
-										border border-border-light
-									'
-									>
-										<div className='min-w-0 flex-1'>
-											<div className='truncate text-sm font-medium'>
-												{item.label}
-											</div>
-											<div className='text-std-400 truncate text-xs'>
-												{item.description}
-											</div>
-										</div>
-										<div className='flex items-center gap-2'>
-											<span className='text-std-400 text-xs'>
-												{enabled
-													? t('tools.enabled')
-													: t('tools.disabled')}
-											</span>
-											<Switch
-												size='sm'
-												checked={enabled}
-												onCheckedChange={next_value =>
-													void setToolEnabled({
-														tool_name: item.value,
-														enabled: Boolean(next_value)
-													})
-												}
-											/>
-										</div>
-									</div>
-								)
-							})}
-						</div>
-					)}
-				</div>
-			) : (
-				<div className='flex flex-col'>
-					<CallLogPanel
-						available_dates={tool_log_available_dates}
-						date={tool_log_date}
-						empty_text={t('tools.log_empty')}
-						has_more={tool_log_has_more}
-						items={tool_log_items}
-						loading={tool_log_loading}
-						onDateChange={setToolLogDate}
-						onPageChange={setToolLogPage}
-						page={tool_log_page}
-						renderSummary={item => item.tool_name}
-						total={tool_log_total}
-					/>
-				</div>
-			)}
+				) : (
+					<div className='flex flex-col pb-6'>
+						<CallLogPanel
+							available_dates={tool_log_available_dates}
+							date={tool_log_date}
+							empty_text={t('tools.log_empty')}
+							has_more={tool_log_has_more}
+							items={tool_log_items}
+							loading={tool_log_loading}
+							onDateChange={setToolLogDate}
+							onPageChange={setToolLogPage}
+							page={tool_log_page}
+							renderSummary={item => item.tool_name}
+							total={tool_log_total}
+						/>
+					</div>
+				)}
+			</div>
 		</div>
 	)
 }

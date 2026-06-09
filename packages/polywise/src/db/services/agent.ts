@@ -1,5 +1,6 @@
 import { config } from '@core/config'
 import { preset_providers } from '@core/consts/providers'
+import { readAgentRuntimeConfig } from '@core/db/agentConfig'
 import { normalizeAgentTools } from '@core/db/agentTool'
 import { agent } from '@core/db/schema'
 import { env } from '@core/env'
@@ -86,15 +87,16 @@ const normalizeAgentValues = <T extends Partial<AgentInsert>>(values: T): T => {
 	return next_values as T
 }
 
-const normalizeAgent = (row: Agent | undefined) => {
+const normalizeAgent = async (row: Agent | undefined) => {
 	if (!row) {
 		return row
 	}
 
+	const runtime_config = await readAgentRuntimeConfig(row.id)
 	const next_row = {
 		...row,
 		model: normalizeAgentModel(row.model),
-		tools: normalizeAgentTools(row.tools),
+		tools: runtime_config.has_tools ? runtime_config.config.tools : normalizeAgentTools(row.tools),
 		role: normalizeAgentRole(row.role)
 	}
 	const photo = row.photo
@@ -150,7 +152,9 @@ export const getAgents = async (args: ArgsGetAgents = {}) => {
 
 	if (limit) query = query.limit(limit)
 
-	return query.then(res => res.map(item => normalizeAgent(item) as Agent))
+	return query.then(res =>
+		Promise.all(res.map(item => normalizeAgent(item))).then(items => items.filter(item => item) as Array<Agent>)
+	)
 }
 
 export const setAgent = async (where: SQL, values: Partial<AgentInsert>) => {

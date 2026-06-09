@@ -1,3 +1,4 @@
+import { readAgentRuntimeConfig } from '@core/db/agentConfig'
 import { object, string } from 'zod'
 
 import { getAgentSkills } from '../../db/services/externals'
@@ -16,6 +17,15 @@ export default p
 	.input(input_type)
 	.query(async ({ input }) => {
 		const rows = await getAgentSkills(input.agent_id)
+		const runtime_config = await readAgentRuntimeConfig(input.agent_id)
+		const skill_enabled_map = new Map(
+			runtime_config.has_skills
+				? runtime_config.config.skills.map(item => [item.skill_id, item.enabled] as const)
+				: []
+		)
 
-		return rows.map(item => item.skill)
+		return rows.map(item => ({
+			...item.skill,
+			enabled: skill_enabled_map.get(item.skill.id) ?? true
+		}))
 	})
