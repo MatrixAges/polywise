@@ -1,13 +1,25 @@
 import { agent } from '@core/db/schema'
 import { agent_update_input_schema } from '@core/db/schemas'
 import { getAgentOrThrow, setAgent, setAgentFrozenState } from '@core/db/services'
-import { p } from '@core/utils'
+import { p, SessionStore } from '@core/utils'
 import { eq } from 'drizzle-orm'
 import { omit } from 'es-toolkit'
 
-import type { AgentInsert } from '@core/db'
+import type { Agent, AgentInsert } from '@core/db'
 
 const input_type = agent_update_input_schema
+
+const syncLiveAgentSessions = async (agent_id: string, next_agent: Agent) => {
+	for (const session of SessionStore.values()) {
+		if (session.owner_agent?.id !== agent_id) {
+			continue
+		}
+
+		session.owner_agent = next_agent
+		await session.updateConfig()
+		await session.loadCustomToolsMap()
+	}
+}
 
 export default p
 	.meta({
@@ -35,8 +47,20 @@ export default p
 				await setAgent(eq(agent.id, input.id), rest)
 			}
 
-			return setAgentFrozenState(input.id, is_frozen)
+			const next_agent = await setAgentFrozenState(input.id, is_frozen)
+
+			await syncLiveAgentSessions(input.id, next_agent)
+
+			return next_agent
 		}
 
-		return setAgent(eq(agent.id, input.id), next_values)
+		const next_agent = await setAgent(eq(agent.id, input.id), next_values)
+
+		if (!next_agent) {
+			throw new Error(`Agent not found: ${input.id}`)
+		}
+
+		await syncLiveAgentSessions(input.id, next_agent)
+
+		return next_agent
 	})

@@ -64,3 +64,8 @@ export const getEnabledAgentToolNames = (value: unknown) =>
 	normalizeAgentTools(value)
 		.filter(item => item.enabled)
 		.map(item => item.name)
+
+export const getDisabledAgentToolNames = (value: unknown) =>
+	normalizeAgentTools(value)
+		.filter(item => !item.enabled)
+		.map(item => item.name)

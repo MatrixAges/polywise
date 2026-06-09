@@ -20,6 +20,7 @@ export default async (s: Session, args: InitArgs & { group_id?: string }) => {
 	await fs.ensureDir(s.files_dir)
 	await s.initSession(is_cron, title)
 	await s.getOwnerAgent()
+	await s.updateConfig()
 	await s.getAgents()
 	await s.loadSkillMap()
 	await s.loadCustomToolsMap()

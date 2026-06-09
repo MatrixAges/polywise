@@ -28,10 +28,13 @@ const Index = () => {
 	const [active_tab, setActiveTab] = useState<'tools' | 'logs'>('tools')
 	const {
 		can_edit_selected_agent_behavior,
+		runtime_tool_enabled_map,
+		runtime_tool_items,
 		tool_options,
-		selected_tool_bindings,
+		selected_custom_tool_bindings,
 		selected_tool_names,
 		setTools,
+		setRuntimeToolEnabled,
 		setToolEnabled,
 		tool_log_available_dates,
 		tool_log_date,
@@ -45,7 +48,7 @@ const Index = () => {
 	} = useModel()
 	const ref_anchor = useComboboxAnchor()
 	const selected_items = tool_options.filter(item => selected_tool_names.includes(item.value))
-	const selected_binding_map = new Map(selected_tool_bindings.map(item => [item.name, item.enabled]))
+	const selected_binding_map = new Map(selected_custom_tool_bindings.map(item => [item.name, item.enabled]))
 	const tab_items = [
 		{ key: 'tools', title: t('tools.tab_tools'), Icon: Wrench },
 		{ key: 'logs', title: t('tools.tab_logs'), Icon: Logs }
@@ -68,6 +71,75 @@ const Index = () => {
 			<Separator />
 			{active_tab === 'tools' ? (
 				<div className='flex flex-col gap-3'>
+					<div
+						className='
+							flex flex-col
+							gap-3
+							p-3
+							rounded-2xl
+							border border-border-light
+						'
+					>
+						<div className='flex flex-col gap-1'>
+							<div className='text-sm font-medium'>{t('tools.runtime_title')}</div>
+							<div className='text-std-400 text-xs'>{t('tools.runtime_desc')}</div>
+						</div>
+						<div className='flex flex-col'>
+							{runtime_tool_items.map((item, index) => {
+								const enabled = runtime_tool_enabled_map.get(item.key) ?? true
+
+								return (
+									<div key={item.key}>
+										{index > 0 ? (
+											<Separator className='bg-border-light my-0' />
+										) : null}
+										<div
+											className='
+											flex
+											items-center justify-between
+											gap-3
+											py-3
+										'
+										>
+											<div className='min-w-0 flex-1'>
+												<div className='text-sm font-medium'>
+													{item.label}
+												</div>
+												<div className='text-std-400 text-xs'>
+													{item.description}
+												</div>
+											</div>
+											<div className='flex items-center gap-2'>
+												<span className='text-std-400 text-xs'>
+													{enabled
+														? t('tools.enabled')
+														: t('tools.disabled')}
+												</span>
+												<Switch
+													size='sm'
+													checked={enabled}
+													disabled={
+														!can_edit_selected_agent_behavior
+													}
+													onCheckedChange={next_value =>
+														void setRuntimeToolEnabled({
+															tool_key: item.key,
+															enabled: Boolean(next_value)
+														})
+													}
+												/>
+											</div>
+										</div>
+									</div>
+								)
+							})}
+						</div>
+					</div>
+					<Separator />
+					<div className='flex flex-col gap-1'>
+						<div className='text-sm font-medium'>{t('tools.custom_title')}</div>
+						<div className='text-std-400 text-xs'>{t('tools.custom_desc')}</div>
+					</div>
 					<div
 						className={$cx(
 							!can_edit_selected_agent_behavior && 'pointer-events-none opacity-50'

@@ -1,3 +1,4 @@
+import { configurable_session_tool_items } from '@core/fst/session/config/shared'
 import { arrayMove } from '@dnd-kit/sortable'
 import dayjs from 'dayjs'
 import { makeAutoObservable } from 'mobx'
@@ -38,6 +39,7 @@ import type {
 	GroupItem,
 	IEditableFieldArgs,
 	IGroupDialogSubmitArgs,
+	IRuntimeToolOption,
 	ISkillOption,
 	IToolOption,
 	IUpdateAgentArgs
@@ -197,11 +199,46 @@ export default class Index {
 	}
 
 	get selected_tool_names() {
-		return this.selected_tool_bindings.map(item => item.name)
+		return this.selected_custom_tool_bindings.map(item => item.name)
 	}
 
 	get selected_tool_bindings() {
 		return this.selected_agent?.tools || []
+	}
+
+	get selected_custom_tool_bindings() {
+		const custom_tool_name_set = new Set(this.tool_options.map(item => item.value))
+
+		return this.selected_tool_bindings.filter(item => custom_tool_name_set.has(item.name))
+	}
+
+	get runtime_tool_items() {
+		return [
+			...configurable_session_tool_items.map(
+				item =>
+					({
+						key: item.key,
+						label: item.label,
+						description: item.description
+					}) satisfies IRuntimeToolOption
+			),
+			{
+				key: 'agent_tool',
+				label: 'Agent Tool',
+				description: 'Consult available agents in the current session context.'
+			},
+			{
+				key: 'system_tool',
+				label: 'System Tool',
+				description: 'Delegate work through the internal system agent path.'
+			}
+		] as Array<IRuntimeToolOption>
+	}
+
+	get runtime_tool_enabled_map() {
+		const binding_map = new Map(this.selected_tool_bindings.map(item => [item.name, item.enabled]))
+
+		return new Map(this.runtime_tool_items.map(item => [item.key, binding_map.get(item.key) ?? true]))
 	}
 
 	get is_selected_agent_frozen() {
@@ -2077,8 +2114,12 @@ export default class Index {
 	async setTools(tool_names: Array<string>) {
 		if (!this.selected_agent_id || !this.can_edit_selected_agent_behavior) return
 
+		const runtime_tool_name_set = new Set(this.runtime_tool_items.map(item => item.key))
 		const current_binding_map = new Map<string, AgentToolBinding>(
 			this.selected_tool_bindings.map(item => [item.name, item])
+		)
+		const preserved_runtime_bindings = this.selected_tool_bindings.filter(item =>
+			runtime_tool_name_set.has(item.name)
 		)
 		const next_tools = tool_names.map(tool_name => {
 			const current_binding = current_binding_map.get(tool_name)
@@ -2088,7 +2129,7 @@ export default class Index {
 
 		await this.updateAgent({
 			id: this.selected_agent_id,
-			tools: next_tools
+			tools: preserved_runtime_bindings.concat(next_tools)
 		})
 	}
 
@@ -2100,6 +2141,21 @@ export default class Index {
 		const next_tools = this.selected_tool_bindings.map(item =>
 			item.name === tool_name ? { ...item, enabled } : item
 		)
+
+		await this.updateAgent({
+			id: this.selected_agent_id,
+			tools: next_tools
+		})
+	}
+
+	async setRuntimeToolEnabled(args: { tool_key: string; enabled: boolean }) {
+		const { tool_key, enabled } = args
+
+		if (!this.selected_agent_id || !this.can_edit_selected_agent_behavior) return
+
+		const next_tools = this.selected_tool_bindings.filter(item => item.name !== tool_key)
+
+		next_tools.push({ name: tool_key, enabled })
 
 		await this.updateAgent({
 			id: this.selected_agent_id,

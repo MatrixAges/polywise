@@ -129,6 +129,10 @@ export default {
 	tools: {
 		tab_tools: '工具',
 		tab_logs: '日志',
+		runtime_title: '全部运行时工具',
+		runtime_desc: '控制这个 agent 在会话运行时可用的内建 tools。',
+		custom_title: '自定义工具',
+		custom_desc: '选择并控制这个 agent 可调用的自定义 tools。',
 		placeholder: '搜索并为智能体选择自定义工具',
 		empty: '没有找到工具。',
 		log_empty: '该日期没有工具调用日志。',

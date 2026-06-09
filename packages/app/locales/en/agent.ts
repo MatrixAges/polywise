@@ -131,6 +131,10 @@ export default {
 	tools: {
 		tab_tools: 'Tools',
 		tab_logs: 'Logs',
+		runtime_title: 'All Runtime Tools',
+		runtime_desc: 'Control which built-in runtime tools are available to this agent during session execution.',
+		custom_title: 'Custom Tools',
+		custom_desc: 'Select and control the custom tools this agent can call.',
 		placeholder: 'Search and select custom tools for agent',
 		empty: 'No tools found.',
 		log_empty: 'No tool call logs for this date.',

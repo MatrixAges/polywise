@@ -56,6 +56,12 @@ export interface IToolOption {
 	description: string
 }
 
+export interface IRuntimeToolOption {
+	key: string
+	label: string
+	description: string
+}
+
 export interface IAgentSessionMenuItemProps {
 	item: AgentSessionItem
 	pin: boolean
