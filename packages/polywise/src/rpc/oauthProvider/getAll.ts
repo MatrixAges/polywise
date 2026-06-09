@@ -30,9 +30,20 @@ export default p
 		const providers = oauth_providers.map(item => {
 			const item_name = item.name
 			const item_credential_name = item.credential_name ?? item_name
-			const synced_provider = provider_config.custom_providers?.find(
+			const matched_provider = provider_config.custom_providers?.find(
 				provider => provider.name === item.sync_provider_name
 			)
+			const codex_runtime =
+				matched_provider && 'custom_fields' in matched_provider
+					? ((matched_provider as { custom_fields?: { provider_runtime?: string } }).custom_fields
+							?.provider_runtime ?? '')
+					: ''
+			const synced_provider =
+				item.id === 'codex'
+					? codex_runtime === 'codex_native'
+						? matched_provider
+						: undefined
+					: matched_provider
 
 			if (item.client === 'codex') {
 				return {
@@ -40,9 +51,9 @@ export default p
 					installed: codex_installed,
 					connected: Boolean(codex_label?.toLowerCase().startsWith('logged in')),
 					credential_label: codex_label,
-					synced: false,
-					synced_model_count: 0,
-					synced_models: [] as Array<string>
+					synced: Boolean(synced_provider),
+					synced_model_count: synced_provider?.models?.length ?? 0,
+					synced_models: synced_provider?.models?.slice(0, 8).map(model => model.id) ?? []
 				}
 			}
 

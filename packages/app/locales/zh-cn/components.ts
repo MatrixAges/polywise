@@ -75,6 +75,13 @@ export default {
 			placeholder: '输入你的回答...',
 			submit: '提交'
 		},
+		codex_exec: {
+			pending: '待处理',
+			running: '执行中',
+			completed: '已完成',
+			denied: '已拒绝',
+			error: '异常'
+		},
 		context: {
 			intent: '意图',
 			context: '上下文',

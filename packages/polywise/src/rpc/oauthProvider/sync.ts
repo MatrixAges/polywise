@@ -4,6 +4,7 @@ import { clearObject, p } from '@core/utils'
 import fs from 'fs-extra'
 import { z } from 'zod'
 
+import { listCodexModels } from '../../utils/codexAppServer'
 import { oauth_providers } from './providers'
 import { parseOpenCodeModels, readOpenCodeAuthFile, readProviderConfigFile, runShellCommand } from './runtime'
 
@@ -50,48 +51,71 @@ export default p
 		if (
 			!provider.sync_supported ||
 			!provider.sync_provider_name ||
-			!provider.sync_auth_key ||
-			!provider.sync_base_url ||
-			!provider.sync_models_command
+			(provider.id !== 'codex' &&
+				(!provider.sync_auth_key || !provider.sync_base_url || !provider.sync_models_command))
 		) {
 			throw new Error(`${provider.name} does not support automatic model sync yet.`)
 		}
+		let next_provider = null as Provider | null
+		let models = [] as Array<Provider['models'][number]>
 
-		const auth_file = await readOpenCodeAuthFile()
-		const auth_entry = auth_file?.[provider.sync_auth_key]
-		const api_key = auth_entry?.key?.trim()
+		if (provider.id === 'codex') {
+			const codex_models = await listCodexModels()
 
-		if (!api_key) {
-			throw new Error(`${provider.name} is not logged in locally yet.`)
-		}
+			models = codex_models.map(item => ({
+				id: item.model,
+				name: item.displayName || item.model,
+				enabled: !item.hidden
+			}))
 
-		const models_result = await runShellCommand(provider.sync_models_command, 15000)
+			next_provider = {
+				name: provider.sync_provider_name,
+				apiKey: '',
+				baseURL: '',
+				enabled: true,
+				models,
+				custom_fields: {
+					provider_runtime: 'codex_native'
+				}
+			} as Provider
+		} else {
+			const auth_file = await readOpenCodeAuthFile()
+			const auth_entry = auth_file?.[provider.sync_auth_key!]
+			const api_key = auth_entry?.key?.trim()
 
-		if (models_result.exitCode !== 0) {
-			throw new Error(
-				models_result.stderr.trim() ||
-					models_result.stdout.trim() ||
-					`Failed to list models for ${provider.name}.`
-			)
-		}
+			if (!api_key) {
+				throw new Error(`${provider.name} is not logged in locally yet.`)
+			}
 
-		const models = parseOpenCodeModels(models_result.stdout)
+			const models_result = await runShellCommand(provider.sync_models_command!, 15000)
 
-		if (models.length === 0) {
-			throw new Error(`No models were returned for ${provider.name}.`)
+			if (models_result.exitCode !== 0) {
+				throw new Error(
+					models_result.stderr.trim() ||
+						models_result.stdout.trim() ||
+						`Failed to list models for ${provider.name}.`
+				)
+			}
+
+			models = parseOpenCodeModels(models_result.stdout)
+
+			if (models.length === 0) {
+				throw new Error(`No models were returned for ${provider.name}.`)
+			}
+
+			next_provider = {
+				name: provider.sync_provider_name,
+				apiKey: api_key,
+				baseURL: provider.sync_base_url!,
+				enabled: true,
+				models
+			} satisfies Provider
 		}
 
 		const current_config = await readProviderConfigFile(providers_path)
-		const next_provider = {
-			name: provider.sync_provider_name,
-			apiKey: api_key,
-			baseURL: provider.sync_base_url,
-			enabled: true,
-			models
-		} satisfies Provider
 		const next_config = upsertCustomProvider({
 			config: current_config,
-			provider: next_provider
+			provider: next_provider!
 		})
 
 		await fs.writeJson(providers_path, next_config, { spaces: 4 })

@@ -55,7 +55,8 @@ export default async (args: {
 		throw new Error('group member tools not resolved')
 	}
 
-	const tools = wrapToolSetWithAgentLogging(s, sanitizeToolSet(runtime.tools))
+	const use_native_codex_tools = model.runtime_name === 'codex_native'
+	const tools = use_native_codex_tools ? undefined : wrapToolSetWithAgentLogging(s, sanitizeToolSet(runtime.tools))
 	const tracker = createPartDurationTracker()
 	const res = streamText({
 		model: model.model,
@@ -88,10 +89,6 @@ export default async (args: {
 				} satisfies MessageMetadata
 			},
 			onFinish: async ({ responseMessage }) => {
-				if (durationParts.length > 0) {
-					responseMessage.parts = [...responseMessage.parts, ...durationParts]
-				}
-
 				responseMessage.metadata = {
 					...(responseMessage.metadata ?? {}),
 					timestamp: Date.now(),

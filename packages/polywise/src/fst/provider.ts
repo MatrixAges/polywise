@@ -21,6 +21,7 @@ export interface ModelResult {
 	model: LanguageModel
 	provider_options?: ProviderOptions
 	tools?: ToolSet
+	runtime_name?: string
 }
 
 export type GetModelResult<T extends ModelType> = T extends 'embedding'
@@ -285,6 +286,11 @@ const getEffortProviderOptions = (
 		case 'xiaomi_mimo':
 		case 'open_compatible':
 			return { openaiCompatible: { reasoningEffort: effort } } as ProviderOptions
+		case 'codex_native': {
+			const reasoningEffort = getSupportedEffort(effort, ['none', 'low', 'medium', 'high', 'xhigh'])
+
+			return reasoningEffort ? ({ 'codex-app-server': { reasoningEffort } } as ProviderOptions) : undefined
+		}
 		case 'google_gemini': {
 			const thinkingLevel = getSupportedEffort(effort, ['minimal', 'low', 'medium', 'high'])
 			const thinkingBudget = getThinkingBudget(effort)
@@ -406,6 +412,14 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 						supportsStructuredOutputs: true
 					})(model),
 					provider_options: effort_provider_options
+				}
+			case 'codex_native':
+				return {
+					model: (await import('../utils/codexAppServer')).createCodexNativeLanguageModel({
+						model
+					}),
+					provider_options: effort_provider_options,
+					runtime_name: 'codex_native'
 				}
 			case 'a2a':
 				return { model: (await import('a2a-ai-provider')).a2a(model) }

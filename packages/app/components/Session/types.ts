@@ -47,6 +47,10 @@ export interface IPropsSubAgent extends Pick<IPropsPart, 'streaming' | 'answer'>
 	part: ToolUIPart
 }
 
+export interface IPropsCodexExec extends Pick<IPropsPart, 'streaming'> {
+	part: ToolUIPart
+}
+
 export interface EditFileInput {
 	edits: Array<{
 		file_path: string

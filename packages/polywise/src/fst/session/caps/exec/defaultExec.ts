@@ -40,7 +40,10 @@ export default async (s: Session, message: Message) => {
 	}
 
 	const system = promptState.system
-	const tools = wrapToolSetWithAgentLogging(s, sanitizeToolSet(runtime.tools as any))
+	const use_native_codex_tools = s.model.runtime_name === 'codex_native'
+	const tools = use_native_codex_tools
+		? undefined
+		: wrapToolSetWithAgentLogging(s, sanitizeToolSet(runtime.tools as any))
 	const res = streamText({
 		model: s.model.model,
 		system,

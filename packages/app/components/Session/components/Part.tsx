@@ -6,6 +6,7 @@ import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from '@/__shadcn
 import { useGlobal } from '@/context'
 import { getToolDesc } from '@/utils'
 
+import CodexExec from './CodexExec'
 import Edit from './Edit'
 import Question from './Question'
 import SubAgent from './SubAgent'
@@ -13,6 +14,10 @@ import SubAgent from './SubAgent'
 import type { EditResult, QuestionInput } from '@core/fst/tools'
 import type { DynamicToolUIPart, ToolUIPart } from 'ai'
 import type { IPropsPart } from '../types'
+
+const isCodexBuiltinTool = (part: ToolUIPart) =>
+	part.providerExecuted === true &&
+	(part.type === 'tool-web_search' || part.type === 'tool-exec' || part.type === 'tool-patch')
 
 const Index = (props: IPropsPart) => {
 	const { streaming, duration, part, answer } = props
@@ -81,6 +86,10 @@ const Index = (props: IPropsPart) => {
 		const tool_part = part as ToolUIPart
 
 		if (tool_part.type === 'tool-context_tool' || tool_part.type === 'tool-prompt_tool') return null
+
+		if (isCodexBuiltinTool(tool_part)) {
+			return <CodexExec streaming={streaming} part={tool_part} />
+		}
 
 		if (tool_part.type === 'tool-question_tool' && tool_part.input) {
 			return (

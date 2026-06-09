@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 import { pick } from 'es-toolkit'
 import { z } from 'zod'
 
+import getProviderRuntimeName from '../utils/getProviderRuntimeName'
 import { chunkList, formatCompactNumber, formatReportTime } from './utils'
 
 import type { SpecialProvider } from '@core/types'
@@ -37,7 +38,11 @@ const resolveDefaultTextModel = async () => {
 				...(found_provider as SpecialProvider).custom_fields
 			}
 		: undefined
-	const provider_name = custom_list.some(item => item.name === provider) ? 'open_compatible' : provider
+	const provider_name = getProviderRuntimeName({
+		provider_name: provider,
+		provider_item: found_provider,
+		custom_provider_names: custom_list.map(item => item.name)
+	})
 
 	return getModel({
 		provider: provider_name,

@@ -2,6 +2,7 @@ import { config, providers } from '@core/config'
 import { getModel } from '@core/fst/provider'
 import { pick } from 'es-toolkit'
 
+import getProviderRuntimeName from '../utils/getProviderRuntimeName'
 import { isRemoteProvider } from './getRemoteModel'
 
 import type { SpecialProvider } from '@core/types'
@@ -23,7 +24,11 @@ export default async () => {
 			}
 		: undefined
 
-	const provider_name = custom_list.some(item => item.name === provider) ? 'open_compatible' : provider
+	const provider_name = getProviderRuntimeName({
+		provider_name: provider,
+		provider_item: found_provider,
+		custom_provider_names: custom_list.map(item => item.name)
+	})
 
 	return getModel({
 		provider: provider_name,

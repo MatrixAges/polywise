@@ -3,6 +3,7 @@ import { getModel } from '@core/fst/provider'
 import { generateText } from 'ai'
 import { array, boolean, object, record, string } from 'zod'
 
+import getProviderRuntimeName from '../../utils/getProviderRuntimeName'
 import { p } from '../../utils/trpc'
 
 const input_type = object({
@@ -82,7 +83,13 @@ export default p
 
 			const provider_name = all_providers.some(item => item.name === input.name)
 				? input.name
-				: 'open_compatible'
+				: getProviderRuntimeName({
+						provider_name: input.name,
+						provider_item: input as ProviderTestInput & {
+							custom_fields?: Record<string, string>
+						},
+						custom_provider_names: [input.name]
+					})
 
 			const options = {
 				apiKey: input.apiKey,

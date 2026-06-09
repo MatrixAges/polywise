@@ -76,6 +76,13 @@ export default {
 			placeholder: 'Type your answer...',
 			submit: 'Submit'
 		},
+		codex_exec: {
+			pending: 'Pending',
+			running: 'Running',
+			completed: 'Completed',
+			denied: 'Denied',
+			error: 'Error'
+		},
 		context: {
 			intent: 'Intent',
 			context: 'Context',

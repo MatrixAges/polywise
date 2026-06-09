@@ -1,6 +1,7 @@
 import { config, providers } from '@core/config'
 import { pick } from 'es-toolkit'
 
+import getProviderRuntimeName from '../../../utils/getProviderRuntimeName'
 import { getModel } from '../../provider'
 
 import type { SpecialProvider } from '@core/types'
@@ -22,11 +23,11 @@ export default async (s: Index) => {
 		}
 	}
 
-	let target_provider_name = provider
-
-	if (custom_providers.find(item => item.name === provider)) {
-		target_provider_name = 'open_compatible'
-	}
+	const target_provider_name = getProviderRuntimeName({
+		provider_name: provider,
+		provider_item: target_provider,
+		custom_provider_names: custom_providers.map(item => item.name)
+	})
 
 	s.model = await getModel({ provider: target_provider_name, model, effort, options: target_options })
 }

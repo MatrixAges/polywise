@@ -18,12 +18,15 @@ export const oauth_providers = [
 	{
 		id: 'codex',
 		name: 'Codex',
+		credential_name: 'Codex',
 		client: 'codex',
 		description:
 			'Connect Codex through the shared local ~/.codex authentication state used by the CLI and desktop app.',
 		detect: 'codex',
 		connect_command: 'codex login --device-auth',
-		docs_url: 'https://github.com/openai/codex'
+		docs_url: 'https://github.com/openai/codex',
+		sync_supported: true,
+		sync_provider_name: 'Codex'
 	},
 	{
 		id: 'opencode-go',

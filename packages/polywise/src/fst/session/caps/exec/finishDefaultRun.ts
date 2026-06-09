@@ -19,10 +19,6 @@ export default async (args: {
 	const { s, message, responseMessage, durationParts, titleFocus, wasRunning } = args
 	const timestamp = Date.now()
 
-	if (durationParts.length > 0) {
-		responseMessage.parts = [...responseMessage.parts, ...durationParts]
-	}
-
 	responseMessage.metadata = {
 		...(responseMessage.metadata ?? {}),
 		timestamp
