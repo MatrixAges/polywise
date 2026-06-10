@@ -1,9 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises'
 
 const release_title_prefix = '## Polywise'
-const conventional_commit_matcher = /^([a-z]+)(\([^)]+\))?!?:\s*/i
-const internal_types = new Set(['chore', 'ci', 'build', 'test', 'docs', 'style', 'refactor', 'release'])
-const ignored_messages = new Set(['wip', 'update', 'fix', 'bugfix', 'changes', 'misc'])
+const conventional_commit_matcher = /^(?<type>[a-z]+)(?:\((?<scope>[^)]+)\))?(?<breaking>!)?:\s*/i
+const markdown_link_matcher = /\[([^\]]+)\]\(([^)]+)\)/g
 
 const readRequiredEnv = key => {
 	const value = process.env[key]?.trim()
@@ -26,51 +25,44 @@ const readCommitRecords = async () => {
 	}
 }
 
-const readCommitType = subject => {
-	const match = subject.trim().match(conventional_commit_matcher)
+const readCommitMetadata = subject => {
+	const normalized_subject = `${subject || ''}`.trim()
+	const match = normalized_subject.match(conventional_commit_matcher)
+	const groups = match?.groups || {}
+	const summary = normalized_subject.replace(conventional_commit_matcher, '').trim()
 
-	return match?.[1]?.toLowerCase() || ''
-}
-
-const stripCommitPrefix = subject => subject.replace(conventional_commit_matcher, '').trim()
-
-const isMeaningfulMessage = message => {
-	const normalized_message = message.toLowerCase().replace(/\s+/g, ' ').trim()
-
-	if (normalized_message.length < 5) {
-		return false
+	return {
+		type: `${groups.type || ''}`.toLowerCase(),
+		scope: `${groups.scope || ''}`.trim(),
+		is_breaking: groups.breaking === '!',
+		summary,
+		subject: normalized_subject
 	}
-
-	if (ignored_messages.has(normalized_message)) {
-		return false
-	}
-
-	return /[a-z0-9]/i.test(normalized_message)
 }
-
-const filterUserFacingCommits = commit_records =>
-	commit_records.filter(commit_record => {
-		const subject = `${commit_record?.subject || ''}`.trim()
-
-		if (!subject) {
-			return false
-		}
-
-		const commit_type = readCommitType(subject)
-
-		if (commit_type && internal_types.has(commit_type)) {
-			return false
-		}
-
-		return isMeaningfulMessage(stripCommitPrefix(subject))
-	})
 
 const createReleasePayload = commit_records =>
-	commit_records.map(commit_record => ({
-		hash: `${commit_record.short_hash || ''}`.trim(),
-		url: `${commit_record.url || ''}`.trim(),
-		message: `${commit_record.subject || ''}`.trim()
-	}))
+	commit_records
+		.map(commit_record => {
+			const subject = `${commit_record?.subject || ''}`.trim()
+
+			if (!subject) {
+				return null
+			}
+
+			const commit_metadata = readCommitMetadata(subject)
+
+			return {
+				hash: `${commit_record.short_hash || ''}`.trim(),
+				full_hash: `${commit_record.hash || ''}`.trim(),
+				url: `${commit_record.url || ''}`.trim(),
+				message: commit_metadata.subject,
+				type: commit_metadata.type || 'other',
+				scope: commit_metadata.scope,
+				is_breaking: commit_metadata.is_breaking,
+				summary: commit_metadata.summary || commit_metadata.subject
+			}
+		})
+		.filter(Boolean)
 
 const buildPrompt = args => {
 	const { release_tag, commit_payload } = args
@@ -79,10 +71,11 @@ const buildPrompt = args => {
 Version: ${release_tag}
 
 【Core Principles - Strictly Enforced】
-1. Human-readable: describe product value and user experience, not implementation details or internal refactors.
-2. Quality over quantity: only include substantial user-facing changes. Do not invent items or pad empty sections.
-3. Smart merge: combine scattered commits from the same feature area into one cohesive bullet when they describe the same outcome.
-4. Filter noise: ignore vague, repetitive, or purely development-facing commits even if they appear in the input.
+1. Full coverage is mandatory: every input commit must be represented exactly once in the final Markdown through bullet-link coverage. You may merge related commits into one bullet, but no commit may be omitted.
+2. Features are highest priority: any commit that introduces a new capability, workflow, entry point, integration, or meaningful enhancement should be surfaced under "### ✨ New Features" when applicable. Features are the least acceptable category to omit.
+3. User-facing first: write concise, readable release notes focused on product value, behavior changes, and real user impact.
+4. Smart merge: combine related commits into one bullet when they describe the same outcome. You may simplify wording, but do not lose meaningful information from the input.
+5. Accuracy only: do not invent behavior, user impact, or bug fixes that are not supported by the input.
 
 【Output Format Requirements】
 - Output Markdown only.
@@ -91,12 +84,33 @@ Version: ${release_tag}
   - ### ✨ New Features
   - ### 🚀 Updates
   - ### 🐛 Fixed Bugs
+  - ### 🛠️ Maintenance
 - Use '-' for each bullet item.
 - Each bullet must end with Markdown commit links in this format: ([hash1](url1), [hash2](url2))
+- Use the provided "hash" field as the link label and the provided "url" field as the link target.
+- Across all bullets, every input commit link must appear once and only once.
+- Do not repeat the same commit link across multiple bullets.
+- Keep bullets concise. Merging and simplification are encouraged, omission is not.
 - Do not wrap the answer in code fences.
 
 【Input Data (JSON)】
 ${JSON.stringify(commit_payload, null, 2)}
+`.trim()
+}
+
+const buildRepairPrompt = args => {
+	const { release_tag, commit_payload, validation_errors, previous_release_notes } = args
+
+	return `
+${buildPrompt({ release_tag, commit_payload })}
+
+【Validation Failures From Previous Attempt】
+${validation_errors.map(error_message => `- ${error_message}`).join('\n')}
+
+【Previous Invalid Draft】
+${previous_release_notes}
+
+Rewrite the release notes from scratch. Do not explain the fixes. Output only the corrected Markdown release notes.
 `.trim()
 }
 
@@ -140,6 +154,72 @@ const readResponseText = response_data => {
 	}
 
 	return text_content
+}
+
+const readLinkedHashes = markdown => Array.from(markdown.matchAll(markdown_link_matcher)).map(match => match[1].trim())
+
+const readSectionContent = args => {
+	const { markdown, heading } = args
+	const escaped_heading = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+	const section_match = markdown.match(new RegExp(`${escaped_heading}[\\t ]*\\n([\\s\\S]*?)(?=\\n### |$)`))
+
+	return section_match?.[1]?.trim() || ''
+}
+
+const groupHashCounts = hashes => {
+	const hash_counts = new Map()
+
+	for (const hash of hashes) {
+		hash_counts.set(hash, (hash_counts.get(hash) || 0) + 1)
+	}
+
+	return hash_counts
+}
+
+const readReleaseNoteValidationErrors = args => {
+	const { commit_payload, release_notes } = args
+	const linked_hashes = readLinkedHashes(release_notes)
+	const linked_hash_counts = groupHashCounts(linked_hashes)
+	const expected_hashes = commit_payload.map(commit_record => commit_record.hash)
+	const expected_hash_set = new Set(commit_payload.map(commit_record => commit_record.hash))
+	const duplicate_hashes = Array.from(linked_hash_counts.entries())
+		.filter(([, count]) => count > 1)
+		.map(([hash]) => hash)
+	const missing_hashes = expected_hashes.filter(hash => !linked_hash_counts.has(hash))
+	const unexpected_hashes = Array.from(linked_hash_counts.keys()).filter(hash => !expected_hash_set.has(hash))
+	const feature_hashes = commit_payload
+		.filter(commit_record => commit_record.type === 'feat')
+		.map(commit_record => commit_record.hash)
+	const feature_section_hashes = new Set(
+		readLinkedHashes(
+			readSectionContent({
+				markdown: release_notes,
+				heading: '### ✨ New Features'
+			})
+		)
+	)
+	const missing_feature_hashes = feature_hashes.filter(hash => !feature_section_hashes.has(hash))
+	const validation_errors = Array()
+
+	if (missing_hashes.length > 0) {
+		validation_errors.push(`Missing commit links: ${missing_hashes.join(', ')}`)
+	}
+
+	if (duplicate_hashes.length > 0) {
+		validation_errors.push(`Duplicate commit links: ${duplicate_hashes.join(', ')}`)
+	}
+
+	if (unexpected_hashes.length > 0) {
+		validation_errors.push(`Unexpected commit links: ${unexpected_hashes.join(', ')}`)
+	}
+
+	if (feature_hashes.length > 0 && missing_feature_hashes.length > 0) {
+		validation_errors.push(
+			`Feature commits must appear under "### ✨ New Features": ${missing_feature_hashes.join(', ')}`
+		)
+	}
+
+	return validation_errors
 }
 
 const requestReleaseNotes = async args => {
@@ -233,24 +313,55 @@ const buildReleaseNotes = async args => {
 		commit_payload
 	})
 	let release_notes = ''
+	let validation_errors = Array()
 
 	try {
 		release_notes = await requestReleaseNotes({
 			api_key,
-			prompt,
 			request_body: createPrimaryRequestBody(prompt)
 		})
+		validation_errors = readReleaseNoteValidationErrors({
+			commit_payload,
+			release_notes
+		})
+
+		if (validation_errors.length === 0) {
+			return normalizeReleaseNotes({
+				release_tag,
+				release_notes
+			})
+		}
+
+		console.warn(
+			`Primary DeepSeek release-notes validation failed, retrying with fallback model: ${validation_errors.join('; ')}`
+		)
 	} catch (error) {
 		const error_message = error instanceof Error ? error.message : String(error)
 
 		console.warn(
 			`Primary DeepSeek release-notes request failed, retrying with fallback model: ${error_message}`
 		)
-		release_notes = await requestReleaseNotes({
-			api_key,
-			prompt,
-			request_body: createRetryRequestBody(prompt)
-		})
+	}
+
+	const retry_prompt = buildRepairPrompt({
+		release_tag,
+		commit_payload,
+		validation_errors:
+			validation_errors.length > 0 ? validation_errors : Array('Primary model request failed before validation.'),
+		previous_release_notes: release_notes || '(empty)'
+	})
+
+	release_notes = await requestReleaseNotes({
+		api_key,
+		request_body: createRetryRequestBody(retry_prompt)
+	})
+	validation_errors = readReleaseNoteValidationErrors({
+		commit_payload,
+		release_notes
+	})
+
+	if (validation_errors.length > 0) {
+		throw new Error(`Release notes validation failed: ${validation_errors.join('; ')}`)
 	}
 
 	return normalizeReleaseNotes({
@@ -262,12 +373,11 @@ const buildReleaseNotes = async args => {
 const run = async () => {
 	const release_tag = readRequiredEnv('RELEASE_TAG')
 	const commit_records = await readCommitRecords()
-	const user_facing_commit_records = filterUserFacingCommits(commit_records)
-	const api_key = user_facing_commit_records.length === 0 ? '' : readRequiredEnv('DEEPSEEK_API_KEY')
+	const api_key = commit_records.length === 0 ? '' : readRequiredEnv('DEEPSEEK_API_KEY')
 	const release_notes = await buildReleaseNotes({
 		api_key,
 		release_tag,
-		commit_records: user_facing_commit_records
+		commit_records
 	})
 
 	await writeFile('release-notes.md', `${release_notes.trim()}\n`, 'utf8')
