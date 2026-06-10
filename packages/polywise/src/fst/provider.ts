@@ -334,6 +334,7 @@ const getEffortProviderOptions = (
 			return reasoningEffort ? ({ open_responses: { reasoningEffort } } as ProviderOptions) : undefined
 		}
 		case 'xiaomi_mimo':
+		case 'opencode_oauth':
 		case 'open_compatible':
 			return { openaiCompatible: { reasoningEffort: effort } } as ProviderOptions
 		case 'google_gemini': {
@@ -462,6 +463,7 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 					runtime_name: 'codex_oauth'
 				}
 			case 'xiaomi_mimo':
+			case 'opencode_oauth':
 			case 'open_compatible':
 				return {
 					model: (await import('@ai-sdk/openai-compatible')).createOpenAICompatible({
