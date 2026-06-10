@@ -3,6 +3,7 @@ import { getEffectiveState, getSyncedProvider, hasCustomizedModels } from '../st
 import probeCodexAuthState from './probeCodexAuthState'
 import openai_oauth_provider from './provider'
 import readCodexAuthState from './readCodexAuthState'
+import readCodexModelsCache from './readCodexModelsCache'
 
 import type { ProviderConfig } from '@core/types'
 import type { AppConfigState } from '../state'
@@ -19,6 +20,7 @@ export default async (args: { app_config: AppConfigState; provider_config: Provi
 	}))
 	const { auth_state: codex_auth, connected: codex_connected } = codex_probe
 	const codex_installed = (await isToolInstalled('codex')) || Boolean(codex_auth)
+	const cached_models = await readCodexModelsCache()
 	const synced_provider = getSyncedProvider({
 		config: provider_config,
 		definition: openai_oauth_provider
@@ -28,7 +30,7 @@ export default async (args: { app_config: AppConfigState; provider_config: Provi
 		id: openai_oauth_provider.id,
 		synced_provider: synced_provider ?? null
 	})
-	const detected_models = effective_state?.detected_models ?? synced_provider?.models ?? []
+	const detected_models = effective_state?.detected_models ?? synced_provider?.models ?? cached_models
 	const current_models = effective_state?.models ?? synced_provider?.models ?? detected_models
 	const synced = Boolean(synced_provider)
 
