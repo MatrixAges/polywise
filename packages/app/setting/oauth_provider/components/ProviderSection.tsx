@@ -25,7 +25,7 @@ const Index = () => {
 					variant='outline'
 					size='sm'
 					onClick={() => void x.refreshProviders()}
-					disabled={x.loading}
+					disabled={x.loading || x.busy}
 				>
 					{x.loading ? <Spinner className='size-4' /> : <RefreshCw className='size-4' />}
 					<span>{t('oauth_provider.refresh')}</span>
@@ -38,8 +38,12 @@ const Index = () => {
 						provider={provider}
 						connecting_id={x.connecting_id}
 						syncing_id={x.syncing_id}
+						updating_id={x.updating_id}
 						onConnect={x.connectProvider}
 						onSync={x.syncProvider}
+						onToggleEnabled={x.setProviderEnabled}
+						onSaveModels={x.saveProviderModels}
+						onResetModels={x.resetProviderModels}
 					></ProviderCard>
 				))}
 			</div>

@@ -4,6 +4,8 @@ import { injectable } from 'tsyringe'
 
 import { rpc } from '@/utils'
 
+import type { Model } from '@core/types'
+
 export type OAuthProvidersResponse = Awaited<ReturnType<typeof rpc.oauthProvider.getAll.query>>
 export type OAuthProvider = OAuthProvidersResponse['providers'][number]
 export type OAuthProviderId = OAuthProvider['id']
@@ -14,9 +16,14 @@ export default class Index {
 	loading = false
 	connecting_id = null as OAuthProviderId | null
 	syncing_id = null as OAuthProviderId | null
+	updating_id = null as OAuthProviderId | null
 
 	constructor() {
 		makeAutoObservable(this, {}, { autoBind: true })
+	}
+
+	get busy() {
+		return this.connecting_id !== null || this.syncing_id !== null || this.updating_id !== null
 	}
 
 	async init() {
@@ -61,7 +68,7 @@ export default class Index {
 				$t('oauth_provider.sync_started', {
 					ns: 'setting',
 					name: res.synced_provider_name,
-					count: res.model_count
+					count: res.detected_model_count ?? res.model_count
 				})
 			)
 		} catch (error) {
@@ -86,6 +93,65 @@ export default class Index {
 			)
 		} finally {
 			this.connecting_id = null
+			await this.refreshProviders()
+		}
+	}
+
+	async setProviderEnabled(args: { id: OAuthProviderId; enabled: boolean }) {
+		const { id, enabled } = args
+		this.updating_id = id
+
+		try {
+			await rpc.oauthProvider.setEnabled.mutate({ id, enabled })
+			toast.success(
+				enabled
+					? $t('oauth_provider.provider_enabled', { ns: 'setting' })
+					: $t('oauth_provider.provider_disabled', { ns: 'setting' })
+			)
+			return true
+		} catch (error) {
+			toast.error(
+				error instanceof Error ? error.message : $t('oauth_provider.update_failed', { ns: 'setting' })
+			)
+			return false
+		} finally {
+			this.updating_id = null
+			await this.refreshProviders()
+		}
+	}
+
+	async saveProviderModels(args: { id: OAuthProviderId; models: Array<Model> }) {
+		const { id, models } = args
+		this.updating_id = id
+
+		try {
+			await rpc.oauthProvider.setModels.mutate({ id, models })
+			return true
+		} catch (error) {
+			toast.error(
+				error instanceof Error ? error.message : $t('oauth_provider.update_failed', { ns: 'setting' })
+			)
+			return false
+		} finally {
+			this.updating_id = null
+			await this.refreshProviders()
+		}
+	}
+
+	async resetProviderModels(id: OAuthProviderId) {
+		this.updating_id = id
+
+		try {
+			await rpc.oauthProvider.resetModels.mutate({ id })
+			toast.success($t('oauth_provider.models_reset_done', { ns: 'setting' }))
+			return true
+		} catch (error) {
+			toast.error(
+				error instanceof Error ? error.message : $t('oauth_provider.update_failed', { ns: 'setting' })
+			)
+			return false
+		} finally {
+			this.updating_id = null
 			await this.refreshProviders()
 		}
 	}

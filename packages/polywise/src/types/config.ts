@@ -115,6 +115,7 @@ export interface AppConfig {
 	pthink?: AppPthinkConfig
 	report?: AppReportConfig
 	auth?: AppAuthConfig
+	oauth_providers?: Record<string, OAuthProviderState>
 }
 
 export interface ProviderConfig {
@@ -137,6 +138,12 @@ export interface Model {
 	enabled: boolean
 	type?: 'text' | 'embedding' | 'rerank' | 'image' | 'audio' | 'video'
 	fid?: string
+}
+
+export interface OAuthProviderState {
+	enabled: boolean
+	models: Array<Model>
+	detected_models: Array<Model>
 }
 
 export interface PresetProvider extends Omit<Provider, 'baseURL'> {

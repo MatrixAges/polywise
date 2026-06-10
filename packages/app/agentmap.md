@@ -32,7 +32,7 @@ This document is the outline-level map and code-style routing table for `package
 			"login": "Authentication entry."
 		},
 		"panel": "Auxiliary panel UI mounted outside the main page flow.",
-		"setting": "Settings workspace for providers, OAuth, models, MCP, IM, and general preferences; complex setting pages may own local model/context/components folders."
+		"setting": "Settings workspace for providers, OAuth, models, MCP, IM, and general preferences; complex setting pages may own local model/context/components folders, including nested editor/card groups for provider-specific configuration flows."
 	},
 	"state_and_shared_logic": {
 		"models": "MobX stores and shared view-model state.",

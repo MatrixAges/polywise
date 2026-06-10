@@ -1,35 +1,24 @@
-import { providers as live_providers } from '@core/config'
-import { providers_path } from '@core/consts/app'
-import { clearObject, p } from '@core/utils'
-import fs from 'fs-extra'
+import { config_path, providers_path } from '@core/consts/app'
+import { p } from '@core/utils'
 import { z } from 'zod'
 
 import { getCodexOauthModels, probeCodexAuthState } from '../../utils/codexOauth'
 import { oauth_providers } from './providers'
 import { parseOpenCodeModels, readOpenCodeAuthFile, readProviderConfigFile, runShellCommand } from './runtime'
+import {
+	getBaseState,
+	getStoredState,
+	getSyncedProvider,
+	mergeDetectedModels,
+	readAppConfigFile,
+	saveOAuthProviderState
+} from './shared'
 
-import type { Provider, ProviderConfig } from '@core/types'
+import type { Provider } from '@core/types'
 
 const input_type = z.object({
 	id: z.enum(oauth_providers.map(item => item.id) as [string, ...Array<string>])
 })
-
-const upsertCustomProvider = (args: { config: ProviderConfig; provider: Provider }) => {
-	const { config, provider } = args
-	const next_custom_providers = [...(config.custom_providers ?? [])]
-	const target_index = next_custom_providers.findIndex(item => item.name === provider.name)
-
-	if (target_index >= 0) {
-		next_custom_providers[target_index] = provider
-	} else {
-		next_custom_providers.push(provider)
-	}
-
-	return {
-		...config,
-		custom_providers: next_custom_providers
-	} satisfies ProviderConfig
-}
 
 export default p
 	.meta({
@@ -37,7 +26,7 @@ export default p
 			method: 'POST',
 			path: '/oauthProvider/sync',
 			description:
-				'Sync one OAuth-backed provider into providers.json so its models become selectable without manual API setup.'
+				'Sync one OAuth-backed provider into local config so its models become selectable without manual API setup.'
 		}
 	})
 	.input(input_type)
@@ -76,7 +65,8 @@ export default p
 				models,
 				custom_fields: {
 					provider_runtime: 'codex_oauth',
-					auth_mode: codex_auth.auth_mode || 'chatgpt'
+					auth_mode: codex_auth.auth_mode || 'chatgpt',
+					oauth_provider_id: provider.id
 				}
 			} as Provider
 		} else {
@@ -109,20 +99,50 @@ export default p
 				apiKey: api_key,
 				baseURL: provider.sync_base_url!,
 				enabled: true,
-				models
-			} satisfies Provider
+				models,
+				custom_fields: {
+					provider_runtime: 'opencode_oauth',
+					oauth_provider_id: provider.id
+				}
+			} as Provider
 		}
 
+		const current_app_config = await readAppConfigFile()
 		const current_config = await readProviderConfigFile(providers_path)
-		const next_config = upsertCustomProvider({
-			config: current_config,
-			provider: next_provider!
+		const stored_state = getStoredState({
+			config: current_app_config,
+			id: provider.id
 		})
+		const synced_provider = getSyncedProvider({
+			config: current_config,
+			definition: provider
+		})
+		const current_state = getBaseState({
+			stored_state,
+			synced_provider
+		})
+		const next_state = {
+			enabled: current_state?.enabled ?? true,
+			models: mergeDetectedModels({
+				current_state,
+				detected_models: models
+			}),
+			detected_models: models.map(model => ({ ...model }))
+		}
 
-		await fs.writeJson(providers_path, next_config, { spaces: 4 })
-
-		clearObject(live_providers)
-		Object.assign(live_providers, next_config)
+		const { provider_config: saved_provider_config } = await saveOAuthProviderState({
+			app_config: current_app_config,
+			provider_config: current_config,
+			id: provider.id,
+			state: next_state,
+			provider: next_provider!,
+			config_path,
+			providers_path
+		})
+		const saved_provider = getSyncedProvider({
+			config: saved_provider_config,
+			definition: provider
+		})
 
 		return {
 			ok: true as const,
@@ -130,7 +150,8 @@ export default p
 				id: provider.id,
 				name: provider.name
 			},
-			model_count: models.length,
-			synced_provider_name: provider.sync_provider_name
+			model_count: next_state.models.length,
+			detected_model_count: models.length,
+			synced_provider_name: saved_provider?.name ?? provider.sync_provider_name
 		}
 	})

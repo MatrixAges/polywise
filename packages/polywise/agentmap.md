@@ -31,7 +31,7 @@ This document is the outline-level map and code-style routing table for `package
 		"src/api": "HTTP-facing endpoints and session/page access surface.",
 		"src/rpc": {
 			"workspace_domains": "Routers for agent, article, project, session, todo, skill, group, post, and home workflows.",
-			"runtime_and_ops": "Routers for provider, OAuth provider, tool, version, upgrade, restart, stop, heartbeat, IM, and notification flows.",
+			"runtime_and_ops": "Routers for provider, OAuth provider, tool, version, upgrade, restart, stop, heartbeat, IM, and notification flows, including local config-backed OAuth sync and model-edit mutations.",
 			"knowledge_domains": "Routers for search, save, update, linkcase, pipeline, report, and related knowledge operations."
 		},
 		"src/im": "IM runtime, routes, stream bridge, and session integration."

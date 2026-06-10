@@ -1,9 +1,10 @@
-import { providers as provider_config } from '@core/config'
+import { config as app_config, providers as provider_config } from '@core/config'
 import { p } from '@core/utils'
 
 import { probeCodexAuthState, readCodexAuthState } from '../../utils/codexOauth'
 import { oauth_providers } from './providers'
 import { isToolInstalled, parseOpenCodeCredentials, runShellCommand } from './runtime'
+import { getEffectiveState, getSyncedProvider, hasCustomizedModels } from './shared'
 
 export default p
 	.meta({
@@ -32,22 +33,21 @@ export default p
 		) as Array<{ name: string; method: string }>
 
 		const providers = oauth_providers.map(item => {
-			const item_name = item.name
-			const item_credential_name = item.credential_name ?? item_name
-			const matched_provider = provider_config.custom_providers?.find(
-				provider => provider.name === item.sync_provider_name
-			)
-			const codex_runtime =
-				matched_provider && 'custom_fields' in matched_provider
-					? ((matched_provider as { custom_fields?: { provider_runtime?: string } }).custom_fields
-							?.provider_runtime ?? '')
-					: ''
-			const synced_provider =
-				item.id === 'codex'
-					? codex_runtime === 'codex_oauth'
-						? matched_provider
-						: undefined
-					: matched_provider
+			const item_credential_name = item.credential_name ?? item.name
+			const synced_provider = getSyncedProvider({
+				config: provider_config,
+				definition: item
+			})
+			const effective_state = getEffectiveState({
+				config: app_config,
+				id: item.id,
+				synced_provider: synced_provider ?? null
+			})
+			const current_models = effective_state?.models ?? synced_provider?.models ?? []
+			const detected_models = effective_state?.detected_models ?? synced_provider?.models ?? []
+			const synced = Boolean(synced_provider)
+			const synced_model_count = current_models.length
+			const synced_provider_name = synced_provider?.name ?? item.sync_provider_name ?? item.name
 
 			if (item.client === 'codex') {
 				return {
@@ -55,9 +55,15 @@ export default p
 					installed: codex_installed,
 					connected: codex_connected,
 					credential_label: codex_label,
-					synced: Boolean(synced_provider),
-					synced_model_count: synced_provider?.models?.length ?? 0,
-					synced_models: synced_provider?.models?.slice(0, 8).map(model => model.id) ?? []
+					synced,
+					editable: synced,
+					enabled: effective_state?.enabled ?? synced_provider?.enabled ?? true,
+					models: current_models,
+					detected_model_count: detected_models.length,
+					has_custom_models: hasCustomizedModels(effective_state),
+					synced_model_count,
+					synced_provider_name,
+					synced_models: current_models.slice(0, 8).map(model => model.id)
 				}
 			}
 
@@ -70,9 +76,15 @@ export default p
 				installed: opencode_installed,
 				connected: Boolean(matched_credential),
 				credential_label: matched_credential?.name ?? null,
-				synced: Boolean(synced_provider),
-				synced_model_count: synced_provider?.models?.length ?? 0,
-				synced_models: synced_provider?.models?.slice(0, 8).map(model => model.id) ?? []
+				synced,
+				editable: synced,
+				enabled: effective_state?.enabled ?? synced_provider?.enabled ?? true,
+				models: current_models,
+				detected_model_count: detected_models.length,
+				has_custom_models: hasCustomizedModels(effective_state),
+				synced_model_count,
+				synced_provider_name,
+				synced_models: current_models.slice(0, 8).map(model => model.id)
 			}
 		})
 
