@@ -157,7 +157,7 @@ polywise save --for user --content "Key takeaway..."
 When payloads become more complex, pass JSON directly:
 
 ```bash
-polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wiki","memory"],"enable_recall":true}'
+polywise search fullTextSearch --json '{"query":"agent memory","for_types":["wiki","memory"]}'
 ```
 
 ## 📚 Docs
