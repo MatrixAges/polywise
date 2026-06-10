@@ -2,7 +2,7 @@
   "name": "desktop",
   "productName": "Polywise",
   "author": "1yasa",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "dist/index.js",
   "scripts": {
     "polywise:build": "npm --prefix ../polywise run build:electron",
