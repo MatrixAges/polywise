@@ -21,11 +21,6 @@ export default p
 	.input(input_type)
 	.mutation(async ({ input }) => {
 		const provider = getOAuthProviderDefinition(input.id)
-		console.log('[rpc.oauth.connect] request', {
-			id: input.id,
-			name: provider.name,
-			command: provider.connect_command
-		})
 
 		if (!(await isToolInstalled(provider.detect))) {
 			throw new Error(`${provider.client} is not installed or not available in PATH.`)
@@ -34,10 +29,6 @@ export default p
 		await launchInteractiveLogin({
 			label: provider.name,
 			command: provider.connect_command
-		})
-		console.log('[rpc.oauth.connect] launched', {
-			id: input.id,
-			name: provider.name
 		})
 
 		return {

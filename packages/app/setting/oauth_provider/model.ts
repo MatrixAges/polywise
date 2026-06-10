@@ -85,28 +85,13 @@ export default class Index {
 		this.connecting_id = id
 
 		try {
-			console.log('[oauth.connectProvider] start', {
-				id,
-				connecting_id: this.connecting_id
-			})
 			const res = await rpc.oauth.connect.mutate({ id })
-			console.log('[oauth.connectProvider] success', {
-				id,
-				provider: res.provider.name
-			})
 			toast.success($t('oauth_provider.connect_started', { ns: 'setting', name: res.provider.name }))
 		} catch (error) {
-			console.error('[oauth.connectProvider] failed', {
-				id,
-				error: error instanceof Error ? error.message : String(error)
-			})
 			toast.error(
 				error instanceof Error ? error.message : $t('oauth_provider.connect_failed', { ns: 'setting' })
 			)
 		} finally {
-			console.log('[oauth.connectProvider] finally', {
-				id
-			})
 			this.connecting_id = null
 			await this.refreshProviders()
 		}

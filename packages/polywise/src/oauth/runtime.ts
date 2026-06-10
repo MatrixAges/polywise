@@ -24,14 +24,9 @@ const buildInteractiveShellCommand = (args: { label: string; command: string }) 
 const openMacTerminal = async (args: { label: string; command: string }) => {
 	const interactive_command = buildInteractiveShellCommand(args)
 	const script = `tell application "Terminal"
-activate
 do script ${JSON.stringify(interactive_command)}
+activate
 end tell`
-	console.log('[oauth.openMacTerminal] invoke', {
-		label: args.label,
-		command: args.command,
-		interactive_command
-	})
 
 	await new Promise<void>((resolve, reject) => {
 		const child = spawn('osascript', ['-e', script], {
@@ -46,11 +41,6 @@ end tell`
 
 		child.on('error', reject)
 		child.on('close', code => {
-			console.log('[oauth.openMacTerminal] close', {
-				label: args.label,
-				code,
-				stderr: stderr.trim()
-			})
 			if (code === 0) {
 				resolve()
 				return
