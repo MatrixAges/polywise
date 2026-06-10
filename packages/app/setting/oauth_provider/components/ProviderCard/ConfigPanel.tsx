@@ -108,7 +108,7 @@ const Index = (props: ConfigPanelProps) => {
 					onAdd={model => onSaveModels({ id: provider.id, models: [...provider.models, model] })}
 				/>
 			) : null}
-			<div className='flex flex-col gap-2'>
+			<div className='flex flex-col px-1'>
 				{provider.models.length ? (
 					provider.models.map(model => (
 						<ModelItem

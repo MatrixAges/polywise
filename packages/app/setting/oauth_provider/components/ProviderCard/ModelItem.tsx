@@ -24,20 +24,20 @@ const Index = (props: ModelItemProps) => {
 				flex
 				items-center justify-between
 				gap-3
-				px-3 py-2
-				rounded-xl
+				py-1.5
 				bg-background/70
-				border border-border/60
+				border-b border-border/30
+				last:border-b-0
 			'
 		>
-			<div className='flex min-w-0 flex-col gap-1'>
+			<div className='flex min-w-0 items-center gap-1'>
 				<div className='text-sm font-medium wrap-break-word whitespace-pre-wrap'>{model.name}</div>
+			</div>
+			<div className='flex shrink-0 items-center gap-3'>
 				<div className='flex flex-wrap items-center gap-2'>
 					<Badge variant='outline'>{model.id}</Badge>
 					{model.type ? <Badge variant='outline'>{model.type}</Badge> : null}
 				</div>
-			</div>
-			<div className='flex shrink-0 items-center gap-3'>
 				<div
 					className='
 						flex
