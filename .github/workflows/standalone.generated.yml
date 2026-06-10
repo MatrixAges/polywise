@@ -75,4 +75,4 @@ jobs:
         working-directory: packages/polywise
         env: 
           RELEASE_VERSION: "${{ inputs.release_version }}"
-        run: "publish_userconfig=$(mktemp)\nprintf \"registry=https://registry.npmjs.org/\\n\" > \"$publish_userconfig\"\nexport NPM_CONFIG_USERCONFIG=\"$publish_userconfig\"\nunset NODE_AUTH_TOKEN\nnpm publish --access public --provenance --no-git-checks"
+        run: "publish_userconfig=$(mktemp)\nprintf \"registry=https://registry.npmjs.org/\\n\" > \"$publish_userconfig\"\nexport NPM_CONFIG_USERCONFIG=\"$publish_userconfig\"\nunset NODE_AUTH_TOKEN\npnpm publish --access public --provenance --no-git-checks"

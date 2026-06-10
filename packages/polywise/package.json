@@ -57,7 +57,8 @@
     "auth:migrate": "pnpx auth migrate",
     "studio": "drizzle-kit studio",
     "rebuild": "cross-env CI=true npm rebuild better-sqlite3 bufferutil lmdb node-llama-cpp simsimd sqlite-vec utf-8-validate @node-rs/jieba @node-rs/xxhash",
-    "pub": "npm publish --access public --no-git-checks"
+    "prepublishOnly": "node -e \"const user_agent = process.env.npm_config_user_agent || ''; if (!user_agent.includes('pnpm')) { console.error('Use pnpm publish so workspace and catalog dependencies are rewritten before release.'); process.exit(1); }\"",
+    "pub": "pnpm publish --access public --no-git-checks"
   },
   "dependencies": {
     "@abraham/reflection": "catalog:",
@@ -136,7 +137,6 @@
     "shelljs": "^0.10.0",
     "simsimd": "^6.5.5",
     "sqlite-vec": "^0.1.9",
-    "stk": "workspace:*",
     "stopword": "^3.1.5",
     "superjson": "^2.2.6",
     "tinypool": "^2.1.0",
@@ -179,6 +179,7 @@
     "drizzle-seed": "^0.3.1",
     "picocolors": "^1.1.1",
     "reflect-metadata": "catalog:",
+    "stk": "workspace:*",
     "type-fest": "catalog:"
   }
 }
