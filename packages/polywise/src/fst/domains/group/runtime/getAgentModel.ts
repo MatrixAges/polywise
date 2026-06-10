@@ -11,7 +11,8 @@ export default async (agent: Agent, args?: { omit_effort?: boolean }) => {
 	const modelConfig = agent.model || config.default_model
 	const { provider, model, effort } = modelConfig
 	const customProviders = providers.custom_providers || []
-	const allProviders = [...providers.providers, ...customProviders]
+	const managedProviders = providers.managed_providers || []
+	const allProviders = [...providers.providers, ...customProviders, ...managedProviders]
 	const targetProvider = allProviders.find(item => item.name === provider)
 
 	let targetOptions

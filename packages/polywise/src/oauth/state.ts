@@ -45,6 +45,18 @@ const isCodexOAuthProvider = (provider: Provider | null | undefined) => {
 	return custom_fields?.provider_runtime === 'codex_oauth' || custom_fields?.oauth_provider_id === 'codex'
 }
 
+const isManagedProvider = (provider: Provider | null | undefined) => {
+	const custom_fields = getProviderCustomFields(provider)
+	const provider_runtime = custom_fields?.provider_runtime?.trim()
+
+	return (
+		Boolean(custom_fields?.oauth_provider_id?.trim()) ||
+		provider_runtime === 'codex_native' ||
+		provider_runtime === 'codex_oauth' ||
+		provider_runtime === 'opencode_oauth'
+	)
+}
+
 const buildUniqueProviderName = (args: { provider_name: string; providers: Array<Provider> }) => {
 	const { provider_name, providers } = args
 	const provider_name_set = new Set(providers.map(item => item.name))
@@ -68,30 +80,133 @@ const buildUniqueProviderName = (args: { provider_name: string; providers: Array
 	return `${oauth_name} ${index}`
 }
 
-const upsertCustomProvider = (args: { config: ProviderConfig; provider: Provider }) => {
-	const { config, provider } = args
-	const next_custom_providers = [...(config.custom_providers ?? [])]
-	const provider_id = getManagedProviderId(provider)
-	const target_index =
-		provider_id !== null
-			? next_custom_providers.findIndex(item => getManagedProviderId(item) === provider_id)
-			: next_custom_providers.findIndex(item => item.name === provider.name)
+const matchesManagedProviderFamily = (args: { existing_provider: Provider; provider: Provider }) => {
+	const { existing_provider, provider } = args
+	const candidate_name = existing_provider.name.trim()
+	const provider_name = provider.name.trim()
 
-	if (target_index >= 0) {
-		next_custom_providers[target_index] = provider
-	} else {
-		next_custom_providers.push({
-			...provider,
-			name: buildUniqueProviderName({
-				provider_name: provider.name,
-				providers: next_custom_providers
-			})
+	return (
+		existing_provider.baseURL === provider.baseURL &&
+		(candidate_name === provider_name || candidate_name === `${provider_name} (OAuth)`)
+	)
+}
+
+const getCustomProviderTargetIndex = (args: { providers: Array<Provider>; provider: Provider }) => {
+	const { providers, provider } = args
+	const provider_id = getManagedProviderId(provider)
+
+	if (provider_id !== null) {
+		const managed_index = providers.findIndex(item => getManagedProviderId(item) === provider_id)
+
+		if (isManagedProvider(provider)) {
+			const exact_name_index = providers.findIndex(item => item.name === provider.name)
+
+			if (exact_name_index >= 0) {
+				return exact_name_index
+			}
+
+			if (managed_index >= 0) {
+				return managed_index
+			}
+
+			const family_index = providers.findIndex(item =>
+				matchesManagedProviderFamily({
+					existing_provider: item,
+					provider
+				})
+			)
+
+			if (family_index >= 0) {
+				return family_index
+			}
+		}
+
+		if (managed_index >= 0) {
+			return managed_index
+		}
+	}
+
+	return providers.findIndex(item => item.name === provider.name)
+}
+
+const getCustomProviderWriteName = (args: {
+	providers: Array<Provider>
+	provider: Provider
+	target_index: number | null
+}) => {
+	const { providers, provider, target_index } = args
+	const sibling_providers =
+		target_index === null ? providers : providers.filter((_, index) => index !== target_index)
+
+	if (isManagedProvider(provider) && !sibling_providers.some(item => item.name === provider.name)) {
+		return provider.name
+	}
+
+	return buildUniqueProviderName({
+		provider_name: provider.name,
+		providers: sibling_providers
+	})
+}
+
+const dedupeCustomProviders = (args: { providers: Array<Provider>; target_index: number }) => {
+	const { providers, target_index } = args
+	const target_provider = providers[target_index]
+	const provider_id = getManagedProviderId(target_provider)
+
+	if (provider_id === null || !isManagedProvider(target_provider)) {
+		return providers
+	}
+
+	return providers.filter((item, index) => {
+		if (index === target_index) {
+			return true
+		}
+
+		if (getManagedProviderId(item) === provider_id) {
+			return false
+		}
+
+		return !matchesManagedProviderFamily({
+			existing_provider: item,
+			provider: target_provider
+		})
+	})
+}
+
+const upsertManagedProvider = (args: { config: ProviderConfig; provider: Provider }) => {
+	const { config, provider } = args
+	const next_managed_providers = [...(config.managed_providers ?? [])]
+	const raw_target_index = getCustomProviderTargetIndex({
+		providers: next_managed_providers,
+		provider
+	})
+	const target_index = raw_target_index >= 0 ? raw_target_index : null
+	const next_provider = {
+		...provider,
+		name: getCustomProviderWriteName({
+			providers: next_managed_providers,
+			provider,
+			target_index
 		})
 	}
+	let deduped_managed_providers = next_managed_providers
+	let next_target_index = target_index
+
+	if (target_index !== null) {
+		deduped_managed_providers[target_index] = next_provider
+	} else {
+		deduped_managed_providers.push(next_provider)
+		next_target_index = deduped_managed_providers.length - 1
+	}
+
+	deduped_managed_providers = dedupeCustomProviders({
+		providers: deduped_managed_providers,
+		target_index: next_target_index!
+	})
 
 	return {
 		...config,
-		custom_providers: next_custom_providers
+		managed_providers: deduped_managed_providers
 	} satisfies ProviderConfig
 }
 
@@ -118,8 +233,8 @@ export const getSyncedProvider = (args: { config: ProviderConfig; definition: OA
 		return null
 	}
 
-	const custom_providers = config.custom_providers ?? []
-	const matched_by_id = custom_providers.find(item => {
+	const managed_providers = config.managed_providers ?? []
+	const matched_by_id = managed_providers.find(item => {
 		const custom_fields = getProviderCustomFields(item)
 
 		return custom_fields?.oauth_provider_id === definition.id
@@ -131,10 +246,21 @@ export const getSyncedProvider = (args: { config: ProviderConfig; definition: OA
 
 	if (definition.id === 'codex') {
 		return (
-			custom_providers.find(
+			managed_providers.find(
 				item => item.name === definition.sync_provider_name && isCodexOAuthProvider(item)
 			) ?? null
 		)
+	}
+
+	const legacy_custom_providers = config.custom_providers ?? []
+	const legacy_match_by_id = legacy_custom_providers.find(item => {
+		const custom_fields = getProviderCustomFields(item)
+
+		return custom_fields?.oauth_provider_id === definition.id
+	})
+
+	if (legacy_match_by_id) {
+		return legacy_match_by_id
 	}
 
 	return null
@@ -188,7 +314,7 @@ export const saveOAuthProviderState = async (args: {
 			[id]: cloneState(state)
 		}
 	} satisfies AppConfigState
-	const next_provider_config = upsertCustomProvider({
+	const next_provider_config = upsertManagedProvider({
 		config: provider_config,
 		provider: {
 			...provider,

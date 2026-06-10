@@ -15,7 +15,10 @@ export default async () => {
 	if (!isRemoteProvider(provider)) return null
 
 	const custom_list = providers.custom_providers ?? []
-	const found_provider = [...providers.providers, ...custom_list].find(item => item.name === provider)
+	const managed_list = providers.managed_providers ?? []
+	const found_provider = [...providers.providers, ...custom_list, ...managed_list].find(
+		item => item.name === provider
+	)
 
 	const target_options = found_provider
 		? {

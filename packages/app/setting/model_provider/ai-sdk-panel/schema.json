@@ -17,6 +17,12 @@
 					"items": {
 						"$ref": "#/definitions/Provider"
 					}
+				},
+				"managed_providers": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Provider"
+					}
 				}
 			},
 			"required": ["providers"],
@@ -136,6 +142,12 @@
 				},
 				"headers": {
 					"type": "string"
+				},
+				"custom_fields": {
+					"type": "object",
+					"additionalProperties": {
+						"type": "string"
+					}
 				}
 			},
 			"required": ["name", "apiKey", "baseURL", "enabled", "models"],

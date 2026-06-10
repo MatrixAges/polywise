@@ -10,7 +10,8 @@ import type { LanguageModel } from 'ai'
 export default async (): Promise<LanguageModel> => {
 	const { provider, model, effort } = config.default_model
 	const custom_providers = providers.custom_providers ?? []
-	const all_providers = [...providers.providers, ...custom_providers]
+	const managed_providers = providers.managed_providers ?? []
+	const all_providers = [...providers.providers, ...custom_providers, ...managed_providers]
 	const target_provider = all_providers.find(item => item.name === provider)
 	const target_options = target_provider
 		? {

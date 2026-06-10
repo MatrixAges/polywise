@@ -121,6 +121,7 @@ export interface AppConfig {
 export interface ProviderConfig {
 	providers: Array<ConfigProvider>
 	custom_providers?: Array<Provider>
+	managed_providers?: Array<Provider>
 }
 
 export interface Provider {
@@ -130,6 +131,7 @@ export interface Provider {
 	enabled: boolean
 	models: Array<Model>
 	headers?: string
+	custom_fields?: Record<string, string>
 }
 
 export interface Model {

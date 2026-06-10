@@ -96,7 +96,11 @@ const Index = (props: IProps) => {
 	const { t } = useTranslation()
 
 	const s = global.setting
-	const providers = $copy([...s.providers.providers, ...(s.providers.custom_providers || [])])
+	const providers = $copy([
+		...s.providers.providers,
+		...(s.providers.custom_providers || []),
+		...(s.providers.managed_providers || [])
+	])
 
 	const provider_items = useMemo(() => {
 		const target: Array<IProviderGroup> = []

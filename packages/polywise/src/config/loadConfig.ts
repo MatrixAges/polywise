@@ -20,6 +20,9 @@ import type {
 
 const mergeable_provider_keys = ['apiKey', 'baseURL', 'headers', 'models'] as const
 const fetch_fallback_provider_set = new Set<string>(default_fetch_fallback_chain)
+type ManagedProvider = Provider & {
+	custom_fields?: Record<string, string>
+}
 const default_pthink = {
 	enabled: true,
 	idle_grace_ms: 20 * 60 * 1000,
@@ -59,14 +62,79 @@ const isValidDefaultModel = (value: unknown): value is DefaultModel => {
 	return typeof provider === 'string' && provider.trim() !== '' && typeof model === 'string' && model.trim() !== ''
 }
 
+const getProviderCustomFields = (provider: Provider | null | undefined) => {
+	if (!provider || typeof provider !== 'object' || !('custom_fields' in provider)) {
+		return null
+	}
+
+	const custom_fields = (provider as ManagedProvider).custom_fields
+
+	return custom_fields && typeof custom_fields === 'object' ? custom_fields : null
+}
+
+const isManagedProvider = (provider: Provider | null | undefined) => {
+	const custom_fields = getProviderCustomFields(provider)
+	const provider_runtime = custom_fields?.provider_runtime?.trim()
+	const oauth_provider_id = custom_fields?.oauth_provider_id?.trim()
+
+	return (
+		Boolean(oauth_provider_id) ||
+		provider_runtime === 'codex_native' ||
+		provider_runtime === 'codex_oauth' ||
+		provider_runtime === 'opencode_oauth'
+	)
+}
+
+const getManagedProviderKey = (provider: Provider) => {
+	const custom_fields = getProviderCustomFields(provider)
+	const oauth_provider_id = custom_fields?.oauth_provider_id?.trim()
+	const provider_runtime = custom_fields?.provider_runtime?.trim() || 'managed'
+
+	return oauth_provider_id || `${provider_runtime}::${provider.name}::${provider.baseURL}`
+}
+
+const migrateManagedProviders = (provider_config: ProviderConfig | null | undefined) => {
+	const current_provider_config = provider_config ?? { providers: [] }
+	const current_custom_providers = current_provider_config.custom_providers ?? []
+	const current_managed_providers = current_provider_config.managed_providers ?? []
+	const next_custom_providers = current_custom_providers.filter(item => !isManagedProvider(item))
+	const extracted_managed_providers = current_custom_providers.filter(item => isManagedProvider(item))
+	const managed_provider_map = new Map<string, Provider>()
+
+	current_managed_providers.forEach(item => {
+		managed_provider_map.set(getManagedProviderKey(item), item)
+	})
+
+	extracted_managed_providers.forEach(item => {
+		managed_provider_map.set(getManagedProviderKey(item), item)
+	})
+
+	const next_managed_providers = Array.from(managed_provider_map.values())
+	const has_changed_provider =
+		next_custom_providers.length !== current_custom_providers.length ||
+		next_managed_providers.length !== current_managed_providers.length ||
+		JSON.stringify(next_managed_providers) !== JSON.stringify(current_managed_providers)
+
+	return {
+		provider_config: {
+			...current_provider_config,
+			custom_providers: next_custom_providers,
+			managed_providers: next_managed_providers
+		} satisfies ProviderConfig,
+		has_changed_provider
+	}
+}
+
 const getDefaultConfigModel = (args: {
 	provider_config: ProviderConfig | null | undefined
 	type: 'text' | 'embedding' | 'rerank'
 }) => {
 	const { provider_config, type } = args
-	const providers = [...(provider_config?.providers ?? []), ...(provider_config?.custom_providers ?? [])] as Array<
-		Pick<Provider, 'name' | 'models'>
-	>
+	const providers = [
+		...(provider_config?.providers ?? []),
+		...(provider_config?.custom_providers ?? []),
+		...(provider_config?.managed_providers ?? [])
+	] as Array<Pick<Provider, 'name' | 'models'>>
 
 	for (const provider of providers) {
 		const matched_model =
@@ -163,7 +231,11 @@ export default async () => {
 
 	if (err_config || err_providers) return initDefaults()
 
-	const { provider_config, has_changed_provider } = mergePresetProviders(res_providers)
+	const { provider_config: migrated_provider_config, has_changed_provider: has_changed_managed_provider } =
+		migrateManagedProviders(res_providers)
+	const { provider_config, has_changed_provider: has_changed_preset_provider } =
+		mergePresetProviders(migrated_provider_config)
+	const has_changed_provider = has_changed_managed_provider || has_changed_preset_provider
 	const default_model = getDefaultConfigModel({
 		provider_config,
 		type: 'text'

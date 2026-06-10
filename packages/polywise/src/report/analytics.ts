@@ -1,6 +1,7 @@
 import { config, providers } from '@core/config'
 import { env } from '@core/env'
 
+import getProviderRuntimeName from '../utils/getProviderRuntimeName'
 import { getReportWindow } from './utils'
 
 import type {
@@ -154,10 +155,16 @@ const readUsageBreakdown = (start_at: number, end_at: number) => {
 		session_project_rows.map(item => [item.session_id, parseModelConfig(item.project_model)])
 	)
 	const custom_list = providers.custom_providers ?? []
+	const managed_list = providers.managed_providers ?? []
 	const default_model = config.default_model
-	const default_provider_name = custom_list.some(item => item.name === default_model.provider)
-		? 'open_compatible'
-		: default_model.provider
+	const found_provider = [...providers.providers, ...custom_list, ...managed_list].find(
+		item => item.name === default_model.provider
+	)
+	const default_provider_name = getProviderRuntimeName({
+		provider_name: default_model.provider,
+		provider_item: found_provider,
+		custom_provider_names: custom_list.map(item => item.name)
+	})
 	const default_model_config = {
 		provider: default_provider_name,
 		model: default_model.model
