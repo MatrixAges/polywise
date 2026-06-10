@@ -1,4 +1,5 @@
 import { existsSync } from 'fs'
+import { fileURLToPath } from 'url'
 import { serveStatic } from '@hono/node-server/serve-static'
 import { trpcServer } from '@hono/trpc-server'
 import { Hono } from 'hono'
@@ -21,9 +22,9 @@ import { getRemoteAddress } from './utils/localCliAuth'
 export const server = new Hono()
 const cors_allowed_origins = new Set(getAuthTrustedOrigins())
 const is_dev = process.env.NODE_ENV === 'development'
-const standalone_app_dist_root = './dist/app_dist'
-const standalone_app_dist_index = `${standalone_app_dist_root}/index.html`
-const has_standalone_app_dist = existsSync(standalone_app_dist_index)
+export const standalone_app_dist_root = fileURLToPath(new URL('./app_dist', import.meta.url))
+export const standalone_app_dist_index = fileURLToPath(new URL('./app_dist/index.html', import.meta.url))
+export const has_standalone_app_dist = existsSync(standalone_app_dist_index)
 
 server.use(
 	'*',

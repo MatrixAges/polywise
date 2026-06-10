@@ -1,4 +1,3 @@
-import { existsSync } from 'fs'
 import { config_watcher } from '@core/config'
 import { env } from '@core/env'
 import { disposeModels } from '@core/llama'
@@ -7,7 +6,7 @@ import { applyWSSHandler } from '@trpc/server/adapters/ws'
 import { WebSocketServer } from 'ws'
 
 import { router } from '../rpc'
-import { server } from '../server'
+import { has_standalone_app_dist, server, standalone_app_dist_index } from '../server'
 import { getRemoteAddress } from './localCliAuth'
 import { clearRuntimePidFile, writeRuntimePidFile } from './runtimeControl'
 import { create_trpc_context } from './trpc'
@@ -27,10 +26,10 @@ export default async () => {
 		if (env.platform === 'standalone') {
 			const app_url = `http://localhost:${port}/app/`
 
-			if (!is_dev && existsSync('./dist/app_dist/index.html')) {
+			if (!is_dev && has_standalone_app_dist) {
 				console.log(`App: ${app_url}`)
 			} else if (!is_dev) {
-				console.warn(`App dist missing for standalone runtime: ./dist/app_dist/index.html`)
+				console.warn(`App dist missing for standalone runtime: ${standalone_app_dist_index}`)
 				console.log(`App: ${app_url}`)
 			}
 		}
