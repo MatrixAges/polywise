@@ -456,7 +456,7 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 						name: 'codex_oauth',
 						baseURL: options?.baseURL || 'https://chatgpt.com/backend-api',
 						apiKey: options?.apiKey || 'chatgpt-oauth',
-						fetch: (await import('../utils/codexOauth')).createCodexOauthFetch()
+						fetch: (await import('../oauth/openai')).createCodexOauthFetch()
 					})(model),
 					provider_options: effort_provider_options,
 					runtime_name: 'codex_oauth'

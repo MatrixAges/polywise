@@ -6,7 +6,7 @@ import { rpc } from '@/utils'
 
 import type { Model } from '@core/types'
 
-export type OAuthProvidersResponse = Awaited<ReturnType<typeof rpc.oauthProvider.getAll.query>>
+export type OAuthProvidersResponse = Awaited<ReturnType<typeof rpc.oauth.getAll.query>>
 export type OAuthProvider = OAuthProvidersResponse['providers'][number]
 export type OAuthProviderId = OAuthProvider['id']
 
@@ -34,17 +34,17 @@ export default class Index {
 		this.loading = true
 
 		try {
-			const res = await rpc.oauthProvider.getAll.query()
+			const res = await rpc.oauth.getAll.query()
 			const pending_sync_ids = res.providers
 				.filter(item => item.connected && item.sync_supported && !item.synced)
 				.map(item => item.id)
 
 			if (pending_sync_ids.length > 0) {
 				await Promise.all(
-					pending_sync_ids.map(id => rpc.oauthProvider.sync.mutate({ id }).catch(() => undefined))
+					pending_sync_ids.map(id => rpc.oauth.sync.mutate({ id }).catch(() => undefined))
 				)
 
-				const next_res = await rpc.oauthProvider.getAll.query()
+				const next_res = await rpc.oauth.getAll.query()
 				this.providers = next_res.providers
 				return
 			}
@@ -63,7 +63,7 @@ export default class Index {
 		this.syncing_id = id
 
 		try {
-			const res = await rpc.oauthProvider.sync.mutate({ id })
+			const res = await rpc.oauth.sync.mutate({ id })
 			toast.success(
 				$t('oauth_provider.sync_started', {
 					ns: 'setting',
@@ -85,7 +85,7 @@ export default class Index {
 		this.connecting_id = id
 
 		try {
-			const res = await rpc.oauthProvider.connect.mutate({ id })
+			const res = await rpc.oauth.connect.mutate({ id })
 			toast.success($t('oauth_provider.connect_started', { ns: 'setting', name: res.provider.name }))
 		} catch (error) {
 			toast.error(
@@ -102,7 +102,7 @@ export default class Index {
 		this.updating_id = id
 
 		try {
-			await rpc.oauthProvider.setEnabled.mutate({ id, enabled })
+			await rpc.oauth.setEnabled.mutate({ id, enabled })
 			toast.success(
 				enabled
 					? $t('oauth_provider.provider_enabled', { ns: 'setting' })
@@ -125,7 +125,7 @@ export default class Index {
 		this.updating_id = id
 
 		try {
-			await rpc.oauthProvider.setModels.mutate({ id, models })
+			await rpc.oauth.setModels.mutate({ id, models })
 			return true
 		} catch (error) {
 			toast.error(
@@ -142,7 +142,7 @@ export default class Index {
 		this.updating_id = id
 
 		try {
-			await rpc.oauthProvider.resetModels.mutate({ id })
+			await rpc.oauth.resetModels.mutate({ id })
 			toast.success($t('oauth_provider.models_reset_done', { ns: 'setting' }))
 			return true
 		} catch (error) {

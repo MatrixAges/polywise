@@ -29,9 +29,10 @@ This document is the outline-level map and code-style routing table for `package
 	},
 	"service_interfaces": {
 		"src/api": "HTTP-facing endpoints and session/page access surface.",
+		"src/oauth": "Local OAuth provider orchestration, including OpenAI/Codex ChatGPT state handling, OpenCode OAuth sync helpers, and shared OAuth state/runtime coordination.",
 		"src/rpc": {
 			"workspace_domains": "Routers for agent, article, project, session, todo, skill, group, post, and home workflows.",
-			"runtime_and_ops": "Routers for provider, OAuth provider, tool, version, upgrade, restart, stop, heartbeat, IM, and notification flows, including local config-backed OAuth sync and model-edit mutations.",
+			"runtime_and_ops": "Routers for provider, OAuth, tool, version, upgrade, restart, stop, heartbeat, IM, and notification flows, including local config-backed OAuth sync and model-edit mutations.",
 			"knowledge_domains": "Routers for search, save, update, linkcase, pipeline, report, and related knowledge operations."
 		},
 		"src/im": "IM runtime, routes, stream bridge, and session integration."
@@ -63,7 +64,7 @@ This document is the outline-level map and code-style routing table for `package
 		"src/config": "Runtime config loading and watch lifecycle.",
 		"src/consts": "App, provider, prompt, search, and pipeline constants.",
 		"src/types": "Cross-module shared types.",
-		"src/utils": "Shared runtime utilities, including command discovery and Codex OAuth bridge helpers."
+		"src/utils": "Shared runtime utilities, including command discovery, TRPC helpers, and generic runtime support."
 	},
 	"background_subsystems": {
 		"src/cron": "Scheduled job runtime and lifecycle management.",
@@ -197,6 +198,24 @@ This routing table is scoped to outline-level folder matching. Match by `path_sc
 		"path_scope": "packages/polywise/src/llama",
 		"sample_pool": ["packages/polywise/src/llama/index.ts", "packages/polywise/src/llama/getModelContext.ts"]
 	},
+	"src/oauth": {
+		"path_scope": "packages/polywise/src/oauth",
+		"sample_pool": ["packages/polywise/src/oauth/providers.ts", "packages/polywise/src/oauth/state.ts"]
+	},
+	"src/oauth/openai": {
+		"path_scope": "packages/polywise/src/oauth/openai",
+		"sample_pool": [
+			"packages/polywise/src/oauth/openai/index.ts",
+			"packages/polywise/src/oauth/openai/provider.ts"
+		]
+	},
+	"src/oauth/opencode": {
+		"path_scope": "packages/polywise/src/oauth/opencode",
+		"sample_pool": [
+			"packages/polywise/src/oauth/opencode/index.ts",
+			"packages/polywise/src/oauth/opencode/definitions.ts"
+		]
+	},
 	"src/pipeline": {
 		"path_scope": "packages/polywise/src/pipeline",
 		"sample_pool": [
@@ -232,12 +251,9 @@ This routing table is scoped to outline-level folder matching. Match by `path_sc
 		"path_scope": "packages/polywise/src/utils",
 		"sample_pool": ["packages/polywise/src/utils/index.ts", "packages/polywise/src/utils/trpc.ts"]
 	},
-	"src/utils/codexOauth": {
-		"path_scope": "packages/polywise/src/utils/codexOauth",
-		"sample_pool": [
-			"packages/polywise/src/utils/codexOauth/index.ts",
-			"packages/polywise/src/utils/codexOauth/readCodexAuthState.ts"
-		]
+	"src/rpc/oauth": {
+		"path_scope": "packages/polywise/src/rpc/oauth",
+		"sample_pool": ["packages/polywise/src/rpc/oauth/index.ts", "packages/polywise/src/rpc/oauth/getAll.ts"]
 	}
 }
 ```

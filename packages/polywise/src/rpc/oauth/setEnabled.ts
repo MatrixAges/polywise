@@ -2,18 +2,13 @@ import { config_path, providers_path } from '@core/consts/app'
 import { p } from '@core/utils'
 import { z } from 'zod'
 
-import { oauth_providers } from './providers'
-import { readProviderConfigFile } from './runtime'
-import {
-	getEffectiveState,
-	getOAuthProviderDefinition,
-	getSyncedProvider,
-	readAppConfigFile,
-	saveOAuthProviderState
-} from './shared'
+import { getOAuthProviderDefinition } from '../../oauth/providers'
+import { readProviderConfigFile } from '../../oauth/runtime'
+import { getEffectiveState, getSyncedProvider, readAppConfigFile, saveOAuthProviderState } from '../../oauth/state'
+import { oauth_provider_ids } from '../../oauth/types'
 
 const input_type = z.object({
-	id: z.enum(oauth_providers.map(item => item.id) as [string, ...Array<string>]),
+	id: z.enum(oauth_provider_ids),
 	enabled: z.boolean()
 })
 
@@ -21,7 +16,7 @@ export default p
 	.meta({
 		openapi: {
 			method: 'POST',
-			path: '/oauthProvider/setEnabled',
+			path: '/oauth/setEnabled',
 			description: 'Enable or disable one synced OAuth provider and persist the change.'
 		}
 	})

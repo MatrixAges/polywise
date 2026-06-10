@@ -1,33 +1,6 @@
-export interface OAuthProviderDefinition {
-	id: string
-	name: string
-	credential_name?: string
-	client: 'codex' | 'opencode'
-	description: string
-	detect: string
-	connect_command: string
-	docs_url: string
-	sync_supported?: boolean
-	sync_provider_name?: string
-	sync_auth_key?: string
-	sync_base_url?: string
-	sync_models_command?: string
-}
+import type { OAuthProviderDefinition } from '../types'
 
-export const oauth_providers = [
-	{
-		id: 'codex',
-		name: 'Codex',
-		credential_name: 'Codex',
-		client: 'codex',
-		description:
-			'Connect Codex through the local ChatGPT Plus/Pro OAuth state managed by the Codex CLI, then call the Codex API through the OpenAI Responses runtime.',
-		detect: 'codex',
-		connect_command: 'codex login --device-auth',
-		docs_url: 'https://github.com/openai/codex',
-		sync_supported: true,
-		sync_provider_name: 'Codex'
-	},
+export const opencode_oauth_providers = [
 	{
 		id: 'opencode-go',
 		name: 'OpenCode Go',
@@ -60,4 +33,4 @@ export const oauth_providers = [
 	}
 ] satisfies Array<OAuthProviderDefinition>
 
-export type OAuthProviderId = (typeof oauth_providers)[number]['id']
+export default opencode_oauth_providers

@@ -3,13 +3,13 @@ import { config_path } from '@core/consts/app'
 import { clearObject } from '@core/utils'
 import fs from 'fs-extra'
 
-import { oauth_providers } from './providers'
 import { readJsonFile } from './runtime'
 
 import type { AppConfig, OAuthProviderState, Provider, ProviderConfig } from '@core/types'
-import type { OAuthProviderDefinition, OAuthProviderId } from './providers'
+import type { OAuthProviderDefinition, OAuthProviderId } from './types'
 
-type AppConfigState = Partial<AppConfig>
+export type AppConfigState = Partial<AppConfig>
+
 type ProviderModel = Provider['models'][number]
 type OAuthManagedProvider = Provider & {
 	custom_fields?: Record<string, string>
@@ -25,20 +25,6 @@ const cloneState = (state: OAuthProviderState) => ({
 
 const getLiveConfigSnapshot = () => JSON.parse(JSON.stringify(live_config)) as AppConfigState
 
-export const readAppConfigFile = async () => {
-	return (await readJsonFile<AppConfigState>(config_path)) ?? getLiveConfigSnapshot()
-}
-
-export const getOAuthProviderDefinition = (id: OAuthProviderId) => {
-	const provider = oauth_providers.find(item => item.id === id)
-
-	if (!provider) {
-		throw new Error(`Unknown OAuth provider: ${id}`)
-	}
-
-	return provider
-}
-
 const getProviderCustomFields = (provider: Provider | null | undefined) => {
 	if (!provider || typeof provider !== 'object' || !('custom_fields' in provider)) {
 		return null
@@ -53,10 +39,76 @@ const getManagedProviderId = (provider: Provider | null | undefined) => {
 	return getProviderCustomFields(provider)?.oauth_provider_id ?? null
 }
 
-export const isCodexOAuthProvider = (provider: Provider | null | undefined) => {
+const isCodexOAuthProvider = (provider: Provider | null | undefined) => {
 	const custom_fields = getProviderCustomFields(provider)
 
 	return custom_fields?.provider_runtime === 'codex_oauth' || custom_fields?.oauth_provider_id === 'codex'
+}
+
+const buildUniqueProviderName = (args: { provider_name: string; providers: Array<Provider> }) => {
+	const { provider_name, providers } = args
+	const provider_name_set = new Set(providers.map(item => item.name))
+
+	if (!provider_name_set.has(provider_name)) {
+		return provider_name
+	}
+
+	const oauth_name = `${provider_name} (OAuth)`
+
+	if (!provider_name_set.has(oauth_name)) {
+		return oauth_name
+	}
+
+	let index = 2
+
+	while (provider_name_set.has(`${oauth_name} ${index}`)) {
+		index += 1
+	}
+
+	return `${oauth_name} ${index}`
+}
+
+const upsertCustomProvider = (args: { config: ProviderConfig; provider: Provider }) => {
+	const { config, provider } = args
+	const next_custom_providers = [...(config.custom_providers ?? [])]
+	const provider_id = getManagedProviderId(provider)
+	const target_index =
+		provider_id !== null
+			? next_custom_providers.findIndex(item => getManagedProviderId(item) === provider_id)
+			: next_custom_providers.findIndex(item => item.name === provider.name)
+
+	if (target_index >= 0) {
+		next_custom_providers[target_index] = provider
+	} else {
+		next_custom_providers.push({
+			...provider,
+			name: buildUniqueProviderName({
+				provider_name: provider.name,
+				providers: next_custom_providers
+			})
+		})
+	}
+
+	return {
+		...config,
+		custom_providers: next_custom_providers
+	} satisfies ProviderConfig
+}
+
+const getModelSignature = (models: Array<ProviderModel>) => {
+	return JSON.stringify(
+		models.map(model => ({
+			id: model.id,
+			name: model.name,
+			enabled: model.enabled,
+			type: model.type,
+			fid: model.fid
+		}))
+	)
+}
+
+export const readAppConfigFile = async () => {
+	return (await readJsonFile<AppConfigState>(config_path)) ?? getLiveConfigSnapshot()
 }
 
 export const getSyncedProvider = (args: { config: ProviderConfig; definition: OAuthProviderDefinition }) => {
@@ -119,56 +171,6 @@ export const getEffectiveState = (args: {
 	} satisfies OAuthProviderState
 }
 
-const buildUniqueProviderName = (args: { provider_name: string; providers: Array<Provider> }) => {
-	const { provider_name, providers } = args
-	const provider_name_set = new Set(providers.map(item => item.name))
-
-	if (!provider_name_set.has(provider_name)) {
-		return provider_name
-	}
-
-	const oauth_name = `${provider_name} (OAuth)`
-
-	if (!provider_name_set.has(oauth_name)) {
-		return oauth_name
-	}
-
-	let index = 2
-
-	while (provider_name_set.has(`${oauth_name} ${index}`)) {
-		index += 1
-	}
-
-	return `${oauth_name} ${index}`
-}
-
-const upsertCustomProvider = (args: { config: ProviderConfig; provider: Provider }) => {
-	const { config, provider } = args
-	const next_custom_providers = [...(config.custom_providers ?? [])]
-	const provider_id = getManagedProviderId(provider)
-	const target_index =
-		provider_id !== null
-			? next_custom_providers.findIndex(item => getManagedProviderId(item) === provider_id)
-			: next_custom_providers.findIndex(item => item.name === provider.name)
-
-	if (target_index >= 0) {
-		next_custom_providers[target_index] = provider
-	} else {
-		next_custom_providers.push({
-			...provider,
-			name: buildUniqueProviderName({
-				provider_name: provider.name,
-				providers: next_custom_providers
-			})
-		})
-	}
-
-	return {
-		...config,
-		custom_providers: next_custom_providers
-	} satisfies ProviderConfig
-}
-
 export const saveOAuthProviderState = async (args: {
 	app_config: AppConfigState
 	provider_config: ProviderConfig
@@ -207,18 +209,6 @@ export const saveOAuthProviderState = async (args: {
 		app_config: next_app_config,
 		provider_config: next_provider_config
 	}
-}
-
-const getModelSignature = (models: Array<ProviderModel>) => {
-	return JSON.stringify(
-		models.map(model => ({
-			id: model.id,
-			name: model.name,
-			enabled: model.enabled,
-			type: model.type,
-			fid: model.fid
-		}))
-	)
 }
 
 export const hasCustomizedModels = (state: OAuthProviderState | null) => {

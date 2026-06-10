@@ -1,17 +1,9 @@
 import { spawn } from 'child_process'
-import os from 'os'
-import path from 'path'
 import fs from 'fs-extra'
 
-import { getRuntimeCommandEnv, resolveCommand } from '../../utils/resolveCommand'
+import { getRuntimeCommandEnv, resolveCommand } from '../utils/resolveCommand'
 
-import type { Model, ProviderConfig } from '@core/types'
-
-export const isToolInstalled = async (tool_name: string) => {
-	return Boolean(await resolveCommand(tool_name))
-}
-
-const stripAnsi = (value: string) => value.replace(/\u001B\[[0-9;]*m/g, '')
+import type { ProviderConfig } from '@core/types'
 
 const quotePosix = (value: string) => `'${value.replace(/'/g, `'\\''`)}'`
 
@@ -123,6 +115,10 @@ const openLinuxTerminal = async (args: { label: string; command: string }) => {
 	})
 }
 
+export const isToolInstalled = async (tool_name: string) => {
+	return Boolean(await resolveCommand(tool_name))
+}
+
 export const launchInteractiveLogin = async (args: { label: string; command: string }) => {
 	if (process.platform === 'darwin') {
 		await openMacTerminal(args)
@@ -209,94 +205,12 @@ export const runShellCommand = async (command: string, timeout = 10000) => {
 	})
 }
 
-export const parseCodexStatusLabel = (output: string) => {
-	const cleaned_output = stripAnsi(output).trim()
-
-	if (!cleaned_output) {
-		return null
-	}
-
-	const lines = cleaned_output
-		.split('\n')
-		.map(line => line.trim())
-		.filter(Boolean)
-
-	return lines[0] ?? cleaned_output
-}
-
-export const parseOpenCodeCredentials = (output: string) => {
-	const lines = stripAnsi(output)
-		.split('\n')
-		.map(line => line.trim())
-		.filter(Boolean)
-	const credentials = [] as Array<{ name: string; method: string }>
-	let in_credentials = false
-
-	for (const line of lines) {
-		const normalized_line = line.replace(/^[┌└│\s]+/u, '').trim()
-
-		if (normalized_line.startsWith('Credentials')) {
-			in_credentials = true
-			continue
-		}
-
-		if (!in_credentials) {
-			continue
-		}
-
-		if (normalized_line.startsWith('Environment')) {
-			break
-		}
-
-		const matched_credential = /^●\s+(.+?)\s+(api|oauth)\s*$/i.exec(normalized_line)
-
-		if (matched_credential) {
-			credentials.push({
-				name: matched_credential[1] || '',
-				method: (matched_credential[2] || '').toLowerCase()
-			})
-		}
-	}
-
-	return credentials
-}
-
 export const readJsonFile = async <T>(file_path: string) => {
 	try {
 		return (await fs.readJson(file_path)) as T
 	} catch {
 		return null as T | null
 	}
-}
-
-export const readOpenCodeAuthFile = async () => {
-	const auth_path = path.resolve(os.homedir(), '.local/share/opencode/auth.json')
-
-	return readJsonFile<Record<string, { key?: string; type?: string }>>(auth_path)
-}
-
-const normalizeModelName = (value: string) =>
-	value
-		.split(/[/-]/g)
-		.filter(Boolean)
-		.map(part => part.charAt(0).toUpperCase() + part.slice(1))
-		.join(' ')
-
-export const parseOpenCodeModels = (output: string) => {
-	return stripAnsi(output)
-		.split('\n')
-		.map(line => line.trim())
-		.filter(Boolean)
-		.map(line => {
-			const parts = line.split('/')
-			const model_id = parts[parts.length - 1] || line
-
-			return {
-				id: model_id,
-				name: normalizeModelName(model_id),
-				enabled: true
-			} satisfies Model
-		})
 }
 
 export const readProviderConfigFile = async (file_path: string) => {

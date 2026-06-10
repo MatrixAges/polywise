@@ -29,16 +29,13 @@ export const getDescription = (args: {
 }) => {
 	const { provider, t } = args
 
-	switch (provider.id) {
-		case 'codex':
-			return t('oauth_provider.provider_codex_desc')
-		case 'opencode-go':
-			return t('oauth_provider.provider_opencode_go_desc')
-		case 'opencode-zen':
-			return t('oauth_provider.provider_opencode_zen_desc')
-		default:
-			return provider.description
-	}
+	const description_map = {
+		codex: t('oauth_provider.provider_codex_desc'),
+		'opencode-go': t('oauth_provider.provider_opencode_go_desc'),
+		'opencode-zen': t('oauth_provider.provider_opencode_zen_desc')
+	} satisfies Record<OAuthProvider['id'], string>
+
+	return description_map[provider.id]
 }
 
 export const getDetail = (args: { provider: OAuthProvider; t: ReturnType<typeof useTranslation<'setting'>>['t'] }) => {

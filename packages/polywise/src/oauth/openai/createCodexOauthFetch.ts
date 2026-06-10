@@ -109,7 +109,8 @@ const performCodexRequest = async (args: {
 }
 
 export default () => {
-	const fetcher: FetchFunction = async (input, init) => {
+	const fetcher = Object.assign(async (...args: Parameters<FetchFunction>) => {
+		const [input, init] = args
 		const initial_auth = await getValidCodexAuthState()
 
 		if (!initial_auth) {
@@ -141,7 +142,7 @@ export default () => {
 		}
 
 		return await convertSseToJson(result.response)
-	}
+	}, fetch) satisfies FetchFunction
 
 	return fetcher
 }
