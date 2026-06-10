@@ -20,6 +20,14 @@ import type {
 
 const mergeable_provider_keys = ['apiKey', 'baseURL', 'headers', 'models'] as const
 const fetch_fallback_provider_set = new Set<string>(default_fetch_fallback_chain)
+const legacy_codex_model_id_set = new Set([
+	'gpt-5.2-codex',
+	'gpt-5.2',
+	'gpt-5.1-codex-max',
+	'gpt-5.1-codex',
+	'gpt-5.1-codex-mini',
+	'gpt-5.1'
+])
 type ManagedProvider = Provider & {
 	custom_fields?: Record<string, string>
 }
@@ -85,6 +93,48 @@ const isManagedProvider = (provider: Provider | null | undefined) => {
 	)
 }
 
+const isSupportedManagedProvider = (provider: Provider | null | undefined) => {
+	const custom_fields = getProviderCustomFields(provider)
+	const provider_runtime = custom_fields?.provider_runtime?.trim()
+
+	return provider_runtime !== 'codex_native'
+}
+
+const getManagedProviderNormalizedName = (provider: Provider) => {
+	const custom_fields = getProviderCustomFields(provider)
+	const oauth_provider_id = custom_fields?.oauth_provider_id?.trim()
+
+	switch (oauth_provider_id) {
+		case 'codex':
+			return 'Codex'
+		case 'opencode-go':
+			return 'OpenCode Go'
+		case 'opencode-zen':
+			return 'OpenCode Zen'
+		default:
+			return provider.name
+	}
+}
+
+const normalizeManagedProvider = (provider: Provider) => {
+	const custom_fields = getProviderCustomFields(provider)
+	const oauth_provider_id = custom_fields?.oauth_provider_id?.trim()
+	const next_models =
+		oauth_provider_id === 'codex'
+			? provider.models.filter(item => !legacy_codex_model_id_set.has(item.id))
+			: provider.models
+
+	return {
+		...provider,
+		name: getManagedProviderNormalizedName(provider),
+		models: next_models
+	} satisfies Provider
+}
+
+const filterLegacyCodexStateModels = (models: Array<Provider['models'][number]> | undefined) => {
+	return (models ?? []).filter(item => !legacy_codex_model_id_set.has(item.id))
+}
+
 const getManagedProviderKey = (provider: Provider) => {
 	const custom_fields = getProviderCustomFields(provider)
 	const oauth_provider_id = custom_fields?.oauth_provider_id?.trim()
@@ -98,15 +148,24 @@ const migrateManagedProviders = (provider_config: ProviderConfig | null | undefi
 	const current_custom_providers = current_provider_config.custom_providers ?? []
 	const current_managed_providers = current_provider_config.managed_providers ?? []
 	const next_custom_providers = current_custom_providers.filter(item => !isManagedProvider(item))
-	const extracted_managed_providers = current_custom_providers.filter(item => isManagedProvider(item))
+	const extracted_managed_providers = current_custom_providers
+		.filter(item => isManagedProvider(item))
+		.filter(item => isSupportedManagedProvider(item))
+	const filtered_current_managed_providers = current_managed_providers.filter(item =>
+		isSupportedManagedProvider(item)
+	)
 	const managed_provider_map = new Map<string, Provider>()
 
-	current_managed_providers.forEach(item => {
-		managed_provider_map.set(getManagedProviderKey(item), item)
+	filtered_current_managed_providers.forEach(item => {
+		const normalized_item = normalizeManagedProvider(item)
+
+		managed_provider_map.set(getManagedProviderKey(normalized_item), normalized_item)
 	})
 
 	extracted_managed_providers.forEach(item => {
-		managed_provider_map.set(getManagedProviderKey(item), item)
+		const normalized_item = normalizeManagedProvider(item)
+
+		managed_provider_map.set(getManagedProviderKey(normalized_item), normalized_item)
 	})
 
 	const next_managed_providers = Array.from(managed_provider_map.values())
@@ -125,16 +184,79 @@ const migrateManagedProviders = (provider_config: ProviderConfig | null | undefi
 	}
 }
 
+const getSelectableProviders = (provider_config: ProviderConfig | null | undefined) => {
+	return [
+		...(provider_config?.providers ?? []),
+		...(provider_config?.custom_providers ?? []),
+		...(provider_config?.managed_providers ?? [])
+	] as Array<Pick<Provider, 'name' | 'models'>>
+}
+
+const hasConfiguredModel = (args: {
+	provider_config: ProviderConfig | null | undefined
+	value: DefaultModel | undefined
+	type: 'text' | 'embedding' | 'rerank'
+}) => {
+	const { provider_config, value, type } = args
+
+	if (!value) {
+		return false
+	}
+
+	const target_provider = getSelectableProviders(provider_config).find(item => item.name === value.provider)
+
+	if (!target_provider) {
+		return false
+	}
+
+	return target_provider.models.some(item => {
+		if (item.id !== value.model || item.enabled === false) {
+			return false
+		}
+
+		if (type === 'text') {
+			return !item.type || item.type === 'text'
+		}
+
+		return item.type === type
+	})
+}
+
+const getNearestDefaultModel = (args: {
+	provider_config: ProviderConfig | null | undefined
+	value: DefaultModel | undefined
+	type: 'text' | 'embedding' | 'rerank'
+}) => {
+	const { provider_config, value, type } = args
+	const oauth_codex_provider = (provider_config?.managed_providers ?? []).find(item => item.name === 'Codex')
+	const prefers_codex_oauth = value?.provider?.trim().toLowerCase() === 'codex'
+
+	if (prefers_codex_oauth && oauth_codex_provider) {
+		const matched_model =
+			oauth_codex_provider.models.find(
+				item => item.enabled !== false && (!item.type || item.type === type)
+			) ?? oauth_codex_provider.models.find(item => item.enabled !== false)
+
+		if (matched_model) {
+			return {
+				provider: oauth_codex_provider.name,
+				model: matched_model.id
+			} satisfies DefaultModel
+		}
+	}
+
+	return getDefaultConfigModel({
+		provider_config,
+		type
+	})
+}
+
 const getDefaultConfigModel = (args: {
 	provider_config: ProviderConfig | null | undefined
 	type: 'text' | 'embedding' | 'rerank'
 }) => {
 	const { provider_config, type } = args
-	const providers = [
-		...(provider_config?.providers ?? []),
-		...(provider_config?.custom_providers ?? []),
-		...(provider_config?.managed_providers ?? [])
-	] as Array<Pick<Provider, 'name' | 'models'>>
+	const providers = getSelectableProviders(provider_config)
 
 	for (const provider of providers) {
 		const matched_model =
@@ -253,6 +375,28 @@ export default async () => {
 	Object.assign(config, res_config || {})
 	let has_changed_config = false
 
+	const codex_oauth_state = config.oauth_providers?.codex
+
+	if (codex_oauth_state) {
+		const next_models = filterLegacyCodexStateModels(codex_oauth_state.models)
+		const next_detected_models = filterLegacyCodexStateModels(codex_oauth_state.detected_models)
+
+		if (
+			next_models.length !== codex_oauth_state.models.length ||
+			next_detected_models.length !== codex_oauth_state.detected_models.length
+		) {
+			config.oauth_providers = {
+				...(config.oauth_providers ?? {}),
+				codex: {
+					...codex_oauth_state,
+					models: next_models,
+					detected_models: next_detected_models
+				}
+			}
+			has_changed_config = true
+		}
+	}
+
 	if (!Array.isArray(config.workspaces) || config.workspaces.length === 0) {
 		config.workspaces = [{ name: default_workspace_name }]
 		has_changed_config = true
@@ -272,18 +416,51 @@ export default async () => {
 		has_changed_config = true
 	}
 
-	if (!isValidDefaultModel(config.default_model)) {
-		config.default_model = default_model
+	if (
+		!isValidDefaultModel(config.default_model) ||
+		!hasConfiguredModel({
+			provider_config,
+			value: config.default_model,
+			type: 'text'
+		})
+	) {
+		config.default_model = getNearestDefaultModel({
+			provider_config,
+			value: config.default_model,
+			type: 'text'
+		})
 		has_changed_config = true
 	}
 
-	if (!isValidDefaultModel(config.embedding_model)) {
-		config.embedding_model = default_embedding_model
+	if (
+		!isValidDefaultModel(config.embedding_model) ||
+		!hasConfiguredModel({
+			provider_config,
+			value: config.embedding_model,
+			type: 'embedding'
+		})
+	) {
+		config.embedding_model = getNearestDefaultModel({
+			provider_config,
+			value: config.embedding_model,
+			type: 'embedding'
+		})
 		has_changed_config = true
 	}
 
-	if (!isValidDefaultModel(config.rerank_model)) {
-		config.rerank_model = default_rerank_model
+	if (
+		!isValidDefaultModel(config.rerank_model) ||
+		!hasConfiguredModel({
+			provider_config,
+			value: config.rerank_model,
+			type: 'rerank'
+		})
+	) {
+		config.rerank_model = getNearestDefaultModel({
+			provider_config,
+			value: config.rerank_model,
+			type: 'rerank'
+		})
 		has_changed_config = true
 	}
 
@@ -292,8 +469,19 @@ export default async () => {
 		has_changed_config = true
 	}
 
-	if (!isValidDefaultModel(config.triple_model)) {
-		config.triple_model = default_model
+	if (
+		!isValidDefaultModel(config.triple_model) ||
+		!hasConfiguredModel({
+			provider_config,
+			value: config.triple_model,
+			type: 'text'
+		})
+	) {
+		config.triple_model = getNearestDefaultModel({
+			provider_config,
+			value: config.triple_model,
+			type: 'text'
+		})
 		has_changed_config = true
 	}
 
@@ -302,8 +490,19 @@ export default async () => {
 		has_changed_config = true
 	}
 
-	if (!isValidDefaultModel(config.rewrite_model)) {
-		config.rewrite_model = default_model
+	if (
+		!isValidDefaultModel(config.rewrite_model) ||
+		!hasConfiguredModel({
+			provider_config,
+			value: config.rewrite_model,
+			type: 'text'
+		})
+	) {
+		config.rewrite_model = getNearestDefaultModel({
+			provider_config,
+			value: config.rewrite_model,
+			type: 'text'
+		})
 		has_changed_config = true
 	}
 

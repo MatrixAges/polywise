@@ -1,5 +1,4 @@
 import { codex_base_url, codex_dummy_api_key } from './constants'
-import getCodexOauthModels from './getCodexOauthModels'
 import probeCodexAuthState from './probeCodexAuthState'
 import openai_oauth_provider from './provider'
 
@@ -12,7 +11,7 @@ export default async () => {
 		throw new Error('Codex ChatGPT login is missing or expired. Run `codex login` again first.')
 	}
 
-	const models = getCodexOauthModels()
+	const models = [] as Array<Provider['models'][number]>
 	const provider = {
 		name: openai_oauth_provider.sync_provider_name!,
 		apiKey: codex_dummy_api_key,

@@ -1,6 +1,5 @@
 import { isToolInstalled } from '../runtime'
 import { getEffectiveState, getSyncedProvider, hasCustomizedModels } from '../state'
-import getCodexOauthModels from './getCodexOauthModels'
 import probeCodexAuthState from './probeCodexAuthState'
 import openai_oauth_provider from './provider'
 import readCodexAuthState from './readCodexAuthState'
@@ -29,7 +28,7 @@ export default async (args: { app_config: AppConfigState; provider_config: Provi
 		id: openai_oauth_provider.id,
 		synced_provider: synced_provider ?? null
 	})
-	const detected_models = effective_state?.detected_models ?? synced_provider?.models ?? getCodexOauthModels()
+	const detected_models = effective_state?.detected_models ?? synced_provider?.models ?? []
 	const current_models = effective_state?.models ?? synced_provider?.models ?? detected_models
 	const synced = Boolean(synced_provider)
 

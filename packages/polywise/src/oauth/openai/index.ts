@@ -1,7 +1,6 @@
 export { default as buildCodexHeaders } from './buildCodexHeaders'
 export { codex_base_url, codex_dummy_api_key } from './constants'
 export { default as createCodexOauthFetch } from './createCodexOauthFetch'
-export { default as getCodexOauthModels } from './getCodexOauthModels'
 export { default as getOpenAIOAuthProviderStatus } from './getProviderStatus'
 export { default as getValidCodexAuthState } from './getValidCodexAuthState'
 export { openai_oauth_provider } from './provider'
