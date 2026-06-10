@@ -24,11 +24,57 @@ const getCommandExtensions = () => {
 		.map(ext => ext.toLowerCase())
 }
 
+const getEnvPathDirs = (env: NodeJS.ProcessEnv = process.env) => (env.PATH || '').split(path.delimiter).filter(Boolean)
+
+const getBinDirFromPrefix = (prefix: string) => (process.platform === 'win32' ? prefix : path.join(prefix, 'bin'))
+
+const getHomebrewBinDirs = () => {
+	if (process.platform === 'win32') {
+		return [] as Array<string>
+	}
+
+	const prefixes = [process.env.HOMEBREW_PREFIX?.trim(), '/opt/homebrew', '/usr/local'].filter(
+		(value): value is string => Boolean(value)
+	)
+	const dirs = new Set<string>()
+
+	for (const prefix of prefixes) {
+		dirs.add(path.join(prefix, 'bin'))
+		dirs.add(path.join(prefix, 'sbin'))
+	}
+
+	return Array.from(dirs)
+}
+
+const getNodeToolchainBinDirs = () => {
+	const dirs = [] as Array<string>
+	const npm_prefix = process.env.npm_config_prefix?.trim() || process.env.NPM_CONFIG_PREFIX?.trim()
+	const volta_home = process.env.VOLTA_HOME?.trim()
+
+	if (npm_prefix) {
+		dirs.push(getBinDirFromPrefix(npm_prefix))
+	}
+
+	if (volta_home) {
+		dirs.push(path.join(volta_home, 'bin'))
+	}
+
+	dirs.push(path.resolve(os.homedir(), '.volta/bin'))
+	dirs.push(path.resolve(os.homedir(), '.npm-global/bin'))
+
+	return dirs
+}
+
 const getNpmGlobalBinDir = () => {
 	const npm_prefix = spawnSync('npm', ['prefix', '-g'], {
 		encoding: 'utf8',
 		shell: false,
-		env: process.env
+		env: {
+			...process.env,
+			PATH: Array.from(
+				new Set([...getEnvPathDirs(), ...getHomebrewBinDirs(), ...getNodeToolchainBinDirs()])
+			).join(path.delimiter)
+		}
 	})
 
 	if (npm_prefix.status !== 0) return null
@@ -67,13 +113,21 @@ const getPythonUserBinDirs = () => {
 
 export const getCommandSearchDirs = () => {
 	const dirs = new Set<string>()
-	const path_dirs = (process.env.PATH || '').split(path.delimiter).filter(Boolean)
+	const path_dirs = getEnvPathDirs()
 
 	for (const dir of path_dirs) {
 		dirs.add(dir)
 	}
 
 	dirs.add(path.resolve(os.homedir(), '.local/bin'))
+
+	for (const dir of getHomebrewBinDirs()) {
+		dirs.add(dir)
+	}
+
+	for (const dir of getNodeToolchainBinDirs()) {
+		dirs.add(dir)
+	}
 
 	const npm_global_bin = getNpmGlobalBinDir()
 	if (npm_global_bin) {
@@ -88,7 +142,7 @@ export const getCommandSearchDirs = () => {
 }
 
 export const getRuntimeCommandEnv = (env: NodeJS.ProcessEnv = process.env) => {
-	const path_dirs = new Set((env.PATH || '').split(path.delimiter).filter(Boolean))
+	const path_dirs = new Set(getEnvPathDirs(env))
 
 	for (const dir of getCommandSearchDirs()) {
 		path_dirs.add(dir)

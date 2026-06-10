@@ -97,7 +97,6 @@
     "a2a-ai-provider": "0.4.0-alpha.2",
     "ai": "catalog:",
     "ai-sdk-ollama": "^3.8.4",
-    "ai-sdk-provider-codex-app-server": "^1.1.7",
     "ansis": "catalog:",
     "archiver": "^8.0.0",
     "atomically": "^2.1.1",
