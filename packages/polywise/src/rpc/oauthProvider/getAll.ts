@@ -1,8 +1,9 @@
 import { providers as provider_config } from '@core/config'
 import { p } from '@core/utils'
 
+import { probeCodexAuthState, readCodexAuthState } from '../../utils/codexOauth'
 import { oauth_providers } from './providers'
-import { isToolInstalled, parseCodexStatusLabel, parseOpenCodeCredentials, runShellCommand } from './runtime'
+import { isToolInstalled, parseOpenCodeCredentials, runShellCommand } from './runtime'
 
 export default p
 	.meta({
@@ -14,13 +15,16 @@ export default p
 		}
 	})
 	.query(async () => {
-		const codex_installed = await isToolInstalled('codex')
+		const codex_probe = await probeCodexAuthState().catch(async () => ({
+			auth_state: await readCodexAuthState(),
+			connected: false
+		}))
+		const { auth_state: codex_auth, connected: codex_connected } = codex_probe
+		const codex_installed = (await isToolInstalled('codex')) || Boolean(codex_auth)
 		const opencode_installed = await isToolInstalled('opencode')
-		const codex_status = codex_installed ? await runShellCommand('codex login status', 10000) : null
 		const opencode_status = opencode_installed ? await runShellCommand('opencode providers list', 10000) : null
-		const codex_label = codex_status
-			? parseCodexStatusLabel(`${codex_status.stdout}\n${codex_status.stderr}`)
-			: null
+		const codex_label =
+			codex_auth?.auth_mode === 'chatgpt' ? 'ChatGPT Plus/Pro' : codex_auth?.auth_mode || 'Codex'
 		const opencode_credentials = (
 			opencode_status
 				? parseOpenCodeCredentials(`${opencode_status.stdout}\n${opencode_status.stderr}`)
@@ -40,7 +44,7 @@ export default p
 					: ''
 			const synced_provider =
 				item.id === 'codex'
-					? codex_runtime === 'codex_native'
+					? codex_runtime === 'codex_oauth'
 						? matched_provider
 						: undefined
 					: matched_provider
@@ -49,7 +53,7 @@ export default p
 				return {
 					...item,
 					installed: codex_installed,
-					connected: Boolean(codex_label?.toLowerCase().startsWith('logged in')),
+					connected: codex_connected,
 					credential_label: codex_label,
 					synced: Boolean(synced_provider),
 					synced_model_count: synced_provider?.models?.length ?? 0,

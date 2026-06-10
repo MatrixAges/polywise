@@ -4,7 +4,7 @@ import { clearObject, p } from '@core/utils'
 import fs from 'fs-extra'
 import { z } from 'zod'
 
-import { listCodexModels } from '../../utils/codexAppServer'
+import { getCodexOauthModels, probeCodexAuthState } from '../../utils/codexOauth'
 import { oauth_providers } from './providers'
 import { parseOpenCodeModels, readOpenCodeAuthFile, readProviderConfigFile, runShellCommand } from './runtime'
 
@@ -60,22 +60,23 @@ export default p
 		let models = [] as Array<Provider['models'][number]>
 
 		if (provider.id === 'codex') {
-			const codex_models = await listCodexModels()
+			const { auth_state: codex_auth, connected: codex_connected } = await probeCodexAuthState()
 
-			models = codex_models.map(item => ({
-				id: item.model,
-				name: item.displayName || item.model,
-				enabled: !item.hidden
-			}))
+			if (!codex_auth || !codex_connected) {
+				throw new Error('Codex ChatGPT login is missing or expired. Run `codex login` again first.')
+			}
+
+			models = getCodexOauthModels()
 
 			next_provider = {
 				name: provider.sync_provider_name,
-				apiKey: '',
-				baseURL: '',
+				apiKey: 'chatgpt-oauth',
+				baseURL: 'https://chatgpt.com/backend-api',
 				enabled: true,
 				models,
 				custom_fields: {
-					provider_runtime: 'codex_native'
+					provider_runtime: 'codex_oauth',
+					auth_mode: codex_auth.auth_mode || 'chatgpt'
 				}
 			} as Provider
 		} else {

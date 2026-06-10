@@ -179,7 +179,7 @@ export default {
 	},
 	oauth_provider: {
 		title: 'OAuth Providers',
-		desc: 'Detect and connect local OAuth-capable CLI providers in one place. OpenCode Go and Zen sync their models automatically after login, so no manual API setup is needed on the Model Provider page.',
+		desc: 'Detect and connect local OAuth-capable CLI providers in one place. Codex, OpenCode Go, and OpenCode Zen all sync their models automatically after login, so no manual API setup is needed on the Model Provider page.',
 		refresh: 'Refresh',
 		status_connected: 'Connected',
 		status_disconnected: 'Disconnected',
@@ -193,8 +193,6 @@ export default {
 		detected_via: 'Detection',
 		connection_ready: 'Detected {{label}}.',
 		connection_ready_fallback: 'Detected reusable local credentials.',
-		connection_codex_pending:
-			'Detected {{label}}. Polywise is reusing the local `~/.codex` login state, but the native Codex model runtime is not wired into the model picker yet.',
 		connection_ready_needs_sync: 'Detected {{label}}, but its models have not been synced locally yet.',
 		connection_synced: '{{name}} synced {{count}} models and is ready to use from Model Settings.',
 		connection_missing:
@@ -203,7 +201,7 @@ export default {
 		models_synced: '{{count}} models synced',
 		models_not_synced: 'Models not synced',
 		provider_codex_desc:
-			'Connect Codex through the shared `~/.codex` auth state used by both the Codex CLI and desktop app.',
+			'Use the ChatGPT Plus/Pro OAuth state created by `codex login`, then call Codex through the OpenAI Responses API with the full Polywise toolchain.',
 		provider_opencode_go_desc: 'Connect the OpenCode Go OAuth provider through the OpenCode CLI.',
 		provider_opencode_zen_desc: 'Connect the OpenCode Zen OAuth provider through the OpenCode CLI.',
 		load_failed: 'Failed to load OAuth providers',

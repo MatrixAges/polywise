@@ -63,7 +63,7 @@ This document is the outline-level map and code-style routing table for `package
 		"src/config": "Runtime config loading and watch lifecycle.",
 		"src/consts": "App, provider, prompt, search, and pipeline constants.",
 		"src/types": "Cross-module shared types.",
-		"src/utils": "Shared runtime utilities."
+		"src/utils": "Shared runtime utilities, including command discovery and Codex OAuth bridge helpers."
 	},
 	"background_subsystems": {
 		"src/cron": "Scheduled job runtime and lifecycle management.",
@@ -231,6 +231,13 @@ This routing table is scoped to outline-level folder matching. Match by `path_sc
 	"src/utils": {
 		"path_scope": "packages/polywise/src/utils",
 		"sample_pool": ["packages/polywise/src/utils/index.ts", "packages/polywise/src/utils/trpc.ts"]
+	},
+	"src/utils/codexOauth": {
+		"path_scope": "packages/polywise/src/utils/codexOauth",
+		"sample_pool": [
+			"packages/polywise/src/utils/codexOauth/index.ts",
+			"packages/polywise/src/utils/codexOauth/readCodexAuthState.ts"
+		]
 	}
 }
 ```

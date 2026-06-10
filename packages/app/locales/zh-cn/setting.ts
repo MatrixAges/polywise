@@ -173,7 +173,7 @@ export default {
 	},
 	oauth_provider: {
 		title: 'OAuth 提供方',
-		desc: '统一检查并连接本地支持 OAuth 的 CLI 提供方。OpenCode Go / Zen 在连接后会自动同步模型，无需再去“模型提供方”页面手填 API。',
+		desc: '统一检查并连接本地支持 OAuth 的 CLI 提供方。Codex、OpenCode Go、OpenCode Zen 在连接后都会自动同步模型，无需再去“模型提供方”页面手填 API。',
 		refresh: '刷新',
 		status_connected: '已连接',
 		status_disconnected: '未连接',
@@ -187,15 +187,14 @@ export default {
 		detected_via: '检测结果',
 		connection_ready: '已检测到 {{label}}。',
 		connection_ready_fallback: '已检测到可复用的本地凭据。',
-		connection_codex_pending:
-			'已检测到 {{label}}。当前只复用了 `~/.codex` 登录状态，Codex 原生模型 runtime 还没有接进 Polywise 的模型选择链路。',
 		connection_ready_needs_sync: '已检测到 {{label}}，但还没有同步到本地模型提供方。',
 		connection_synced: '{{name}} 已同步 {{count}} 个模型，可直接在“模型设置”中选择。',
 		connection_missing: '已检测到 {{client}}。点击“连接”会在本地终端中启动原生登录流程。',
 		cli_missing: '当前 PATH 中未检测到 {{client}}。请先安装对应 CLI 后再连接。',
 		models_synced: '已同步 {{count}} 个模型',
 		models_not_synced: '模型未同步',
-		provider_codex_desc: '通过共享的 `~/.codex` 认证状态连接 Codex；Codex CLI 与桌面程序共用这套登录状态。',
+		provider_codex_desc:
+			'通过 `codex login` 生成的 ChatGPT Plus/Pro 登录态连接 Codex，并通过 OpenAI Responses API 使用完整的 Polywise 工具链。',
 		provider_opencode_go_desc: '通过 OpenCode CLI 连接 OpenCode Go OAuth Provider。',
 		provider_opencode_zen_desc: '通过 OpenCode CLI 连接 OpenCode Zen OAuth Provider。',
 		load_failed: '加载 OAuth 提供方失败',

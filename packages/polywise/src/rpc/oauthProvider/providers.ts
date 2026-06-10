@@ -21,7 +21,7 @@ export const oauth_providers = [
 		credential_name: 'Codex',
 		client: 'codex',
 		description:
-			'Connect Codex through the shared local ~/.codex authentication state used by the CLI and desktop app.',
+			'Connect Codex through the local ChatGPT Plus/Pro OAuth state managed by the Codex CLI, then call the Codex API through the OpenAI Responses runtime.',
 		detect: 'codex',
 		connect_command: 'codex login --device-auth',
 		docs_url: 'https://github.com/openai/codex',

@@ -254,6 +254,56 @@ const getEffortProviderOptions = (
 	if (!effort) return undefined
 
 	switch (provider) {
+		case 'codex_oauth': {
+			const normalized_model = model.toLowerCase()
+			const is_gpt_52_general = normalized_model.includes('gpt-5.2') && !normalized_model.includes('codex')
+			const is_gpt_51_general = normalized_model.includes('gpt-5.1') && !normalized_model.includes('codex')
+			const is_codex_max = normalized_model.includes('codex-max')
+			const is_codex_mini = normalized_model.includes('codex-mini')
+			const supports_none = is_gpt_52_general || is_gpt_51_general
+			const supports_xhigh = is_gpt_52_general || normalized_model.includes('gpt-5.2-codex') || is_codex_max
+			let reasoningEffort = effort
+
+			if (is_codex_mini) {
+				if (reasoningEffort === 'none' || reasoningEffort === 'minimal' || reasoningEffort === 'low') {
+					reasoningEffort = 'medium'
+				}
+
+				if (reasoningEffort === 'xhigh') {
+					reasoningEffort = 'high'
+				}
+			}
+
+			if (reasoningEffort === 'minimal') {
+				reasoningEffort = 'low'
+			}
+
+			if (!supports_none && reasoningEffort === 'none') {
+				reasoningEffort = 'low'
+			}
+
+			if (!supports_xhigh && reasoningEffort === 'xhigh') {
+				reasoningEffort = 'high'
+			}
+
+			const reasoningSummary =
+				is_codex_max && (reasoningEffort === 'high' || reasoningEffort === 'xhigh')
+					? 'detailed'
+					: reasoningEffort === 'high' || reasoningEffort === 'xhigh'
+						? 'detailed'
+						: 'auto'
+			const textVerbosity = is_gpt_51_general && reasoningEffort === 'high' ? 'high' : 'medium'
+
+			return {
+				openai: {
+					reasoningEffort,
+					reasoningSummary,
+					textVerbosity,
+					include: ['reasoning.encrypted_content'],
+					store: false
+				}
+			} as ProviderOptions
+		}
 		case 'openai': {
 			const reasoningEffort = getSupportedEffort(effort, [
 				'none',
@@ -286,11 +336,6 @@ const getEffortProviderOptions = (
 		case 'xiaomi_mimo':
 		case 'open_compatible':
 			return { openaiCompatible: { reasoningEffort: effort } } as ProviderOptions
-		case 'codex_native': {
-			const reasoningEffort = getSupportedEffort(effort, ['none', 'low', 'medium', 'high', 'xhigh'])
-
-			return reasoningEffort ? ({ 'codex-app-server': { reasoningEffort } } as ProviderOptions) : undefined
-		}
 		case 'google_gemini': {
 			const thinkingLevel = getSupportedEffort(effort, ['minimal', 'low', 'medium', 'high'])
 			const thinkingBudget = getThinkingBudget(effort)
@@ -404,6 +449,18 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 
 	const getResponse = async (): Promise<EmbeddingResult | RerankResult | ModelResult> => {
 		switch (provider) {
+			case 'codex_oauth':
+				return {
+					model: (await import('@ai-sdk/openai')).createOpenAI({
+						...options,
+						name: 'codex_oauth',
+						baseURL: options?.baseURL || 'https://chatgpt.com/backend-api',
+						apiKey: options?.apiKey || 'chatgpt-oauth',
+						fetch: (await import('../utils/codexOauth')).createCodexOauthFetch()
+					})(model),
+					provider_options: effort_provider_options,
+					runtime_name: 'codex_oauth'
+				}
 			case 'xiaomi_mimo':
 			case 'open_compatible':
 				return {
@@ -412,14 +469,6 @@ export const getModel = async <T extends ModelType = 'text'>(args: GetModelArgs<
 						supportsStructuredOutputs: true
 					})(model),
 					provider_options: effort_provider_options
-				}
-			case 'codex_native':
-				return {
-					model: (await import('../utils/codexAppServer')).createCodexNativeLanguageModel({
-						model
-					}),
-					provider_options: effort_provider_options,
-					runtime_name: 'codex_native'
 				}
 			case 'a2a':
 				return { model: (await import('a2a-ai-provider')).a2a(model) }

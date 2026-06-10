@@ -53,12 +53,6 @@ const getDetail = (args: { provider: OAuthProvider; t: ReturnType<typeof useTran
 	}
 
 	if (provider.connected) {
-		if (provider.id === 'codex' && !provider.sync_supported) {
-			return t('oauth_provider.connection_codex_pending', {
-				label: provider.credential_label || provider.name
-			})
-		}
-
 		if (provider.sync_supported && !provider.synced) {
 			return t('oauth_provider.connection_ready_needs_sync', {
 				label: provider.credential_label || provider.name

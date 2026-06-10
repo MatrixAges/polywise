@@ -55,8 +55,7 @@ export default async (args: {
 		throw new Error('group member tools not resolved')
 	}
 
-	const use_native_codex_tools = model.runtime_name === 'codex_native'
-	const tools = use_native_codex_tools ? undefined : wrapToolSetWithAgentLogging(s, sanitizeToolSet(runtime.tools))
+	const tools = wrapToolSetWithAgentLogging(s, sanitizeToolSet(runtime.tools))
 	const tracker = createPartDurationTracker()
 	const res = streamText({
 		model: model.model,
