@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from 'child_process'
-import { closeSync, openSync } from 'fs'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { closeSync, openSync, realpathSync } from 'fs'
+import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { logs_dir, runtime_pid_path } from '@core/consts/app'
 import { boolean, command, number, positional, run, string } from '@drizzle-team/brocli'
@@ -188,6 +188,29 @@ const renderRootCliHelp = () => {
 		hints,
 		items
 	}
+}
+
+const resolveRuntimePath = (target_path?: string | null) => {
+	if (!target_path) {
+		return null
+	}
+
+	try {
+		return realpathSync(target_path)
+	} catch {
+		return path.resolve(target_path)
+	}
+}
+
+const isCliEntrypoint = () => {
+	const runtime_entrypoint_path = resolveRuntimePath(process.argv[1])
+	const module_entrypoint_path = resolveRuntimePath(fileURLToPath(import.meta.url))
+
+	if (!runtime_entrypoint_path || !module_entrypoint_path) {
+		return false
+	}
+
+	return runtime_entrypoint_path === module_entrypoint_path
 }
 
 const shouldPrintVersion = (argv: Array<string>) => argv.length === 1 && version_flags.has(argv[0] || '')
@@ -655,7 +678,7 @@ export const main = async (argv = process.argv.slice(2)) => {
 	})
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
+if (isCliEntrypoint()) {
 	main().catch(error => {
 		const message = error instanceof Error ? error.message : String(error)
 		process.stderr.write(`${message}\n`)
