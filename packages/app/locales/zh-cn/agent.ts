@@ -96,6 +96,8 @@ export default {
 		visible_edges: '边',
 		expand: '扩展关联',
 		expanding: '扩展中...',
+		load_more_nodes: '加载更多节点',
+		loading_more: '加载中...',
 		related_articles: '关联文章',
 		related_chunks: '关联分块',
 		no_articles: '暂无关联文章。',

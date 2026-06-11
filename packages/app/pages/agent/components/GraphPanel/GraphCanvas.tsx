@@ -1,6 +1,8 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { Loader2, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { Button } from '@/__shadcn__/components/ui/button'
 import { useSize } from '@/hooks'
 
 import {
@@ -25,9 +27,12 @@ interface IProps {
 	selected_node_id: string
 	graph_loading: boolean
 	graph_expanding: boolean
+	graph_loading_more: boolean
 	can_expand_graph: boolean
+	can_load_more_graph: boolean
 	on_select_node: (node_id: string) => void
 	on_expand_graph: () => void
+	on_load_more_graph: () => void
 }
 
 const Index = (props: IProps) => {
@@ -37,14 +42,20 @@ const Index = (props: IProps) => {
 		selected_node_id,
 		graph_loading,
 		graph_expanding,
+		graph_loading_more,
 		can_expand_graph,
+		can_load_more_graph,
 		on_select_node,
-		on_expand_graph
+		on_expand_graph,
+		on_load_more_graph
 	} = props
 	const { t } = useTranslation('agent')
 	const ref_container = useRef<HTMLDivElement | null>(null)
 	const ref_dragging = useRef(null as null | { pointer_id: number; origin_x: number; origin_y: number })
 	const ref_expand_key = useRef('')
+	const ref_viewport = useRef(getDefaultViewport())
+	const ref_wheel_frame = useRef(0)
+	const ref_pending_viewport = useRef(null as GraphViewport | null)
 	const size = useSize(() => ref_container.current as HTMLElement)
 	const chart_id = useId().replace(/:/g, '')
 	const [viewport, setViewport] = useState<GraphViewport>(getDefaultViewport)
@@ -81,6 +92,10 @@ const Index = (props: IProps) => {
 		ref_expand_key.current = ''
 	}, [selected_node_id, nodes.length])
 
+	useEffect(() => {
+		ref_viewport.current = viewport
+	}, [viewport])
+
 	const tryExpandGraph = (next_scale: number) => {
 		if (!can_expand_graph || graph_expanding || next_scale < 1.28) {
 			return
@@ -96,6 +111,77 @@ const Index = (props: IProps) => {
 		on_expand_graph()
 	}
 
+	const applyViewport = (next_viewport: GraphViewport) => {
+		ref_viewport.current = next_viewport
+		setViewport(next_viewport)
+	}
+
+	const scheduleViewport = (next_viewport: GraphViewport) => {
+		ref_pending_viewport.current = next_viewport
+
+		if (ref_wheel_frame.current) {
+			return
+		}
+
+		ref_wheel_frame.current = requestAnimationFrame(() => {
+			ref_wheel_frame.current = 0
+
+			const pending_viewport = ref_pending_viewport.current
+
+			if (!pending_viewport) {
+				return
+			}
+
+			ref_pending_viewport.current = null
+			applyViewport(pending_viewport)
+		})
+	}
+
+	useEffect(() => {
+		const container = ref_container.current
+
+		if (!container) {
+			return
+		}
+
+		const handleWheel = (event: WheelEvent) => {
+			event.preventDefault()
+
+			const container_rect = container.getBoundingClientRect()
+			const pointer_x = event.clientX - container_rect.left
+			const pointer_y = event.clientY - container_rect.top
+			const current_viewport = ref_pending_viewport.current ?? ref_viewport.current
+			const scale_delta = event.deltaY < 0 ? 1.12 : 0.9
+			const next_scale = Math.max(0.68, Math.min(2.8, current_viewport.scale * scale_delta))
+			const graph_x = (pointer_x - current_viewport.x) / current_viewport.scale
+			const graph_y = (pointer_y - current_viewport.y) / current_viewport.scale
+			const next_viewport = {
+				scale: next_scale,
+				x: pointer_x - graph_x * next_scale,
+				y: pointer_y - graph_y * next_scale
+			} satisfies GraphViewport
+
+			if (event.deltaY < 0) {
+				tryExpandGraph(next_scale)
+			}
+
+			scheduleViewport(next_viewport)
+		}
+
+		container.addEventListener('wheel', handleWheel, { passive: false })
+
+		return () => {
+			container.removeEventListener('wheel', handleWheel)
+
+			if (ref_wheel_frame.current) {
+				cancelAnimationFrame(ref_wheel_frame.current)
+				ref_wheel_frame.current = 0
+			}
+
+			ref_pending_viewport.current = null
+		}
+	}, [can_expand_graph, graph_expanding, nodes.length, on_expand_graph, selected_node_id])
+
 	return (
 		<div
 			className='
@@ -104,34 +190,10 @@ const Index = (props: IProps) => {
 				flex flex-1
 				min-h-[420px]
 				bg-[#f8fafc]
+				group
 				touch-none select-none cursor-grab
 			'
 			ref={ref_container}
-			onWheel={event => {
-				event.preventDefault()
-
-				const container_rect = event.currentTarget.getBoundingClientRect()
-				const pointer_x = event.clientX - container_rect.left
-				const pointer_y = event.clientY - container_rect.top
-				const scale_delta = event.deltaY < 0 ? 1.12 : 0.9
-
-				setViewport(current_viewport => {
-					const next_scale = Math.max(0.68, Math.min(2.8, current_viewport.scale * scale_delta))
-					const graph_x = (pointer_x - current_viewport.x) / current_viewport.scale
-					const graph_y = (pointer_y - current_viewport.y) / current_viewport.scale
-					const next_viewport = {
-						scale: next_scale,
-						x: pointer_x - graph_x * next_scale,
-						y: pointer_y - graph_y * next_scale
-					} satisfies GraphViewport
-
-					if (event.deltaY < 0) {
-						tryExpandGraph(next_scale)
-					}
-
-					return next_viewport
-				})
-			}}
 			onPointerDown={event => {
 				const target = event.target as HTMLElement
 
@@ -139,10 +201,14 @@ const Index = (props: IProps) => {
 					return
 				}
 
+				if (target.closest('[data-graph-load-more="true"]')) {
+					return
+				}
+
 				ref_dragging.current = {
 					pointer_id: event.pointerId,
-					origin_x: event.clientX - viewport.x,
-					origin_y: event.clientY - viewport.y
+					origin_x: event.clientX - ref_viewport.current.x,
+					origin_y: event.clientY - ref_viewport.current.y
 				}
 				setIsDragging(true)
 				event.currentTarget.setPointerCapture(event.pointerId)
@@ -154,11 +220,11 @@ const Index = (props: IProps) => {
 					return
 				}
 
-				setViewport(current_viewport => ({
-					...current_viewport,
+				applyViewport({
+					...ref_viewport.current,
 					x: event.clientX - dragging_state.origin_x,
 					y: event.clientY - dragging_state.origin_y
-				}))
+				})
 			}}
 			onPointerUp={event => {
 				if (ref_dragging.current?.pointer_id !== event.pointerId) {
@@ -407,6 +473,44 @@ const Index = (props: IProps) => {
 					{t('graph_panel.empty', { ns: 'agent' })}
 				</div>
 			)}
+			<Button
+				data-graph-load-more='true'
+				variant='outline'
+				size='xs'
+				className={$cx(
+					`
+					absolute
+					right-4 bottom-4
+					bg-white/96
+					shadow-sm
+					opacity-0 backdrop-blur
+					translate-y-1
+					transition-all
+					group-hover:translate-y-0 group-hover:opacity-100
+				`,
+					(!can_load_more_graph || graph_loading_more) &&
+						'
+					text-std-400
+					bg-secondary
+					border-border-light
+					opacity-100
+					translate-y-0
+				'
+				)}
+				disabled={!can_load_more_graph}
+				onClick={on_load_more_graph}
+			>
+				{graph_loading_more ? (
+					<Loader2 className='size-3.5 animate-spin'></Loader2>
+				) : (
+					<Plus className='size-3.5'></Plus>
+				)}
+				<span>
+					{graph_loading_more
+						? t('graph_panel.loading_more', { ns: 'agent' })
+						: t('graph_panel.load_more_nodes', { ns: 'agent' })}
+				</span>
+			</Button>
 		</div>
 	)
 }

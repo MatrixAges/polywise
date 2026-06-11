@@ -6,12 +6,13 @@ const default_node_limit = 18
 const default_expand_limit = 12
 const default_chunk_limit = 8
 const default_article_limit = 8
-const max_visible_node_count = 80
+const max_visible_node_count = 999
 
 export interface ReadAgentGraphArgs {
 	agent_id: string
 	center_node_id?: string
 	expand?: boolean
+	load_more?: boolean
 	visible_node_ids?: Array<string>
 }
 
@@ -131,9 +132,66 @@ const getInitialVisibleNodeIds = async (agent_id: string) => {
 	return getUniqueIds(seed_node_ids.concat(fallback_node_ids), default_node_limit)
 }
 
-const getVisibleNodeIds = async (args: ReadAgentGraphArgs) => {
-	const { agent_id, center_node_id, expand, visible_node_ids = [] } = args
+const getMoreVisibleNodeIds = async (args: {
+	agent_id: string
+	center_node_id?: string
+	visible_node_ids: Array<string>
+}) => {
+	const { agent_id, center_node_id, visible_node_ids } = args
 	const next_visible_ids = getUniqueIds(visible_node_ids)
+
+	if (next_visible_ids.length === 0) {
+		return getInitialVisibleNodeIds(agent_id)
+	}
+
+	if (center_node_id && !next_visible_ids.includes(center_node_id)) {
+		next_visible_ids.unshift(center_node_id)
+	}
+
+	const visible_node_id_set = new Set(next_visible_ids)
+	const candidate_nodes = await env.db
+		.select()
+		.from(node)
+		.where(eq(node.agent_id, agent_id))
+		.orderBy(desc(node.active_times), desc(node.active_level), desc(node.created_at))
+
+	const seed_more_ids = candidate_nodes
+		.sort((left_item, right_item) => getNodeScore(right_item) - getNodeScore(left_item))
+		.map(item => item.id)
+		.filter(item => !visible_node_id_set.has(item))
+		.slice(0, 3)
+
+	if (seed_more_ids.length === 0) {
+		return getUniqueIds(next_visible_ids)
+	}
+
+	const related_edges = await env.db
+		.select()
+		.from(edge)
+		.where(
+			and(
+				eq(edge.agent_id, agent_id),
+				or(inArray(edge.source_id, seed_more_ids), inArray(edge.target_id, seed_more_ids))
+			)
+		)
+		.orderBy(desc(edge.weight), desc(edge.confidence), desc(edge.active_times), desc(edge.created_at))
+
+	const related_node_ids = related_edges.flatMap(item => [item.source_id, item.target_id])
+
+	return getUniqueIds(next_visible_ids.concat(seed_more_ids, related_node_ids))
+}
+
+const getVisibleNodeIds = async (args: ReadAgentGraphArgs) => {
+	const { agent_id, center_node_id, expand, load_more, visible_node_ids = [] } = args
+	const next_visible_ids = getUniqueIds(visible_node_ids)
+
+	if (load_more) {
+		return getMoreVisibleNodeIds({
+			agent_id,
+			center_node_id,
+			visible_node_ids: next_visible_ids
+		})
+	}
 
 	if (!center_node_id) {
 		return next_visible_ids.length > 0 ? next_visible_ids : getInitialVisibleNodeIds(agent_id)

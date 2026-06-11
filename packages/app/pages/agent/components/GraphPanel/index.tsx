@@ -15,12 +15,18 @@ const Index = () => {
 		selected_node_id: graph_data?.selected_node_id ?? '',
 		graph_loading: x.graph_loading,
 		graph_expanding: x.graph_expanding,
+		graph_loading_more: x.graph_loading_more,
 		can_expand_graph:
 			Boolean(graph_data?.selected_node && graph_data.selected_node.hidden_neighbor_count > 0) &&
 			!x.graph_loading &&
 			!x.graph_expanding,
+		can_load_more_graph:
+			Boolean(graph_data && graph_data.nodes.length < graph_data.total_node_count) &&
+			!x.graph_loading &&
+			!x.graph_loading_more,
 		on_select_node: x.selectGraphNode,
-		on_expand_graph: x.expandGraphNode
+		on_expand_graph: x.expandGraphNode,
+		on_load_more_graph: x.loadMoreGraphNodes
 	}
 	const props_sidebar = {
 		graph_data,

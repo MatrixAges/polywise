@@ -98,6 +98,8 @@ export default {
 		visible_edges: 'Edges',
 		expand: 'Expand',
 		expanding: 'Expanding...',
+		load_more_nodes: 'Load More Nodes',
+		loading_more: 'Loading...',
 		related_articles: 'Related Articles',
 		related_chunks: 'Related Chunks',
 		no_articles: 'No related articles.',

@@ -100,6 +100,7 @@ export default class Index {
 	graph_agent_id = ''
 	graph_loading = false
 	graph_expanding = false
+	graph_loading_more = false
 	graph_request_key = 0
 	article_search = ''
 	article_search_list = [] as Array<AgentArticleSearchItem>
@@ -285,7 +286,7 @@ export default class Index {
 	}
 
 	get should_refresh_graph() {
-		return this.current_tab === 'graph' || this.graph_data !== null
+		return this.current_tab === 'graph'
 	}
 
 	constructor(
@@ -353,6 +354,10 @@ export default class Index {
 		}
 
 		if (this.current_tab === 'sessions') {
+			this.current_tab = 'info'
+		}
+
+		if (this.current_tab === 'graph') {
 			this.current_tab = 'info'
 		}
 
@@ -1234,9 +1239,10 @@ export default class Index {
 		this.graph_agent_id = ''
 		this.graph_loading = false
 		this.graph_expanding = false
+		this.graph_loading_more = false
 	}
 
-	async refreshGraph(args?: { center_node_id?: string; expand?: boolean }) {
+	async refreshGraph(args?: { center_node_id?: string; expand?: boolean; load_more?: boolean }) {
 		if (!this.selected_agent_id) {
 			this.resetGraph()
 
@@ -1253,6 +1259,8 @@ export default class Index {
 
 		if (args?.expand) {
 			this.graph_expanding = true
+		} else if (args?.load_more) {
+			this.graph_loading_more = true
 		} else if (!silent_focus_change) {
 			this.graph_loading = true
 		}
@@ -1262,6 +1270,7 @@ export default class Index {
 				agent_id,
 				center_node_id,
 				expand: args?.expand,
+				load_more: args?.load_more,
 				visible_node_ids
 			})) as AgentGraphResponse
 
@@ -1275,6 +1284,7 @@ export default class Index {
 			if (this.graph_request_key === request_key) {
 				this.graph_loading = false
 				this.graph_expanding = false
+				this.graph_loading_more = false
 			}
 		}
 	}
@@ -1295,6 +1305,21 @@ export default class Index {
 		void this.refreshGraph({
 			center_node_id: this.selected_graph_node_id,
 			expand: true
+		})
+	}
+
+	loadMoreGraphNodes() {
+		if (
+			!this.graph_data ||
+			this.graph_loading_more ||
+			this.graph_data.nodes.length >= this.graph_data.total_node_count
+		) {
+			return
+		}
+
+		void this.refreshGraph({
+			center_node_id: this.selected_graph_node_id || undefined,
+			load_more: true
 		})
 	}
 

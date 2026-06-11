@@ -17,7 +17,8 @@ export default p
 			agent_id: string(),
 			center_node_id: string().optional(),
 			expand: boolean().optional(),
-			visible_node_ids: array(string()).max(80).optional()
+			load_more: boolean().optional(),
+			visible_node_ids: array(string()).max(999).optional()
 		})
 	)
 	.query(async ({ input }) => {
