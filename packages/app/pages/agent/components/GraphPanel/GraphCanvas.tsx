@@ -13,8 +13,7 @@ import {
 	getEdgeWidth,
 	getLinkNode,
 	getNodeColor,
-	getNodeLabelLines,
-	getNodeLabelWidth
+	getNodeLabelLines
 } from './graph'
 import useGraphSimulation from './useGraphSimulation'
 
@@ -369,8 +368,12 @@ const Index = (props: IProps) => {
 						})()}
 					{layout_nodes.map(node_item => {
 						const label_lines = getNodeLabelLines(node_item.name)
-						const label_width = getNodeLabelWidth(label_lines)
-						const label_height = label_lines.length > 1 ? 30 : 22
+						const label_width = node_item.label_width
+						const label_height = node_item.label_height
+						const should_place_label_above = (node_item.y ?? 0) > canvas_size.height * 0.58
+						const label_translate_y = should_place_label_above
+							? -(node_item.radius + 16)
+							: node_item.radius + 14
 
 						return (
 							<g
@@ -401,7 +404,7 @@ const Index = (props: IProps) => {
 									stroke='rgba(255,255,255,0.98)'
 									strokeWidth={node_item.id === selected_node_id ? 2.5 : 1.5}
 								></circle>
-								<g transform={`translate(0, ${node_item.radius + 14})`}>
+								<g transform={`translate(0, ${label_translate_y})`}>
 									<rect
 										x={-label_width / 2}
 										y={-label_height / 2}
@@ -489,13 +492,13 @@ const Index = (props: IProps) => {
 					group-hover:translate-y-0 group-hover:opacity-100
 				`,
 					(!can_load_more_graph || graph_loading_more) &&
-						'
+						`
 					text-std-400
 					bg-secondary
 					border-border-light
 					opacity-100
 					translate-y-0
-				'
+				`
 				)}
 				disabled={!can_load_more_graph}
 				onClick={on_load_more_graph}

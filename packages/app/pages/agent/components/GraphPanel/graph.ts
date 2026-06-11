@@ -6,6 +6,13 @@ export interface GraphLayoutNode extends AgentGraphNode {
 	vx?: number
 	vy?: number
 	radius: number
+	label_width: number
+	label_height: number
+	collision_radius: number
+	anchor_x: number
+	anchor_y: number
+	anchor_radius: number
+	boundary_radius: number
 }
 
 export interface GraphLayoutEdge extends AgentGraphEdge {
@@ -81,61 +88,76 @@ export const getEdgeWidth = (edge_item: AgentGraphEdge) => {
 }
 
 export const getLinkDistance = (edge_item: AgentGraphEdge) => {
-	return Math.max(120, Math.min(220, 196 - edge_item.weight * 12 - edge_item.confidence * 16))
+	return Math.max(140, Math.min(240, 208 - edge_item.weight * 12 - edge_item.confidence * 16))
 }
 
 export const getChargeStrength = (node_count: number) => {
-	return Math.max(-980, -260 - node_count * 18)
+	return Math.max(-1280, -360 - node_count * 22)
+}
+
+export const getGraphBoundaryRadius = (args: {
+	node_count: number
+	width: number
+	height: number
+	padding: number
+}) => {
+	const { node_count, width, height, padding } = args
+	const base_radius = Math.max(150, Math.min(width, height) / 2 - padding - 84)
+	const growth_radius = Math.max(0, Math.sqrt(Math.max(node_count - 18, 0)) * 28)
+
+	return base_radius + growth_radius
 }
 
 export const getInitialNodePoint = (args: {
 	index: number
 	total: number
-	width: number
-	height: number
-	padding: number
+	center_x: number
+	center_y: number
+	boundary_radius: number
 }) => {
-	const { index, total, width, height, padding } = args
+	const { index, total, center_x, center_y, boundary_radius } = args
 	const golden_angle = Math.PI * (3 - Math.sqrt(5))
 	const angle = index * golden_angle
-	const center_x = width / 2
-	const center_y = height / 2
-	const usable_radius = Math.max(48, Math.min(width, height) / 2 - padding - 40)
 	const normalized_step = total <= 1 ? 0.5 : (index + 0.5) / total
-	const distance = usable_radius * Math.sqrt(normalized_step) * 0.9
+	const distance_scale = Math.sqrt(normalized_step) * 0.96
+	const distance = boundary_radius * distance_scale
 
 	return {
 		x: center_x + Math.cos(angle) * distance,
-		y: center_y + Math.sin(angle) * distance
+		y: center_y + Math.sin(angle) * distance,
+		radius: distance
 	}
 }
 
-export const clampNodePosition = (args: {
-	layout_node: GraphLayoutNode
-	width: number
-	height: number
-	padding: number
-}) => {
-	const { layout_node, width, height, padding } = args
+export const clampNodePosition = (args: { layout_node: GraphLayoutNode; width: number; height: number }) => {
+	const { layout_node, width, height } = args
+	const center_x = width / 2
+	const center_y = height / 2
 	const next_x = layout_node.x ?? width / 2
 	const next_y = layout_node.y ?? height / 2
-	const limit_left = padding + layout_node.radius
-	const limit_right = width - padding - layout_node.radius
-	const limit_top = padding + layout_node.radius
-	const limit_bottom = height - padding - layout_node.radius
-	const clamped_x = Math.max(limit_left, Math.min(limit_right, next_x))
-	const clamped_y = Math.max(limit_top, Math.min(limit_bottom, next_y))
+	const boundary_radius = Math.max(
+		96,
+		layout_node.boundary_radius - Math.max(layout_node.collision_radius * 0.62, layout_node.radius + 24)
+	)
+	const delta_x = next_x - center_x
+	const delta_y = next_y - center_y
+	const distance = Math.sqrt(delta_x * delta_x + delta_y * delta_y)
+
+	if (distance <= boundary_radius || distance === 0) {
+		layout_node.x = next_x
+		layout_node.y = next_y
+
+		return
+	}
+
+	const scale = boundary_radius / distance
+	const clamped_x = center_x + delta_x * scale
+	const clamped_y = center_y + delta_y * scale
 
 	layout_node.x = clamped_x
 	layout_node.y = clamped_y
-
-	if (clamped_x !== next_x) {
-		layout_node.vx = (layout_node.vx ?? 0) * 0.35
-	}
-
-	if (clamped_y !== next_y) {
-		layout_node.vy = (layout_node.vy ?? 0) * 0.35
-	}
+	layout_node.vx = (layout_node.vx ?? 0) * 0.35
+	layout_node.vy = (layout_node.vy ?? 0) * 0.35
 }
 
 export const getLinkNode = (value: string | GraphLayoutNode, node_map: Map<string, GraphLayoutNode>) => {
@@ -182,6 +204,16 @@ export const getNodeLabelWidth = (label_lines: Array<string>) => {
 	)
 
 	return Math.max(58, Math.min(132, max_line_length * 7.2 + 18))
+}
+
+export const getNodeLabelHeight = (label_lines: Array<string>) => {
+	return label_lines.length > 1 ? 30 : 22
+}
+
+export const getNodeCollisionRadius = (args: { radius: number; label_width: number; label_height: number }) => {
+	const { radius, label_width, label_height } = args
+
+	return Math.max(radius + 26, label_width * 0.54, radius + label_height + 18)
 }
 
 export const getPreviewText = (value: string, size = 120) => {
