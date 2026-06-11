@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { forceCenter, forceCollide, forceLink, forceManyBody, forceRadial, forceSimulation } from 'd3-force'
+import { forceCenter, forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY } from 'd3-force'
 
 import { clampNodePosition, getChargeStrength, getInitialNodePoint, getLinkDistance, getNodeRadius } from './graph'
 
@@ -20,26 +20,26 @@ const useGraphSimulation = (args: IArgs) => {
 	const ref_position_map = useRef({} as Record<string, { x: number; y: number }>)
 
 	useEffect(() => {
-		const boundary_size = Math.min(width, height)
+		const minimum_size = Math.min(width, height)
 
-		if (boundary_size <= 0 || nodes.length === 0) {
+		if (minimum_size <= 0 || nodes.length === 0) {
 			setLayoutNodes([])
 			setLayoutEdges([])
 
 			return
 		}
 
-		const boundary_radius = boundary_size / 2
-		const center_x = boundary_radius
-		const center_y = boundary_radius
+		const center_x = width / 2
+		const center_y = height / 2
+		const boundary_padding = Math.max(28, Math.min(width, height) * 0.08)
 		const next_layout_nodes = nodes.map((node_item, index) => {
 			const cached_position = ref_position_map.current[node_item.id]
 			const fallback_position = getInitialNodePoint({
 				index,
 				total: nodes.length,
-				boundary_radius,
-				center_x,
-				center_y
+				width,
+				height,
+				padding: boundary_padding
 			})
 
 			return {
@@ -61,9 +61,9 @@ const useGraphSimulation = (args: IArgs) => {
 				next_layout_nodes.forEach(layout_node => {
 					clampNodePosition({
 						layout_node,
-						center_x,
-						center_y,
-						boundary_radius
+						width,
+						height,
+						padding: boundary_padding
 					})
 					ref_position_map.current[layout_node.id] = {
 						x: layout_node.x ?? center_x,
@@ -77,24 +77,25 @@ const useGraphSimulation = (args: IArgs) => {
 		}
 		const simulation = forceSimulation(next_layout_nodes)
 			.force('center', forceCenter(center_x, center_y))
+			.force('axis_x', forceX(center_x).strength(0.035))
+			.force('axis_y', forceY(center_y).strength(0.05))
 			.force('charge', forceManyBody().strength(getChargeStrength(nodes.length)))
 			.force(
 				'collision',
 				forceCollide<GraphLayoutNode>()
-					.radius(layout_node => layout_node.radius + 6)
-					.strength(0.92)
+					.radius(layout_node => layout_node.radius + 24)
+					.strength(0.98)
 			)
 			.force(
 				'link',
 				forceLink<GraphLayoutNode, GraphLayoutEdge>(next_layout_edges)
 					.id(layout_node => layout_node.id)
 					.distance(layout_edge => getLinkDistance(layout_edge))
-					.strength(0.26)
+					.strength(0.22)
 			)
-			.force('radial', forceRadial(boundary_radius * 0.58, center_x, center_y).strength(0.08))
-			.alpha(0.9)
-			.alphaDecay(0.045)
-			.velocityDecay(0.3)
+			.alpha(0.82)
+			.alphaDecay(0.06)
+			.velocityDecay(0.38)
 			.on('tick', syncGraph)
 
 		syncGraph()

@@ -13,6 +13,22 @@ export interface GraphLayoutEdge extends AgentGraphEdge {
 	target: string | GraphLayoutNode
 }
 
+export interface GraphViewport {
+	x: number
+	y: number
+	scale: number
+}
+
+const getCompactNodeName = (name: string) => {
+	const compact_name = name.trim()
+
+	if (compact_name.length <= 24) {
+		return compact_name
+	}
+
+	return `${compact_name.slice(0, 23)}…`
+}
+
 const getNodeWeight = (node_item: AgentGraphNode) => {
 	return (
 		node_item.active_times * 0.45 +
@@ -23,9 +39,9 @@ const getNodeWeight = (node_item: AgentGraphNode) => {
 }
 
 export const getNodeRadius = (node_item: AgentGraphNode) => {
-	const weighted_size = Math.sqrt(getNodeWeight(node_item) + 1) * 3.2
+	const weighted_size = Math.sqrt(getNodeWeight(node_item) + 1) * 2.1
 
-	return Math.max(16, Math.min(34, weighted_size))
+	return Math.max(10, Math.min(22, weighted_size))
 }
 
 export const getNodeColor = (node_item: AgentGraphNode, selected_node_id: string) => {
@@ -57,33 +73,36 @@ export const getEdgeColor = (edge_item: AgentGraphEdge) => {
 }
 
 export const getEdgeOpacity = (edge_item: AgentGraphEdge) => {
-	return Math.max(0.18, Math.min(0.72, 0.18 + edge_item.confidence * 0.45 + edge_item.article_count * 0.04))
+	return Math.max(0.14, Math.min(0.38, 0.12 + edge_item.confidence * 0.22 + edge_item.article_count * 0.02))
 }
 
 export const getEdgeWidth = (edge_item: AgentGraphEdge) => {
-	return Math.max(1.2, Math.min(4.6, 1 + edge_item.weight * 0.9 + edge_item.article_count * 0.2))
+	return Math.max(1, Math.min(2.6, 0.9 + edge_item.weight * 0.42 + edge_item.article_count * 0.08))
 }
 
 export const getLinkDistance = (edge_item: AgentGraphEdge) => {
-	return Math.max(70, Math.min(170, 152 - edge_item.weight * 14 - edge_item.confidence * 18))
+	return Math.max(120, Math.min(220, 196 - edge_item.weight * 12 - edge_item.confidence * 16))
 }
 
 export const getChargeStrength = (node_count: number) => {
-	return Math.max(-540, -160 - node_count * 12)
+	return Math.max(-980, -260 - node_count * 18)
 }
 
 export const getInitialNodePoint = (args: {
 	index: number
 	total: number
-	boundary_radius: number
-	center_x: number
-	center_y: number
+	width: number
+	height: number
+	padding: number
 }) => {
-	const { index, total, boundary_radius, center_x, center_y } = args
+	const { index, total, width, height, padding } = args
 	const golden_angle = Math.PI * (3 - Math.sqrt(5))
 	const angle = index * golden_angle
-	const normalized_step = total <= 1 ? 0 : index / (total - 1)
-	const distance = boundary_radius * (0.18 + normalized_step * 0.55)
+	const center_x = width / 2
+	const center_y = height / 2
+	const usable_radius = Math.max(48, Math.min(width, height) / 2 - padding - 40)
+	const normalized_step = total <= 1 ? 0.5 : (index + 0.5) / total
+	const distance = usable_radius * Math.sqrt(normalized_step) * 0.9
 
 	return {
 		x: center_x + Math.cos(angle) * distance,
@@ -93,31 +112,30 @@ export const getInitialNodePoint = (args: {
 
 export const clampNodePosition = (args: {
 	layout_node: GraphLayoutNode
-	center_x: number
-	center_y: number
-	boundary_radius: number
+	width: number
+	height: number
+	padding: number
 }) => {
-	const { layout_node, center_x, center_y, boundary_radius } = args
-	const next_x = layout_node.x ?? center_x
-	const next_y = layout_node.y ?? center_y
-	const delta_x = next_x - center_x
-	const delta_y = next_y - center_y
-	const distance = Math.sqrt(delta_x * delta_x + delta_y * delta_y)
-	const limit = boundary_radius - layout_node.radius - 8
+	const { layout_node, width, height, padding } = args
+	const next_x = layout_node.x ?? width / 2
+	const next_y = layout_node.y ?? height / 2
+	const limit_left = padding + layout_node.radius
+	const limit_right = width - padding - layout_node.radius
+	const limit_top = padding + layout_node.radius
+	const limit_bottom = height - padding - layout_node.radius
+	const clamped_x = Math.max(limit_left, Math.min(limit_right, next_x))
+	const clamped_y = Math.max(limit_top, Math.min(limit_bottom, next_y))
 
-	if (distance <= limit || distance === 0) {
-		layout_node.x = next_x
-		layout_node.y = next_y
+	layout_node.x = clamped_x
+	layout_node.y = clamped_y
 
-		return
+	if (clamped_x !== next_x) {
+		layout_node.vx = (layout_node.vx ?? 0) * 0.35
 	}
 
-	const scale = limit / distance
-
-	layout_node.x = center_x + delta_x * scale
-	layout_node.y = center_y + delta_y * scale
-	layout_node.vx = (layout_node.vx ?? 0) * 0.4
-	layout_node.vy = (layout_node.vy ?? 0) * 0.4
+	if (clamped_y !== next_y) {
+		layout_node.vy = (layout_node.vy ?? 0) * 0.35
+	}
 }
 
 export const getLinkNode = (value: string | GraphLayoutNode, node_map: Map<string, GraphLayoutNode>) => {
@@ -128,8 +146,42 @@ export const getLinkNode = (value: string | GraphLayoutNode, node_map: Map<strin
 	return value
 }
 
-export const getNodeLabel = (name: string) => {
-	return name.length > 16 ? `${name.slice(0, 15)}…` : name
+export const getDefaultViewport = () =>
+	({
+		x: 0,
+		y: 0,
+		scale: 1
+	}) satisfies GraphViewport
+
+export const getEdgeLabel = (edge_item: AgentGraphEdge, args?: { source_name?: string; target_name?: string }) => {
+	if (edge_item.relation.trim()) {
+		return edge_item.relation.trim()
+	}
+
+	if (args?.source_name && args?.target_name) {
+		return `${args.source_name} -> ${args.target_name}`
+	}
+
+	return 'Untitled edge'
+}
+
+export const getNodeLabelLines = (name: string) => {
+	const compact_name = getCompactNodeName(name)
+
+	if (compact_name.length <= 12) {
+		return [compact_name]
+	}
+
+	return [compact_name.slice(0, 12), compact_name.slice(12, 24)]
+}
+
+export const getNodeLabelWidth = (label_lines: Array<string>) => {
+	const max_line_length = label_lines.reduce(
+		(longest_size, line_item) => Math.max(longest_size, line_item.length),
+		0
+	)
+
+	return Math.max(58, Math.min(132, max_line_length * 7.2 + 18))
 }
 
 export const getPreviewText = (value: string, size = 120) => {

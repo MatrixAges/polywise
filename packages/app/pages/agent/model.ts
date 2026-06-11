@@ -1247,12 +1247,13 @@ export default class Index {
 		const request_key = this.graph_request_key + 1
 		const visible_node_ids = this.graph_data?.nodes.map(item => item.id) ?? []
 		const center_node_id = args?.center_node_id || this.selected_graph_node_id || undefined
+		const silent_focus_change = Boolean(args?.center_node_id && !args?.expand && this.graph_data)
 
 		this.graph_request_key = request_key
 
 		if (args?.expand) {
 			this.graph_expanding = true
-		} else {
+		} else if (!silent_focus_change) {
 			this.graph_loading = true
 		}
 

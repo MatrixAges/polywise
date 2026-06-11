@@ -94,15 +94,16 @@ const Index = () => {
 			<DetailMenu active_tab={active_tab}></DetailMenu>
 			<div
 				className={$cx(
-					'min-h-0 min-w-0 flex-1 overflow-y-scroll',
-					active_tab !== 'content' && 'page_wrap p-0',
+					'min-h-0 min-w-0 flex-1',
+					active_tab === 'graph' ? 'overflow-hidden' : 'overflow-y-scroll',
+					!['content', 'graph'].includes(active_tab) && 'page_wrap p-0',
 					!['content', 'graph'].includes(active_tab) && !isTextTab(active_tab) && 'p-6'
 				)}
 			>
 				{match(active_tab)
 					.with('info', () => <DetailInfo agent={selected_agent}></DetailInfo>)
 					.with('content', () => <ContentPanel></ContentPanel>)
-					.with('graph', () => <GraphPanel agent={selected_agent}></GraphPanel>)
+					.with('graph', () => <GraphPanel></GraphPanel>)
 					.with('skills', () => <SkillsPanel></SkillsPanel>)
 					.with('tools', () => <ToolsPanel></ToolsPanel>)
 					.when(isTextTab, text_tab => (

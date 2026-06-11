@@ -1,19 +1,10 @@
 import { observer } from 'mobx-react-lite'
-import { useTranslation } from 'react-i18next'
 
 import { useModel } from '../../context'
 import GraphCanvas from './GraphCanvas'
 import GraphSidebar from './GraphSidebar'
 
-import type { AgentItem } from '../../types'
-
-interface IProps {
-	agent: AgentItem
-}
-
-const Index = (props: IProps) => {
-	const { agent } = props
-	const { t } = useTranslation('agent')
+const Index = () => {
 	const x = useModel()
 	const graph_data = x.graph_data
 	const selected_graph_node =
@@ -23,7 +14,13 @@ const Index = (props: IProps) => {
 		edges: graph_data?.edges ?? [],
 		selected_node_id: graph_data?.selected_node_id ?? '',
 		graph_loading: x.graph_loading,
-		on_select_node: x.selectGraphNode
+		graph_expanding: x.graph_expanding,
+		can_expand_graph:
+			Boolean(graph_data?.selected_node && graph_data.selected_node.hidden_neighbor_count > 0) &&
+			!x.graph_loading &&
+			!x.graph_expanding,
+		on_select_node: x.selectGraphNode,
+		on_expand_graph: x.expandGraphNode
 	}
 	const props_sidebar = {
 		graph_data,
@@ -37,32 +34,18 @@ const Index = (props: IProps) => {
 	return (
 		<div
 			className='
-				flex flex-col
+				overflow-hidden
+				flex flex-row
 				h-full
-				min-h-0
-				gap-4
-				py-5
-				xl:flex-row
-				page_wrap
+				min-w-0 min-h-0
 			'
 		>
 			<div
 				className='
 					flex flex-1 flex-col
-					min-w-0 min-h-[420px]
-					gap-3
+					min-w-0 min-h-0
 				'
 			>
-				<div className='space-y-1 px-1'>
-					<div className='text-std-950 text-sm font-semibold'>
-						{t('detail.graph', { ns: 'agent' })}
-					</div>
-					<div className='text-std-400 text-xs leading-5'>
-						{agent.name
-							? `${agent.name} · ${t('graph_panel.desc', { ns: 'agent' })}`
-							: t('graph_panel.desc', { ns: 'agent' })}
-					</div>
-				</div>
 				<GraphCanvas {...props_canvas}></GraphCanvas>
 			</div>
 			<GraphSidebar {...props_sidebar}></GraphSidebar>
